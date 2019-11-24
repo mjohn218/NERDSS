@@ -1,0 +1,113 @@
+# Input file
+
+start parameters
+    nItr = 1000000
+    timeStep = 0.1
+
+
+    timeWrite = 1000
+    trajWrite = 1000
+    restartWrite = 1000
+    fromRestart = false
+end parameters
+
+start boundaries
+    WaterBox = [1000,1000,1000]
+end boundaries
+
+start molecules
+    pip2
+    ap2
+    clat
+end molecules
+
+start reactions
+    #### PIP2 - AP2 ####
+    pip2(head) + ap2(m2muh) <-> pip2(head!1).ap2(m2muh!1)
+    onRate = 1000
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,1,0]
+    norm2 = [0,1,0]
+    assocAngles = [1.5708, 1.5708, nan, nan, M_PI]
+
+    #### AP2 - CLAT ####
+    ap2(b2clat) + clat(td1) <-> ap2(b2clat!1).clat(td1!1)
+    onRate = 1000
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI, 2.2455, nan, M_PI, nan]
+
+    ap2(b2clat) + clat(td2) <-> ap2(b2clat!1).clat(td2!1)
+    onRate = 1000
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI, 2.2455, nan, M_PI, nan]
+
+    ap2(b2clat) + clat(td3) <-> ap2(b2clat!1).clat(td3!1)
+    onRate = 1000
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI, 2.2455, nan, M_PI, nan]
+
+    ### CLAT - CLAT ###
+    clat(cd1) + clat(cd2) <-> clat(cd1!1).clat(cd2!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1) + clat(cd3) <-> clat(cd1!1).clat(cd3!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2) + clat(cd3) <-> clat(cd2!1).clat(cd3!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1) + clat(cd1) <-> clat(cd1!1).clat(cd1!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2) + clat(cd2) <-> clat(cd2!1).clat(cd2!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd3) + clat(cd3) <-> clat(cd3!1).clat(cd3!1)
+    onRate = 1000
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+end reactions

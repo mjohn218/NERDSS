@@ -1,0 +1,5 @@
+<map id="Molecule" name="Molecule">
+<area shape="rect" id="node3" href="$struct_coord.html" title="Class to hold xyz coordinates. " alt="" coords="5,65,63,90"/>
+<area shape="rect" id="node8" href="$struct_molecule_1_1_iface.html" title="Holds the interface coordinate and the interface&#39;s state. " alt="" coords="185,121,296,146"/>
+<area shape="rect" id="node5" href="$struct_molecule_1_1_interaction.html" title="Holds information on the interactions this Molecule is currently participarting in. " alt="" coords="169,195,313,221"/>
+</map>

@@ -1,0 +1,31 @@
+# Input file
+
+start parameters
+    nItr = 10000000
+    timeStep = 0.1
+
+    timeWrite = 10000
+    trajWrite = 10000
+    restartWrite = 10000
+
+end parameters
+
+start boundaries
+     WaterBox = [500,500,500]
+     implicitLipid = false
+     xBCtype = reflect
+     yBCtype = reflect
+     zBCtype = reflect
+end boundaries
+
+start molecules
+    A
+end molecules
+
+start reactions
+    A(a) + A(a) <-> A(a!1).A(a!1)
+    onRate = 1
+    offRate = 1
+    sigma = 1
+    observeLabel = AA
+end reactions

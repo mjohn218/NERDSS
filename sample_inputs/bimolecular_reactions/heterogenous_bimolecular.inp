@@ -1,0 +1,31 @@
+# Input file
+
+start parameters
+    nItr = 10000000 #number of steps to take
+    timeStep = 0.1 #in us
+
+    timeWrite = 1000 #print instantaneous properties
+    trajWrite = 100000 #print coordinates
+    restartWrite = 100000 #print restart file
+end parameters
+
+start boundaries
+     WaterBox = [500,500,500]
+     implicitLipid = false
+     xBCtype = reflect
+     yBCtype = reflect
+     zBCtype = reflect
+end boundaries
+
+start molecules
+    A
+    B
+end molecules
+
+start reactions
+    A(a) + B(b) <-> A(a!1).B(b!1)
+    onRate = 10
+    offRate = 1
+    sigma = 1
+    observeLabel = AB
+end reactions

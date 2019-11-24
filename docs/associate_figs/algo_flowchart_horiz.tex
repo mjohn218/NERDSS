@@ -1,0 +1,81 @@
+\documentclass[tikz,border=0cm,landscape]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows,positioning}
+\tikzstyle arrowstyle=[thick,-stealth,->]
+\tikzstyle{startstop} = [rectangle,rounded corners,text width=2cm,minimum width=2cm, minimum height=1cm,text centered,draw=black,fill=black!10]
+\tikzstyle{decision} = [circle,minimum width=1cm,text width=1.3cm,text centered,draw=black,fill=black!10]
+\usepackage{MinionPro}
+
+\begin{document}
+    \begin{tikzpicture}
+
+        %% TRANSLATE NODES
+        % \node (start) [startstop] {Start};
+        % \node (contact) [startstop,below=2cm of start] {Put interfaces at contact};
+        \node (contact) [startstop] {Put interfaces at contact};
+        \node (sigma) [startstop,right=1cm of contact] {Translate to sigma};
+
+        %% TRANSLATE ARROWS
+        % \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (start)--(contact);
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (contact)--(sigma);
+
+        %% THETA NODES
+        \node (theta1a) [startstop,right=1cm of sigma] {Rotate $\theta_i$};
+        \node (theta1b) [decision,right=1cm of theta1a] {Correct?};
+        \node (theta1c) [startstop,above=1.5cm of theta1b] {Reset and reverse rotation};
+        \node (theta1d) [decision,right=1cm of theta1c] {Correct?};
+        \node (theta1e) [right=1.5cm of theta1d,text width=2cm,text=red] {Terminate association};
+
+        %% THETA ARROWS
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (sigma)--(theta1a);
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (theta1a)--(theta1b);
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (theta1b)--(theta1c) node [midway,above,sloped] {No};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (theta1c)--(theta1d);
+        % \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt] (theta1d)--(theta1e) node[midway,above,sloped] {Terminate} node[sloped,midway,below] {association};
+        \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (theta1d)--(theta1e) node[midway,above,sloped] {No};
+
+        %% PHI NODES
+        \node (phi1a) [startstop,right=1cm of theta1b] {Rotate $\phi_i$};
+        \node (phi1b) [decision,right=1cm of phi1a] {Correct?};
+        \node (phi1c) [startstop,below=1.5cm of phi1b] {Reset and reverse rotation};
+        \node (phi1d) [decision,right=1cm of phi1c] {Correct?};
+        \node (phi1e) [right=1.5cm of phi1d,text width=2cm,text=red] {Terminate association};
+
+        %% PHI ARROWS
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (theta1b)--(phi1a) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (theta1d)--(phi1a) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (phi1a)--(phi1b);
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (phi1b)--(phi1c) node [midway,above,sloped] {No}; \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (phi1c)--(phi1d);
+        % \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt] (phi1d)--(phi1e) node[midway,above,sloped] {Terminate} node[sloped,midway,below] {association};
+        \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (phi1d)--(phi1e) node[midway,above,sloped] {No};
+
+        %% OMEGA NODES
+        \node (omega1a) [startstop,right=1cm of phi1b] {Rotate $\omega$};
+        \node (omega1b) [decision,right=1cm of omega1a] {Correct?};
+        \node (omega1c) [startstop,above=1.5cm of omega1b] {Reset and reverse rotation};
+        \node (omega1d) [decision,right=1.5cm of omega1c] {Correct?};
+        \node (omega1e) [right=1.5cm of omega1d,text width=2cm,text=red] {Terminate association};
+
+        %% OMEGA ARROWS
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (phi1b)--(omega1a) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (phi1d)--(omega1a) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (omega1a)--(omega1b);
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (omega1b)--(omega1c) node [midway,above,sloped] {No};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (omega1c)--(omega1d);
+        % \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt] (omega1d)--(omega1e) node[midway,above,sloped] {Terminate} node[sloped,midway,below] {association};
+        \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (omega1d)--(omega1e) node[sloped,midway,above] {No};
+
+        %% FINAL CHECK
+        \node (checka) [startstop,right=1.5cm of omega1b] {Check final angles and vector magnitudes};
+        \node (checkb) [decision,right=1cm of checka] {Correct?};
+        \node (finalcorrect) [align=center,above right=1cm of checkb,text width=2cm,text=blue] {Continue simulation};
+        \node (finalincorrect) [align=center,below right=1cm of checkb,text width=2cm,text=red] {Terminate association};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (omega1b)--(checka) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (omega1d)--(checka) node [midway,above,sloped] {Yes};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (checka)--(checkb);
+        % \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt] (checkb)--(finalcorrect) node [midway,above,sloped] {Continue} node[midway,below,sloped] {simulation};
+        % \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt] (checkb)--(finalincorrect) node [midway,above,sloped] {Terminate} node[midway,below,sloped] {association};
+        \draw [-stealth,->,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (checkb)--(finalcorrect) node [midway,above,sloped] {Yes};
+        \draw [-stealth,-|,thick,shorten <= 5pt,shorten >= 5pt,densely dashed] (checkb)--(finalincorrect) node[midway,above,sloped] {No};
+    \end{tikzpicture}
+\end{document}

@@ -1,0 +1,137 @@
+# Input file
+
+start parameters
+    nItr = 1000000000
+    timeStep = 0.1
+
+
+    timeWrite = 50000
+    trajWrite = 50000
+    restartWrite = 50000
+    fromRestart = false
+end parameters
+
+start boundaries
+     WaterBox = [494,494,494]  #nm
+     #     implicitLipid = false
+     #	xBCtype = reflect
+     #	yBCtype = reflect
+     # zBCtype = reflect #these are not used right now--all reflecting
+end boundaries
+
+start molecules
+    pip2
+    ap2
+    clat
+    syn
+end molecules
+
+start reactions
+    #### PIP2 - AP2 ####
+    pip2(head~U) + ap2(m2muh) <-> pip2(head~U!1).ap2(m2muh!1)
+    onRate = 10
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 1.5707963, nan, nan, M_PI]
+    observeLabel = ap2Mem
+
+    #### AP2 - CLAT ####
+    ap2(b2clat) + clat(td1) <-> ap2(b2clat!1).clat(td1!1)
+    onRate = 10.1
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 2.466852, nan, M_PI, M_PI]
+
+    ap2(b2clat) + clat(td2) <-> ap2(b2clat!1).clat(td2!1)
+    onRate = 10.1
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 2.466852, nan, M_PI, M_PI]    
+
+    ap2(b2clat) + clat(td3) <-> ap2(b2clat!1).clat(td3!1)
+    onRate = 10.1
+    offRate = 1
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 2.466852, nan, M_PI, M_PI]
+
+    ### CLAT - CLAT ###
+    clat(cd1) + clat(cd2) <-> clat(cd1!1).clat(cd2!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1) + clat(cd3) <-> clat(cd1!1).clat(cd3!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2) + clat(cd3) <-> clat(cd2!1).clat(cd3!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1) + clat(cd1) <-> clat(cd1!1).clat(cd1!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2) + clat(cd2) <-> clat(cd2!1).clat(cd2!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd3) + clat(cd3) <-> clat(cd3!1).clat(cd3!1)
+    onRate = 0.03323
+    offRate = 1
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    ### SYN - PIP2 ###
+    syn(pi) + pip2(head~U) -> syn(pi) + pip2(head~P)
+    onRate = 0.5
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 1.5707963, nan, nan, M_PI]
+    sigma = 1.0
+    observeLabel = pip2P
+
+    ### SYN - AP2 ### 
+    syn(ap) + ap2(sy) <-> syn(ap!1).ap2(sy!1)
+    onRate = 1
+    offRate = 1
+    sigma = 1.0
+    assocAngles = [1.5707963, 2.35619, nan, M_PI, M_PI]
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]	
+end reactions

@@ -1,0 +1,23 @@
+##
+# map molecule information file
+##
+
+Name    = IL
+copies  = 8900
+isRod   = true
+isImplicitLipid = true
+checkOverlap = false
+mass    = 1
+
+# translational diffusion constants
+D = [0.5, 0.5, 0.0]
+
+# rotational diffusion constants
+Dr = [0, 0, 0.01]
+
+# Coordinates
+COM    0.0000    0.0000    0.0000
+b2clat 0.0000    0.0000    0.0001
+
+bonds = 1
+com b2clat

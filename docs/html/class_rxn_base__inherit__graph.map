@@ -1,0 +1,6 @@
+<map id="RxnBase" name="RxnBase">
+<area shape="rect" id="node2" href="$struct_back_rxn.html" title="Holds information on the back reaction counterpart to a reversible ForwardRxn. " alt="" coords="5,79,80,104"/>
+<area shape="rect" id="node3" href="$struct_create_destruct_rxn.html" title="Holds information on one creation or destruction reaction. " alt="" coords="105,79,239,104"/>
+<area shape="rect" id="node4" href="$struct_forward_rxn.html" title="Holds information on one forward reaction. " alt="" coords="264,79,358,104"/>
+<area shape="rect" id="node5" href="$struct_parsed_rxn.html" title="Contains all the information parsed from the user provided reaction file. Later converted into a Forw..." alt="" coords="267,152,354,177"/>
+</map>

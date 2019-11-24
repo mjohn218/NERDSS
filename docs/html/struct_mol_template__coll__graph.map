@@ -1,0 +1,8 @@
+<map id="MolTemplate" name="MolTemplate">
+<area shape="rect" id="node2" href="$struct_coord.html" title="Class to hold xyz coordinates. " alt="" coords="926,19,984,45"/>
+<area shape="rect" id="node7" href="$struct_interface.html" title="Contains information of a MolTemplate&#39;s interfaces. " alt="" coords="1142,98,1215,123"/>
+<area shape="rect" id="node4" title="STL class. " alt="" coords="270,162,349,187"/>
+<area shape="rect" id="node9" href="$struct_interface_1_1_state.html" title="Holds information for each state of an Interface. " alt="" coords="569,79,680,105"/>
+<area shape="rect" id="node5" title="STL class. " alt="" coords="5,155,131,194"/>
+<area shape="rect" id="node11" href="$struct_interface_1_1_index.html" title="Interface::Index" alt="" coords="11,49,125,74"/>
+</map>

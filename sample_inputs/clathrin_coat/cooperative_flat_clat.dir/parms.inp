@@ -1,0 +1,267 @@
+# Input file
+
+start parameters
+    # nItr = 100000000
+    # timeWrite = 10000
+    # trajWrite = 10000
+    # restartWrite = 50000
+
+    nItr = 2
+    timeWrite = 1
+    trajWrite = 1
+    restartWrite = 50000
+
+    timeStep = 0.1
+
+
+    overlapSepLimit = 5.0
+end parameters
+
+start boundaries
+    WaterBox = [500,500,500]  #nm
+end boundaries
+
+start molecules
+    clat
+end molecules
+
+# start observables
+#     clat
+# end observables
+
+start reactions
+    ### MONOMER - MONOMER ###
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd2,cd3)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1,cd2!1,cd3)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd1,cd2,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1,cd2!1,cd3)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1,cd2,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1,cd2,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+    bindRadSameCom = 5.0
+
+    ### MONOMER -- NON-MONOMER ###
+    ## CD1 - CD1 ##
+    clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd2!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD2 - CD2 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1,cd2!1,cd3).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1,cd2!1,cd3).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD3 - CD3 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD1 - CD2 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1!1,cd2,cd3).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1!1,cd2,cd3).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD1 - CD3 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD2 - CD1 ##
+    clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1,cd2!1,cd3).clat(cd1!1,cd2!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1,cd2!1,cd3).clat(cd1!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD2 - CD3 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD3 - CD2 ##
+    clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1,cd2,cd3!1).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1,cd2,cd3!1).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD3 - CD1 ##
+    clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1,cd2,cd3!1).clat(cd1!1,cd2!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1,cd2,cd3!1).clat(cd1!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## NON-MONOMER - NON-MONOMER ##
+    ## CD1 - CD1 ##
+    clat(cd1,cd2!*) + clat(cd1,cd2!*) <-> clat(cd1!1,cd2!*).clat(cd1!1,cd2!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2!*) + clat(cd1,cd3!*) <-> clat(cd1!1,cd2!*).clat(cd1!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd3!*) + clat(cd1,cd3!*) <-> clat(cd1!1,cd3!*).clat(cd1!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+
+    ## CD2 - CD2 ##
+    clat(cd1!*,cd2) + clat(cd1!*,cd2) <-> clat(cd1!*,cd2!1).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd2,cd3!*) + clat(cd2,cd3!*) <-> clat(cd2!1,cd3!*).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1!*,cd2) + clat(cd2,cd3!*) <-> clat(cd1!*,cd2!1).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD3 - CD3 ##
+    clat(cd1!*,cd3) + clat(cd1!*,cd3) <-> clat(cd1!*,cd3!1).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd2!*,cd3) + clat(cd2!*,cd3) <-> clat(cd2!*,cd3!1).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1!*,cd3) + clat(cd2!*,cd3) <-> clat(cd1!*,cd3!1).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD1 - CD2 ##
+    clat(cd1,cd2!*) + clat(cd1!*,cd2) <-> clat(cd1!1,cd2!*).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd3!*) + clat(cd1!*,cd2) <-> clat(cd1!1,cd3!*).clat(cd1!*,cd2!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2!*) + clat(cd2,cd3!*) <-> clat(cd1!1,cd2!*).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd3!*) + clat(cd2,cd3!*) <-> clat(cd1!1,cd3!*).clat(cd2!1,cd3!*)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD1 - CD3 ##
+    clat(cd1,cd2!*) + clat(cd1!*,cd3) <-> clat(cd1!1,cd2!*).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd2!*) + clat(cd2!*,cd3) <-> clat(cd1!1,cd2!*).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd3!*) + clat(cd1!*,cd3) <-> clat(cd1!1,cd3!*).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1,cd3!*) + clat(cd2!*,cd3) <-> clat(cd1!1,cd3!*).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    ## CD2 - CD3 ##
+    clat(cd1!*,cd2) + clat(cd1!*,cd3) <-> clat(cd1!*,cd2!1).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd1!*,cd2) + clat(cd2!*,cd3) <-> clat(cd1!*,cd2!1).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd2,cd3!*) + clat(cd1!*,cd3) <-> clat(cd2!1,cd3!*).clat(cd1!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+
+    clat(cd2,cd3!*) + clat(cd2!*,cd3) <-> clat(cd2!1,cd3!*).clat(cd2!*,cd3!1)
+    onRate = 0.00332
+    offRate = 1.00022
+end reactions
