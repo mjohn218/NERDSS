@@ -1,9 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title="STL class. " alt="" coords="5,31,109,56"/>
-<area shape="rect" id="node2" href="$class_exception.html" title="Exception" alt="" coords="172,5,252,31"/>
-<area shape="rect" id="node3" title="STL class. " alt="" coords="157,55,266,80"/>
-<area shape="rect" id="node4" title="STL class. " alt="" coords="314,29,463,55"/>
-<area shape="rect" id="node6" title="STL class. " alt="" coords="326,79,451,104"/>
-<area shape="rect" id="node5" href="$class_arg_exception.html" title="ArgException\&lt; ArgType \&gt;" alt="" coords="525,29,698,55"/>
-<area shape="rect" id="node7" href="$class_arg_o_o_f_exception.html" title="ArgOOFException\&lt; ArgType \&gt;" alt="" coords="511,79,712,104"/>
-</map>

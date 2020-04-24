@@ -1,6 +1,0 @@
-<map id="RxnBase" name="RxnBase">
-<area shape="rect" id="node7" href="$struct_rxn_base_1_1_rate_state.html" title="Abstract class holding information applicable to all reactions (ForwardRxn, BackRxn, and CreateDestructRxn) " alt="" coords="109,353,252,379"/>
-<area shape="rect" id="node3" href="$struct_rxn_iface.html" title="Holds information on one reactant or product for a reaction (RxnBase) " alt="" coords="48,180,122,205"/>
-<area shape="rect" id="node4" title="STL class. " alt="" coords="45,93,124,119"/>
-<area shape="rect" id="node5" title="STL class. " alt="" coords="22,5,147,44"/>
-</map>
