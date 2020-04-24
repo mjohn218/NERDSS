@@ -91,9 +91,10 @@ struct ParsedMol {
         // TODO: Temporary
         explicit IfaceInfo(const Interface& _iface)
             : ifaceName(_iface.name)
-              , absIndex(_iface.stateList.at(0).index)
-              , relIndex(_iface.index)
-        {}
+            , absIndex(_iface.stateList.at(0).index)
+            , relIndex(_iface.index)
+        {
+        }
     };
 
     int molTypeIndex { -1 }; //!< index of the corresponding MolTemplate
@@ -105,9 +106,9 @@ struct ParsedMol {
     std::ostream& display_full_name(std::ostream& os) const;
 
     // member functions
-//    void set_ifaceAndStateNames();
+    //    void set_ifaceAndStateNames();
     void set_molTypeIndex(const std::vector<MolTemplate>& molTemplateList);
-//    bool has_no_Z_iface();
+    //    bool has_no_Z_iface();
 
     void display() const;
 
@@ -132,8 +133,10 @@ struct ParsedRxn : public ForwardRxn {
     std::vector<Vector> norms;
     double creationRadius { 1.0 }; //!< see CreateDesructRxn
 
-    double onRate { std::numeric_limits<double>::quiet_NaN() }; //!< the forward rate of the reaction
-    double offRate { std::numeric_limits<double>::quiet_NaN() }; //!< the rate of a reversible reaction's back reaction
+    double onRate3Dka { std::numeric_limits<double>::quiet_NaN() }; //!< the forward rate of the reaction, micro
+    double onRate3DMacro { std::numeric_limits<double>::quiet_NaN() }; //!< the forward rate of the reaction, macro
+    double offRatekb { std::numeric_limits<double>::quiet_NaN() }; //!< the rate of a reversible reaction's back reaction, micro
+    double offRateMacro { std::numeric_limits<double>::quiet_NaN() }; //!< the rate of a reversible reaction's back reaction, macro
     std::vector<std::vector<RxnIface>> otherIfaceLists; //!< ancillary interfaces which must be present
     std::pair<RxnIface, RxnIface> stateChangeIface; //!< interfaces which don't change interaction but change state
 
@@ -152,7 +155,7 @@ struct ParsedRxn : public ForwardRxn {
      * reactions for the reactants. If none of the reactions already have the state change product as a reaction
      * forming the state change reactant exists, create a new absolute interface index.
      */
-    void check_previous_bound_states(int& totSpecies, const std::vector<ForwardRxn>& forwardRxns);
+    void check_previous_bound_states(int& totSpecies, const std::vector<ForwardRxn>& forwardRxns, const std::vector<MolTemplate>& molTemplateList);
 
     /*!\ingroup Parser
      * \brief The purpose of this function is to determine which of the parsed interfaces are reactants.

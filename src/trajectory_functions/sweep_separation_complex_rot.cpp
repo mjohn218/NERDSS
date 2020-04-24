@@ -5,7 +5,7 @@
 
 void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-				  const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject)
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
     /*
       In this version, complex com1Index is on the membrane.
@@ -54,9 +54,21 @@ void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& p
         }
     }
 
+    //determine RS3Dinput
+    double RS3Dinput { 0.0 };
+    Complex targCom { complexList[com1Index] };
+    for (auto& molIndex : targCom.memberList) {
+        for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
+            if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
+                RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+                break;
+            }
+        }
+    }
+
     int tsave = 0;
     std::array<double, 9> M = create_euler_rotation_matrix(complexList[com1Index].trajRot);
-    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], M, membraneObject);
+    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], M, membraneObject, RS3Dinput);
     int itr { 0 };
     int maxItr { 50 };
     int saveit { 0 };
@@ -88,7 +100,7 @@ void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& p
 
                     /*Now complex 2*/
                     std::array<double, 9> M2 = create_euler_rotation_matrix(complexList[com2Index].trajRot);
-                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], M2, membraneObject);
+                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], M2, membraneObject, RS3Dinput);
 
                     Vector iface2Vec { moleculeList[pro2Index].interfaceList[i2].coord
                         - complexList[com2Index].comCoord };
@@ -131,7 +143,7 @@ void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& p
             complexList[com1Index].trajRot.z = sqrt(2.0 * params.timeStep * complexList[com1Index].Dr.z) * GaussV();
 
             M = create_euler_rotation_matrix(complexList[com1Index].trajRot);
-            reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], M, membraneObject);
+            reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], M, membraneObject, RS3Dinput);
 
             for (int checkMolItr { 0 }; checkMolItr < numOverlap; checkMolItr++) {
                 int p2 { overlapList[checkMolItr] };
@@ -159,7 +171,7 @@ void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& p
                     complexList[com2Index].trajRot.z
                         = sqrt(2.0 * params.timeStep * complexList[com2Index].Dr.z) * GaussV();
                     std::array<double, 9> M2 = create_euler_rotation_matrix(complexList[com2Index].trajRot);
-                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], M2, membraneObject);
+                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], M2, membraneObject, RS3Dinput);
                 }
             }
             tsave = numOverlap;

@@ -257,7 +257,7 @@ void ParsedRxn::assemble_reactions(std::vector<ForwardRxn>& forwardRxns, std::ve
         forwardRxns.back().relRxnIndex = forwardRxns.size() - 1;
         // if the reaction is reversible, create the conjugate BackRxn
         if (forwardRxns.back().isReversible) {
-            backRxns.emplace_back(this->offRate, forwardRxns.back());
+            backRxns.emplace_back(this->offRatekb, forwardRxns.back());
             backRxns.back().relRxnIndex = backRxns.size() - 1;
             create_conjugate_reaction_itrs(forwardRxns, backRxns);
         } else {
@@ -272,16 +272,16 @@ void ParsedRxn::assemble_reactions(std::vector<ForwardRxn>& forwardRxns, std::ve
 /* ParsedRxn */
 std::pair<bool, std::string> ParsedRxn::isComplete(const std::vector<MolTemplate>& molTemplateList)
 {
-    if (std::isnan(onRate))
-        return std::make_pair(false, "onRate is not set or reaction");
+    if (std::isnan(onRate3Dka))
+        return std::make_pair(false, "onRate3Dka is not set for reaction");
 
     if (rxnType == ReactionType::bimolecular) {
-        if (isReversible && std::isnan(offRate))
-            return std::make_pair(false, "offRate is not set for reaction");
+        if (isReversible && std::isnan(offRatekb))
+            return std::make_pair(false, "offRatekb is not set for reaction");
         if (std::isnan(bindRadius))
             return std::make_pair(false, "Sigma is not defined");
         if (!molTemplateList[reactantList[0].molTypeIndex].isPoint && !molTemplateList[reactantList[1].molTypeIndex].isPoint) {
-            if (!molTemplateList.at(reactantList[0].molTypeIndex).isRod 
+            if (!molTemplateList.at(reactantList[0].molTypeIndex).isRod
                 && (norm1.magnitude == 0 || std::isnan(norm1.magnitude))) {
                 return std::make_pair(false, "Norm1 is not set or is not a vector for reaction");
             }
@@ -310,76 +310,93 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
     try {
         switch (key) {
         case 0: {
-            onRate = std::stod(line);
+            onRate3Dka = std::stod(line);
             break;
         }
         case 1: {
-            offRate = std::stod(line);
+            onRate3DMacro = std::stod(line);
             break;
         }
         case 2: {
+            offRatekb = std::stod(line);
+            break;
+        }
+        case 3: {
+            offRateMacro = std::stod(line);
+            break;
+        }
+        case 4: {
             norm1 = Vector { parse_input_array(line) };
             norm1.calc_magnitude();
             break;
         }
-        case 3: {
+        case 5: {
             norm2 = Vector { parse_input_array(line) };
             norm2.calc_magnitude();
             break;
         }
-        case 4: {
+        case 6: {
             //            sigma = Vector{ parse_input_array(line) };
             bindRadius = std::stod(line);
-	    std::cout <<"Read in value of sigma: "<<bindRadius<<'\n';
-            break;
-        }
-        case 5: {
-            assocAngles = Angles { parse_input_array(line) };
-            break;
-        }
-        case 6: {
-            isOnMem = read_boolean(line);
+            std::cout << "Read in value of sigma: " << bindRadius << '\n';
             break;
         }
         case 7: {
-            onRate = std::stod(line);
+            assocAngles = Angles { parse_input_array(line) };
             break;
         }
         case 8: {
+            isOnMem = read_boolean(line);
+            break;
+        }
+        case 9: {
+            onRate3Dka = std::stod(line);
+            break;
+        }
+        case 10: {
             isCoupled = true;
             coupledRxn = CoupledRxn { std::stoi(line) };
             break;
         }
-        case 9: {
+        case 11: {
             isObserved = true;
             break;
         }
-        case 10: {
+        case 12: {
             isObserved = true;
             observeLabel = line;
             break;
         }
-        case 11: {
-            bindRadSameCom = std::stod(line);
-	    std::cout <<"Read in value of bindRadSameCom: "<<bindRadSameCom<<'\n';
-            break;
-        }
-        case 12: {
-            irrevRingClosure = read_boolean(line);
-            break;
-        }
         case 13: {
-            creationRadius = std::stod(line);
+            bindRadSameCom = std::stod(line);
+            std::cout << "Read in value of bindRadSameCom: " << bindRadSameCom << '\n';
             break;
         }
         case 14: {
-            loopCoopFactor = std::stod(line);
-	    std::cout <<"Read in value of loopCoopFactor: "<<loopCoopFactor<<'\n';
+            irrevRingClosure = read_boolean(line);
             break;
         }
         case 15: {
+            creationRadius = std::stod(line);
+            break;
+        }
+        case 16: {
+            loopCoopFactor = std::stod(line);
+            std::cout << "Read in value of loopCoopFactor: " << loopCoopFactor << '\n';
+            break;
+        }
+        case 17: {
             length3Dto2D = std::stod(line);
-	    std::cout <<"Read in value of length3Dto2D: "<<length3Dto2D<<'\n';
+            std::cout << "Read in value of length3Dto2D: " << length3Dto2D << '\n';
+            break;
+        }
+        case 18: {
+            rxnLabel = line;
+            break;
+        }
+        case 19: {
+            isCoupled = true;
+            coupledRxn = CoupledRxn { line };
             break;
         }
         default: {
@@ -392,15 +409,16 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
     }
 }
 
-
 void ParsedRxn::display() const
 {
-  /*THIS ROUTINE IS DUPLICATED IN CLASS_RXNS>CPP, FORWARDRXN::DISPLAY, and OTHER RXN TYPES, THIS IS NOT CALLED!*/
-  std::cout << "reactantList:\n" << std::setw(10) << std::setfill('-') << ' ' << std::setfill(' ') << '\n';
+    /*THIS ROUTINE IS DUPLICATED IN CLASS_RXNS>CPP, FORWARDRXN::DISPLAY, and OTHER RXN TYPES, THIS IS NOT CALLED!*/
+    std::cout << "reactantList:\n"
+              << std::setw(10) << std::setfill('-') << ' ' << std::setfill(' ') << '\n';
     for (auto& oneReactant : reactantList) {
         oneReactant.display();
     }
-    std::cout << "productList:\n" << std::setw(10) << std::setfill('-') << ' ' << std::setfill(' ') << '\n';
+    std::cout << "productList:\n"
+              << std::setw(10) << std::setfill('-') << ' ' << std::setfill(' ') << '\n';
     for (auto& oneProduct : productList) {
         oneProduct.display();
     }
@@ -420,29 +438,39 @@ void ParsedRxn::display() const
         std::cout << "Reactant 2 normal: " << norm2 << '\n';
     }
     std::cout << "\nOn membrane? " << std::boolalpha << isOnMem << '\n';
-    std::cout << "bindRadSameCom " <<  bindRadSameCom << '\n';
-    std::cout << "loopCoopFactor " <<  loopCoopFactor << '\n';
-    std::cout << "length3Dto2D " <<  length3Dto2D << '\n';
-    std::cout << "isCoupled? " <<  isCoupled << '\n';
-    if(isCoupled)
-      std::cout << " coupledRxn Number: " <<  coupledRxn.absRxnIndex<<" type: "<<coupledRxn.rxnType << '\n';
-    std::cout << "Rate: " << onRate << '\n';
+    std::cout << "bindRadSameCom " << bindRadSameCom << '\n';
+    std::cout << "loopCoopFactor " << loopCoopFactor << '\n';
+    std::cout << "length3Dto2D " << length3Dto2D << '\n';
+    std::cout << "isCoupled? " << isCoupled << '\n';
+    if (isCoupled)
+        std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << '\n';
+    std::cout << "microRate3D: " << onRate3Dka << '\n';
+    std::cout << "macroRate3D: " << onRate3DMacro << '\n';
     if (isReversible)
-        std::cout << "Off Rate: " << offRate << '\n';
+        std::cout << "micro Off Rate: " << offRatekb << '\n';
+    std::cout << "macro Off Rate: " << offRateMacro << '\n';
 }
 
-void ParsedRxn::check_previous_bound_states(int& totSpecies, const std::vector<ForwardRxn>& forwardRxns)
+void ParsedRxn::check_previous_bound_states(int& totSpecies, const std::vector<ForwardRxn>& forwardRxns, const std::vector<MolTemplate>& molTemplateList)
 {
     for (auto& oneRxn : forwardRxns) {
-        if (oneRxn.productListNew == this->rxnReactants) {
-            ++totSpecies;
-            this->productListNew.back().absIfaceIndex = totSpecies;
-            return;
+        if (oneRxn.rxnType == ReactionType::bimolecular) {
+            for (auto& oneProduct : oneRxn.productListNew) {
+                if (oneProduct.requiresState == this->rxnReactants[0].state) {
+                    // add species for the biomolecular Product with other states of oneProduct
+                    for (auto& oneState : molTemplateList[this->rxnReactants[0].molTypeIndex].interfaceList[this->rxnReactants[0].relIndex].stateList) {
+                        if (oneState.iden != this->rxnReactants[0].state) {
+                            ++totSpecies;
+                            this->rxnProducts.emplace_back();
+                            this->rxnProducts.back().absIndex = totSpecies;
+                        }
+                    }
+                }
+            }
         }
     }
 
-    std::cerr << "Error, declare association reaction before declaring a state change of its product.\n";
-    exit(1);
+    std::cout << "Warning: must declare association reaction before declaring a state change of its product.\n";
 }
 
 void ParsedRxn::determine_reactants()
@@ -699,14 +727,14 @@ bool ParsedRxn::check_for_conditional_rates(
                 std::swap(otherIfaceLists[0], otherIfaceLists[1]);
             }
             // ...give that ForwardRxn this on rate and list of ancillary interfaces...
-            oneRxn.rateList.emplace_back(onRate, otherIfaceLists);
+            oneRxn.rateList.emplace_back(onRate3Dka, otherIfaceLists);
             // ...and the conjugate BackRxn the off rate and list of ancillary interfaces. and interfaces which change
             // state (swapped, of course)
-            backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRate, otherIfaceLists);
+            backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRatekb, otherIfaceLists);
             --totSpecies; // since it's not a new reaction, reduce the number of total species...
             std::cout << linebreak;
             std::cout << "Forward Reaction " << &oneRxn - &forwardRxns[0]
-                      << " has been updated with a new rate:\nRate:" << onRate << '\n';
+                      << " has been updated with a new rate:\nRate:" << onRate3Dka << '\n';
             std::cout << "Reactant 1 requires interfaces:\n";
             for (auto& iface : otherIfaceLists[0])
                 std::cout << iface << '\n';

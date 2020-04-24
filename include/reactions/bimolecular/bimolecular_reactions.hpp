@@ -67,4 +67,10 @@ void perform_bimolecular_state_change(int stateChangeIface, int facilitatorIface
     Molecule& stateChangeMol, Molecule& facilitatorMol, Complex& stateChangeCom, Complex& facilitatorCom,
     copyCounters& counterArrays, const Parameters& params, std::vector<ForwardRxn>& forwardRxns,
     std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-				      std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, const Membrane &membraneObject);
+    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, const Membrane& membraneObject);
+
+void perform_implicitlipid_state_change(int stateChangeIface, int facilitatorIface, std::array<int, 3>& rxnItr,
+    Molecule& stateChangeMol, Molecule& facilitatorMol, Complex& stateChangeCom, Complex& facilitatorCom,
+    copyCounters& counterArrays, const Parameters& params, std::vector<ForwardRxn>& forwardRxns,
+    std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, Membrane& membraneObject);

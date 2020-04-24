@@ -1,3 +1,4 @@
+#include "math/rand_gsl.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
@@ -7,10 +8,10 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
     const Parameters& params, std::vector<gsl_matrix*>& normMatrices, std::vector<gsl_matrix*>& survMatrices,
     std::vector<gsl_matrix*>& pirMatrices, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane &membraneObject)
+    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject)
 {
-  int pro1MolType = moleculeList[pro1Index].molTypeIndex;
-    
+    int pro1MolType = moleculeList[pro1Index].molTypeIndex;
+
     bool canInteract { false };
     for (auto partner : molTemplateList[pro1MolType].rxnPartners) {
         if (partner == moleculeList[pro2Index].molTypeIndex) {
@@ -18,13 +19,13 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
             break;
         }
     }
-    
+
     // only consider when pro2 is NOT implicit-lipid
-    if (canInteract){
-    	 if(moleculeList[pro2Index].isImplicitLipid)
-    	     canInteract = false;
+    if (canInteract) {
+        if (moleculeList[pro2Index].isImplicitLipid)
+            canInteract = false;
     }
-    
+
     // If this pair of proteins are already bound together, don't test for binding OR overlap
     if (canInteract) {
         /*If this pair of proteins are already bound together, don't test for binding OR overlap, set canInteract=0*/
@@ -76,48 +77,56 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
                         int rxnIndex { -1 };
                         int rateIndex { -1 };
                         bool isStateChangeBackRxn { false };
-			
-			find_which_reaction(relIface1, relIface2, rxnIndex, rateIndex, isStateChangeBackRxn, state,
-						                          moleculeList[pro1Index], moleculeList[pro2Index], forwardRxns, backRxns, molTemplateList);
-						
-                        if (rxnIndex != -1 && rateIndex != -1) {
-                            int com1Index { moleculeList[pro1Index].myComIndex };
-                            int com2Index { moleculeList[pro2Index].myComIndex };
 
-                            if (com1Index == com2Index) {
+                        find_which_reaction(relIface1, relIface2, rxnIndex, rateIndex, isStateChangeBackRxn, state,
+                            moleculeList[pro1Index], moleculeList[pro2Index], forwardRxns, backRxns, molTemplateList);
+
+                        if (rxnIndex != -1 && rateIndex != -1) {
+                            //int com1Index { moleculeList[pro1Index].myComIndex };
+                            //int com2Index { moleculeList[pro2Index].myComIndex };
+
+                            if (moleculeList[pro1Index].myComIndex == moleculeList[pro2Index].myComIndex) {
                                 evaluate_binding_within_complex(pro1Index, pro2Index, relIface1, relIface2, rxnIndex,
-                                                                rateIndex, isStateChangeBackRxn, params, moleculeList,
-                                                                complexList, molTemplateList,
-                                                                forwardRxns[rxnIndex], backRxns, counterArrays);
+                                    rateIndex, isStateChangeBackRxn, params, moleculeList,
+                                    complexList, molTemplateList,
+                                    forwardRxns[rxnIndex], backRxns, counterArrays);
                             } else {
-			      Vector ifaceVec { moleculeList[pro1Index].interfaceList[relIface1].coord
-                                    - complexList[com1Index].comCoord };
+                                Vector ifaceVec { moleculeList[pro1Index].interfaceList[relIface1].coord
+                                    - complexList[moleculeList[pro1Index].myComIndex].comCoord };
                                 Vector ifaceVec2 { moleculeList[pro2Index].interfaceList[relIface2].coord
-                                    - complexList[com2Index].comCoord };
+                                    - complexList[moleculeList[pro2Index].myComIndex].comCoord };
                                 double magMol1 { ifaceVec.x * ifaceVec.x + ifaceVec.y * ifaceVec.y
                                     + ifaceVec.z * ifaceVec.z };
                                 double magMol2 { ifaceVec2.x * ifaceVec2.x + ifaceVec2.y * ifaceVec2.y
                                     + ifaceVec2.z * ifaceVec2.z };
 
-                                double Dtot = 1.0 / 3.0 * (complexList[com1Index].D.x + complexList[com2Index].D.x)
-                                    + 1.0 / 3.0 * (complexList[com1Index].D.y + complexList[com2Index].D.y)
-                                    + 1.0 / 3.0 * (complexList[com1Index].D.z + complexList[com2Index].D.z);
+                                // binding with explicit-lipid model.
+                                //write_rng_state();
+                                if (std::abs(complexList[moleculeList[pro1Index].myComIndex].D.z) < 1E-10 && std::abs(complexList[moleculeList[pro2Index].myComIndex].D.z) < 1E-10) {
+                                    // both Complexes are on the membrane, evaluate as 2D reaction
+                                    double Dtot = 1.0 / 2.0 * (complexList[moleculeList[pro1Index].myComIndex].D.x + complexList[moleculeList[pro2Index].myComIndex].D.x)
+                                        + 1.0 / 2.0 * (complexList[moleculeList[pro1Index].myComIndex].D.y + complexList[moleculeList[pro2Index].myComIndex].D.y);
 
-                                BiMolData biMolData { pro1Index, pro2Index, com1Index, com2Index, relIface1, relIface2,
-                                    absIface1, absIface2, Dtot, magMol1, magMol2 };
+                                    BiMolData biMolData { pro1Index, pro2Index, moleculeList[pro1Index].myComIndex, moleculeList[pro2Index].myComIndex, relIface1, relIface2,
+                                        absIface1, absIface2, Dtot, magMol1, magMol2 };
 
-                                	   // binding with explicit-lipid model.
-                                    if (complexList[com1Index].D.z == 0 && complexList[com2Index].D.z == 0) {
-                                        // both Complexes are on the membrane, evaluate as 2D reaction
-                                        determine_2D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
-                                            isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
-                                            complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
-                                    } else {
-                                        //3D reaction
-                                        determine_3D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
-                                            isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
-                                            complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
-				                        }//end else 3D
+                                    determine_2D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
+                                        isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
+                                        complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
+                                } else {
+                                    //3D reaction
+                                    double Dtot = 1.0 / 3.0 * (complexList[moleculeList[pro1Index].myComIndex].D.x + complexList[moleculeList[pro2Index].myComIndex].D.x)
+                                        + 1.0 / 3.0 * (complexList[moleculeList[pro1Index].myComIndex].D.y + complexList[moleculeList[pro2Index].myComIndex].D.y)
+                                        + 1.0 / 3.0 * (complexList[moleculeList[pro1Index].myComIndex].D.z + complexList[moleculeList[pro2Index].myComIndex].D.z);
+
+                                    BiMolData biMolData { pro1Index, pro2Index, moleculeList[pro1Index].myComIndex, moleculeList[pro2Index].myComIndex, relIface1, relIface2,
+                                        absIface1, absIface2, Dtot, magMol1, magMol2 };
+
+                                    determine_3D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
+                                        isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
+                                        complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
+                                } //end else 3D
+                                //read_rng_state();
                             }
                         }
                     }

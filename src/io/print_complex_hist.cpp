@@ -3,7 +3,7 @@
 #include <iostream>
 
 double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
-			  std::vector<MolTemplate>& molTemplateList, int nImplicitLipids)
+    std::vector<MolTemplate>& molTemplateList, int nImplicitLipids)
 {
     int i { 0 };
     int j { 0 };
@@ -105,16 +105,16 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
     outfile << "iter: " << it << std::endl;
     for (int a = 0; a < assemblylist.size(); a++) {
         int c1 = complexrep[a];
-        if(complexList[c1].memberList.size() == 1 ){
-	    //int proIndex=complexList[c1].memberList[0];
-	    for (j = 0; j < nTypes; j++) {
-		if (complexList[c1].numEachMol[j] != 0 && molTemplateList[j].isImplicitLipid== true){
-		    //instead of saying 1 IL, print out N copies of the IL. 
-		    histogram[a]=nImplicitLipids;
-		}
-	    }
-	}
-	// cout <<"Representative complex: "<<c1<<std::endl;
+        if (complexList[c1].memberList.size() == 1) {
+            //int proIndex=complexList[c1].memberList[0];
+            for (j = 0; j < nTypes; j++) {
+                if (complexList[c1].numEachMol[j] != 0 && molTemplateList[j].isImplicitLipid == true) {
+                    //instead of saying 1 IL, print out N copies of the IL.
+                    histogram[a] = nImplicitLipids;
+                }
+            }
+        }
+        // cout <<"Representative complex: "<<c1<<std::endl;
         outfile << histogram[a] << '\t';
         totProteins = 0;
         for (j = 0; j < nTypes; j++) {
@@ -124,9 +124,15 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
             }
         }
         if (complexList[c1].linksToSurface > 0) {
-            outfile << "IL"
+            outfile << molTemplateList[0].molName
                     << ": " << complexList[c1].linksToSurface << ". ";
         }
+
+        // here we want to record the complex's coord
+        //if (histogram[a] == 1) {
+        //    outfile << "?" << complexList[c1].comCoord.x << '\t' << complexList[c1].comCoord.y << '\t' << complexList[c1].comCoord.z << "?";
+        //}
+
         if (assemblylist[a] == 0)
             outfile << "PI1: 1. ";
         outfile << std::endl;

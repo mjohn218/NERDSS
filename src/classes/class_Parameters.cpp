@@ -11,21 +11,23 @@
  * ### TODO List
  * ***
  */
-#include "classes/class_Parameters.hpp"
 #include "classes/class_Membrane.hpp"
-#include "parser/parser_functions.hpp"
+#include "classes/class_Parameters.hpp"
 #include "io/io.hpp"
+#include "parser/parser_functions.hpp"
 
 // this is so we can compare parsed keywords with the enumerations (we need them as strings)
 std::map<const std::string, ParamKeyword> parmKeywords = {
-    { "nummoltypes", ParamKeyword::numMolTypes }, { "numtotalspecies", ParamKeyword::numTotalSpecies},
+    { "nummoltypes", ParamKeyword::numMolTypes }, { "numtotalspecies", ParamKeyword::numTotalSpecies },
     { "nitr", ParamKeyword::nItr },
     { "fromrestart", ParamKeyword::fromRestart }, { "timewrite", ParamKeyword::timeWrite },
     { "trajwrite", ParamKeyword::trajWrite }, { "timestep", ParamKeyword::timeStep },
-    { "numtotalcomplex", ParamKeyword::numTotalComplex }, 
+    { "numtotalcomplex", ParamKeyword::numTotalComplex },
     { "mass", ParamKeyword::mass }, { "restartwrite", ParamKeyword::restartWrite },
     { "pdbwrite", ParamKeyword::pdbWrite },
-    { "overlapseplimit", ParamKeyword::overlapSepLimit }, { "name", ParamKeyword::name } };
+    { "overlapseplimit", ParamKeyword::overlapSepLimit }, { "name", ParamKeyword::name },
+    { "checkpoint", ParamKeyword::checkPoint }
+};
 
 void Parameters::set_value(std::string value, ParamKeyword keywords)
 {
@@ -52,9 +54,11 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             break;
         case 4:
             this->timeWrite = std::stoi(value);
+	    std::cout <<"Read in timeWrite: "<<value<<std::endl;
             break;
         case 5:
             this->trajWrite = std::stoi(value);
+	    std::cout <<"Read in trajWrite: "<<value<<std::endl;
             break;
         case 6:
             this->timeStep = std::stod(value);
@@ -65,7 +69,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
         case 8:
             this->mass = std::stod(value);
             break;
-	    //        case 9:
+            //        case 9:
             //this->waterBox = WaterBox(parse_input_array(value));
             //break;
         case 10:
@@ -79,6 +83,9 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             break;
         case 13:
             this->name = value;
+            break;
+        case 14:
+            this->checkPoint = std::stoi(value);
             break;
         default:
             throw std::invalid_argument("Not a valid keyword.");
@@ -116,7 +123,7 @@ void Parameters::parse_paramFile(std::ifstream& paramFile)
             continue;
         else
             remove_comment(line);
-	
+
         bool gotValue { false };
         std::string buffer;
         for (auto lineItr = line.begin(); lineItr != line.end(); ++lineItr) {
@@ -145,12 +152,12 @@ void Parameters::display()
 {
     std::cout << "Number of iterations: " << nItr << '\n';
     std::cout << "Timestep: " << timeStep << '\n';
-    std::cout << "Timestep log interval: " << timeWrite << " timesteps\n";
+    std::cout << "Timestep log interval (timeWrite): " << timeWrite << " timesteps\n";
     std::cout << "Restart file write interval: " << restartWrite << " timesteps\n";
-    std::cout << "Coordinate write interval: " << trajWrite << " timesteps\n";
+    std::cout << "Coordinate write interval (trajWrite): " << trajWrite << " timesteps\n";
     std::cout << "PDB Coordinate write interval: " << pdbWrite << " timesteps\n";
-    std::cout << "overlapSepLimit: "<<overlapSepLimit<<"\n";
-    
+    std::cout << "overlapSepLimit: " << overlapSepLimit << "\n";
+
     //std::cout << "Water box dimensions: [" << waterBox.x << ", " << waterBox.y << ", " << waterBox.z << "]\n";
 
     std::cout << linebreak << "Molecule specific parameters:\n";

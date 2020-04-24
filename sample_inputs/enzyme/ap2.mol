@@ -3,9 +3,7 @@
 ##
 
 Name    = ap2
-copies  = 300
 checkOverlap = false
-mass    = 1
 
 # translational diffusion constants
 D       = [12.0,12.0,12.0]

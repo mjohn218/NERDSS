@@ -1,23 +1,23 @@
-#include "math/rand_gsl.hpp"
 #include "gsl/gsl_rng.h"
+#include "math/rand_gsl.hpp"
 #include <cmath>
 #include <iostream>
 
-static gsl_rng* the_generator = nullptr;
+//static gsl_rng* the_generator = nullptr;
 
 double rand_gsl()
 {
-    ++randNum;
-    if (!the_generator)
-        the_generator = gsl_rng_alloc(gsl_rng_taus);
-    return gsl_rng_uniform(the_generator);
+    //++randNum;
+    //if (!the_generator)
+    //    the_generator = gsl_rng_alloc(gsl_rng_taus);
+    return gsl_rng_uniform(r);
 }
 
 void srand_gsl(int num)
 {
-    if (!the_generator)
-        the_generator = gsl_rng_alloc(gsl_rng_taus);
-    gsl_rng_set(the_generator, num);
+    //if (!the_generator)
+    //    the_generator = gsl_rng_alloc(gsl_rng_taus);
+    gsl_rng_set(r, num);
 }
 
 void write_rng_state()
@@ -28,7 +28,25 @@ void write_rng_state()
         exit(1);
     }
 
-    int stateWriteState = gsl_rng_fwrite(stateOut, the_generator);
+    int stateWriteState = gsl_rng_fwrite(stateOut, r);
+    if (stateWriteState == GSL_EFAILED) {
+        std::cerr << "ERROR: Could not write RNG state file. Exiting.\n";
+        exit(1);
+    }
+    fclose(stateOut);
+}
+
+void write_rng_state_simItr(int simItr)
+{
+    char fnameProXYZ[100];
+    sprintf(fnameProXYZ, "rng_state%d", simItr);
+    FILE* stateOut = fopen(fnameProXYZ, "w");
+    if (ferror(stateOut)) {
+        std::cerr << "ERROR: Could not open RNG state file for writing. Exiting.\n";
+        exit(1);
+    }
+
+    int stateWriteState = gsl_rng_fwrite(stateOut, r);
     if (stateWriteState == GSL_EFAILED) {
         std::cerr << "ERROR: Could not write RNG state file. Exiting.\n";
         exit(1);
@@ -38,7 +56,7 @@ void write_rng_state()
 
 void read_rng_state()
 {
-    std::cout << "Reading RNG state file.\n";
+    //std::cout << "Reading RNG state file.\n";
     FILE* stateIn = fopen("rng_state", "r");
     if (stateIn == nullptr || ferror(stateIn)) {
         std::cerr << "Could not find RNG state file, initializing new RNG..\n";
@@ -46,7 +64,7 @@ void read_rng_state()
         return;
     }
 
-    int stateReadStatus = gsl_rng_fread(stateIn, the_generator);
+    int stateReadStatus = gsl_rng_fread(stateIn, r);
     if (stateReadStatus == GSL_EFAILED) {
         std::cerr << "Could not read RNG state file, initializing new RNG..\n";
         fclose(stateIn);

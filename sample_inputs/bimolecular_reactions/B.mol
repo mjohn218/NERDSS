@@ -3,9 +3,6 @@
 ##
 
 Name    = B
-copies  = 1000
-isPoint   = true
-mass    = 1
 
 # translational diffusion constants
 D       = [12.0,12.0,12.0]

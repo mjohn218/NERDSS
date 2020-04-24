@@ -39,14 +39,14 @@ extern unsigned numAssoc;
  *
  */
 void associate(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
-               Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-               std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
-               std::map<std::string, int>& observablesList, copyCounters& counterArrays, const std::vector<Complex>& complexList, const Membrane &membraneObject, const std::vector<ForwardRxn> &forwardRxns, const std::vector<BackRxn> &backRxns);
-               
+    Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, const Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+
 void associate_binding_to_surface(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
-               Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-               std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
-				  std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, const Membrane &membraneObject, const std::vector<ForwardRxn> &forwardRxns, const std::vector<BackRxn> &backRxns);
+    Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 /* BOOLEANS */
 /*! \ingroup Associate
@@ -214,7 +214,7 @@ ForwardRxn& rxn, Complex& domCom, Complex& infCom, std::vector<Molecule>& molLis
  * cos(ang/2) * w.z)\f$
  */
 void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1, Molecule& reactMol2, double targAngle,
-                    Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList);
+    Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList);
 
 /*! \ingroup Associate
  * \brief Function to rotate a Molecule to some a target dihedral phi, relative to sigma (the
@@ -319,7 +319,6 @@ void check_for_structure_overlap(bool& cancelAssoc, const Complex& reactCom1, co
     const std::vector<Molecule>& moleculeList, const Parameters& params,
     const std::vector<MolTemplate>& molTemplateList);
 
-
 /*! \ingroup Associate
  * \brief Checks to see if the centers of masses of any of the molecules that are undergoing physical association
  * overlap with any of the other molecules in the system! Only checks molecules that are flagged with checkOverlap=1
@@ -327,9 +326,9 @@ void check_for_structure_overlap(bool& cancelAssoc, const Complex& reactCom1, co
  * If so, cancels association.
  */
 
-void check_for_structure_overlap_system(bool &flag, const Complex& reactCom1, const Complex& reactCom2,
+void check_for_structure_overlap_system(bool& flag, const Complex& reactCom1, const Complex& reactCom2,
     std::vector<Molecule>& moleculeList, const Parameters& params,
-					const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList, const std::vector<ForwardRxn> &forwardRxns, const std::vector<BackRxn> &backRxns);
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 /*! \ingroup Associate
  * \brief Checks to see if the centers of masses of any of the molecules that are undergoing physical association
@@ -339,9 +338,9 @@ void check_for_structure_overlap_system(bool &flag, const Complex& reactCom1, co
  *as it is unphysical within a single time-step. Can occur for large complexes re-orienting to bind to one another, causing
  *some proteins to move long distances as the complex rotates.
  */
-void measure_complex_displacement(bool& flag,  Complex& reactCom1, Complex& reactCom2,
-				  std::vector<Molecule>& moleculeList, const Parameters& params,
-				  const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList);
+void measure_complex_displacement(bool& flag, Complex& reactCom1, Complex& reactCom2,
+    std::vector<Molecule>& moleculeList, const Parameters& params,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList);
 
 /*! \ingroup Associate
  * \brief measures separation between interfaces of two proteins, one that is associating (use tmpCoords) one that is in the system 
@@ -351,11 +350,10 @@ void measure_complex_displacement(bool& flag,  Complex& reactCom1, Complex& reac
  * If interfaces overlap, cancels association.
  */
 
-void measure_overlap_protein_interfaces(Molecule base1, Molecule baseTmp, bool &flagCancel);
-
+void measure_overlap_protein_interfaces(Molecule base1, Molecule baseTmp, bool& flagCancel);
 
 void measure_overlap_free_protein_interfaces(Molecule base1, Molecule baseTmp, bool& flagCancel,
-					     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 /*! \ingroup Associate
  * \brief Store Calculate rotation matrix for orienting one molecule to itself (at another timepoint, e.g.)
@@ -369,11 +367,11 @@ Quat save_mem_orientation(Molecule baseTarget, Molecule base1, MolTemplate onePr
  *
  */
 
-void com_of_two_tmp_complexes(Complex &reactCom1, Complex &reactCom2, Coord &vectorCOM, std::vector<Molecule>&moleculeList);
+void com_of_two_tmp_complexes(Complex& reactCom1, Complex& reactCom2, Coord& vectorCOM, std::vector<Molecule>& moleculeList);
 
 /*! \ingroup Associate
  * \brief update the COM of a complex, based on its tmpComCoord, and the members tmpComCoords as well (during association only!)
  *
  */
 
-void update_complex_tmp_com_crds(Complex &reactCom, std::vector<Molecule>& moleculeList);
+void update_complex_tmp_com_crds(Complex& reactCom, std::vector<Molecule>& moleculeList);

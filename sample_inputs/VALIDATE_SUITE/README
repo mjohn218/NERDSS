@@ -1,0 +1,5 @@
+
+Inputs to validate reactions or geometries.
+Includes a solution that should be compared with.
+
+IMPORTANT: Validation of the software needs to verify that the solution from the starting input (-f) is correct, and the solution from the restart (-r) is correct!

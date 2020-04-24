@@ -27,7 +27,8 @@ int find_reaction_rate_state(int simItr, int relIfaceIndex1, int relIfaceIndex2,
 
     if (reactIndex1 == -1 || reactIndex2 == -1) {
         std::cerr << llinebreak;
-        std::cerr << bon << "ERROR: Association product has incorrect dissociation reaction.\n" << boff;
+        std::cerr << bon << "ERROR: Association product has incorrect dissociation reaction.\n"
+                  << boff;
         reactMol1.display(molTemplateList[reactMol1.molTypeIndex]);
         std::cerr << linebreak;
         reactMol2.display(molTemplateList[reactMol2.molTypeIndex]);

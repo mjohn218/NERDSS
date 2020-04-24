@@ -1,9 +1,9 @@
-#include "trajectory_functions/trajectory_functions.hpp"
-#include "math/matrix.hpp"
 #include "boundary_conditions/reflect_functions.hpp"
+#include "math/matrix.hpp"
 #include "math/rand_gsl.hpp"
+#include "trajectory_functions/trajectory_functions.hpp"
 
-void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Parameters& params, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject)
+void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Parameters& params, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
     /*
       In this version, complex comIndex1 is on the membrane.
@@ -23,11 +23,11 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
      resample a new position, the current protein must still continue to avoid overlapping, however.
     */
 
-    int comIndex1{ moleculeList[pro1Index].myComIndex };
+    int comIndex1 { moleculeList[pro1Index].myComIndex };
     int startProIndex = pro1Index;
     int com1Size = complexList[comIndex1].memberList.size();
 
-    int maxRows{ 1 };
+    int maxRows { 1 };
     for (auto memMol : complexList[comIndex1].memberList) {
         if (moleculeList[memMol].crossbase.size() > maxRows)
             maxRows = moleculeList[memMol].crossbase.size();
@@ -42,16 +42,16 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
      at the end of this routine*/
 
     /*figure out i2*/
-    for (int c{ 0 }; c < com1Size; ++c) {
+    for (int c { 0 }; c < com1Size; ++c) {
         pro1Index = complexList[comIndex1].memberList[c];
-        for (int i{ 0 }; i < moleculeList[pro1Index].crossbase.size(); ++i) {
-            int p2{ moleculeList[pro1Index].crossbase[i] };
-            int k2{ moleculeList[p2].myComIndex };
+        for (int i { 0 }; i < moleculeList[pro1Index].crossbase.size(); ++i) {
+            int p2 { moleculeList[pro1Index].crossbase[i] };
+            int k2 { moleculeList[p2].myComIndex };
             if (complexList[k2].D.z == 0) {
                 memCheckList[maxRows * c + i] = 1;
             } else
                 memCheckList[maxRows * c + i] = 0;
-            int i1{ moleculeList[pro1Index].mycrossint[i] };
+            int i1 { moleculeList[pro1Index].mycrossint[i] };
             std::array<int, 3> rxnItr = moleculeList[pro1Index].crossrxn[i];
 
             // get the partner interface
@@ -61,53 +61,65 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
         }
     }
 
+    //determine RS3Dinput
+    double RS3Dinput { 0.0 };
+    Complex targCom { complexList[comIndex1] };
+    for (auto& molIndex : targCom.memberList) {
+        for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
+            if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
+                RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+                break;
+            }
+        }
+    }
+
     int tsave = 0;
     std::array<double, 9> M = create_euler_rotation_matrix(complexList[comIndex1].trajRot);
-    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], M, membraneObject);
-    int itr{ 0 };
-    int maxItr{ 50 };
-    int saveit{ 0 };
+    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], M, membraneObject, RS3Dinput);
+    int itr { 0 };
+    int maxItr { 50 };
+    int saveit { 0 };
     while (itr < maxItr) {
-        int numOverlap{ 0 };
-        bool hasOverlap{ false };
-        int comIndex2{};
-        double dr2{};
-        for (unsigned memMolItr{ 0 }; memMolItr < complexList[comIndex1].memberList.size(); ++memMolItr) {
+        int numOverlap { 0 };
+        bool hasOverlap { false };
+        int comIndex2 {};
+        double dr2 {};
+        for (unsigned memMolItr { 0 }; memMolItr < complexList[comIndex1].memberList.size(); ++memMolItr) {
             pro1Index = complexList[comIndex1].memberList[memMolItr];
-            for (int crossMemItr{ 0 }; crossMemItr < moleculeList[pro1Index].crossbase.size(); ++crossMemItr) {
-                int p2{ moleculeList[pro1Index].crossbase[crossMemItr] };
+            for (int crossMemItr { 0 }; crossMemItr < moleculeList[pro1Index].crossbase.size(); ++crossMemItr) {
+                int p2 { moleculeList[pro1Index].crossbase[crossMemItr] };
                 comIndex2 = moleculeList[p2].myComIndex;
                 /*Do not sweep for overlap if proteins are in the same complex, they cannot move relative to one
                  * another!
                  */
                 if (comIndex1 != comIndex2) {
-                    int relIface1{ moleculeList[pro1Index].mycrossint[crossMemItr] };
-                    int rxnItr{ moleculeList[pro1Index].crossrxn[crossMemItr][0] };
-                    int relIface2{ ifaceList[maxRows * memMolItr + crossMemItr] };
+                    int relIface1 { moleculeList[pro1Index].mycrossint[crossMemItr] };
+                    int rxnItr { moleculeList[pro1Index].crossrxn[crossMemItr][0] };
+                    int relIface2 { ifaceList[maxRows * memMolItr + crossMemItr] };
 
-                    Vector iface1Vec{ moleculeList[pro1Index].interfaceList[relIface1].coord
+                    Vector iface1Vec { moleculeList[pro1Index].interfaceList[relIface1].coord
                         - complexList[comIndex1].comCoord };
                     iface1Vec = matrix_rotate(iface1Vec, M);
 
-                    double dx1{ complexList[comIndex1].comCoord.x + iface1Vec.x + complexList[comIndex1].trajTrans.x };
-                    double dy1{ complexList[comIndex1].comCoord.y + iface1Vec.y + complexList[comIndex1].trajTrans.y };
-                    double dz1{ complexList[comIndex1].comCoord.z + iface1Vec.z + complexList[comIndex1].trajTrans.z };
+                    double dx1 { complexList[comIndex1].comCoord.x + iface1Vec.x + complexList[comIndex1].trajTrans.x };
+                    double dy1 { complexList[comIndex1].comCoord.y + iface1Vec.y + complexList[comIndex1].trajTrans.y };
+                    double dz1 { complexList[comIndex1].comCoord.z + iface1Vec.z + complexList[comIndex1].trajTrans.z };
 
                     /*Now complex 2*/
                     std::array<double, 9> M2 = create_euler_rotation_matrix(complexList[comIndex2].trajRot);
-                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], M2, membraneObject);
+                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], M2, membraneObject, RS3Dinput);
 
-                    Vector iface2Vec{ moleculeList[p2].interfaceList[relIface2].coord
+                    Vector iface2Vec { moleculeList[p2].interfaceList[relIface2].coord
                         - complexList[comIndex2].comCoord };
                     iface2Vec = matrix_rotate(iface2Vec, M2);
-                    double dx2{ complexList[comIndex2].comCoord.x + iface2Vec.x + complexList[comIndex2].trajTrans.x };
-                    double dy2{ complexList[comIndex2].comCoord.y + iface2Vec.y + complexList[comIndex2].trajTrans.y };
-                    double dz2{ complexList[comIndex2].comCoord.z + iface2Vec.z + complexList[comIndex2].trajTrans.z };
+                    double dx2 { complexList[comIndex2].comCoord.x + iface2Vec.x + complexList[comIndex2].trajTrans.x };
+                    double dy2 { complexList[comIndex2].comCoord.y + iface2Vec.y + complexList[comIndex2].trajTrans.y };
+                    double dz2 { complexList[comIndex2].comCoord.z + iface2Vec.z + complexList[comIndex2].trajTrans.z };
 
                     /*separation*/
-                    double df1{ dx1 - dx2 };
-                    double df2{ dy1 - dy2 };
-                    double df3{ dz1 - dz2 };
+                    double df1 { dx1 - dx2 };
+                    double df2 { dy1 - dy2 };
+                    double df3 { dz1 - dz2 };
 
                     dr2 = (df1 * df1) + (df2 * df2);
                     if (memCheckList[maxRows * memMolItr + crossMemItr] != 1)
@@ -134,10 +146,10 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
             complexList[comIndex1].trajRot.z = sqrt(2.0 * params.timeStep * complexList[comIndex1].Dr.z) * GaussV();
 
             M = create_euler_rotation_matrix(complexList[comIndex1].trajRot);
-            reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], M, membraneObject);
+            reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], M, membraneObject, RS3Dinput);
 
-            for (int checkMolItr{ 0 }; checkMolItr < numOverlap; checkMolItr++) {
-                int p2{ overlapList[checkMolItr] };
+            for (int checkMolItr { 0 }; checkMolItr < numOverlap; checkMolItr++) {
+                int p2 { overlapList[checkMolItr] };
                 comIndex2 = moleculeList[p2].myComIndex;
                 if (p2 > startProIndex && (moleculeList[p2].trajStatus == TrajStatus::none || moleculeList[p2].trajStatus == TrajStatus::canBeResampled)) {
                     /*
@@ -161,7 +173,7 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
                     complexList[comIndex2].trajRot.z
                         = sqrt(2.0 * params.timeStep * complexList[comIndex2].Dr.z) * GaussV();
                     std::array<double, 9> M2 = create_euler_rotation_matrix(complexList[comIndex2].trajRot);
-                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], M2, membraneObject);
+                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], M2, membraneObject, RS3Dinput);
                 }
             }
             tsave = numOverlap;
@@ -180,17 +192,17 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
 
                 // write_crds_complex(comIndex1, ind_com, bases);
                 // write_crds_complex(comIndex2, ind_com, bases);
-                for (int c{ 0 }; c < com1Size; ++c) {
+                for (int c { 0 }; c < com1Size; ++c) {
                     pro1Index = complexList[comIndex1].memberList[c];
                     std::cout << "p1: " << pro1Index << ' ' << " nfree and com; "
                               << moleculeList[pro1Index].freelist.size() << ' ' << moleculeList[pro1Index].comCoord
                               << '\t';
                     std::cout << "traj 1: " << ' ' << complexList[comIndex2].trajTrans << '\n';
-                    for (int crossMolItr{ 0 }; crossMolItr < moleculeList[pro1Index].crossbase.size(); ++crossMolItr) {
-                        int pro2Index{ moleculeList[pro1Index].crossbase[crossMolItr] };
+                    for (int crossMolItr { 0 }; crossMolItr < moleculeList[pro1Index].crossbase.size(); ++crossMolItr) {
+                        int pro2Index { moleculeList[pro1Index].crossbase[crossMolItr] };
                         comIndex2 = moleculeList[pro2Index].myComIndex;
-                        int relIface1{ moleculeList[pro1Index].mycrossint[crossMolItr] };
-                        int relIface2{ ifaceList[maxRows * c + crossMolItr] };
+                        int relIface1 { moleculeList[pro1Index].mycrossint[crossMolItr] };
+                        int relIface2 { ifaceList[maxRows * c + crossMolItr] };
                         std::cout << "cross num: " << crossMolItr << " i1: " << relIface1 << " i2: " << relIface2
                                   << " pro: " << pro2Index << ' ' << " nfree; "
                                   << moleculeList[pro2Index].freelist.size() << ' ' << moleculeList[pro2Index].comCoord
@@ -208,8 +220,8 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
 
     } // end maximum iterations
 
-//    for (auto mp : complexList[comIndex1].memberList)
-//        moleculeList[mp].trajStatus = TrajStatus::propagated; // physically updated position of these proteins
+    //    for (auto mp : complexList[comIndex1].memberList)
+    //        moleculeList[mp].trajStatus = TrajStatus::propagated; // physically updated position of these proteins
     complexList[comIndex1].propagate(moleculeList);
 
     // Reset displacements to zero so distance is measured to your current

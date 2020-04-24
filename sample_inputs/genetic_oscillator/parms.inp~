@@ -1,0 +1,100 @@
+# Input file
+
+start parameters
+    nItr = 20000000
+    timeStep = 10 #us
+
+    pdbWrite = 1000
+    timeWrite = 1000
+    trajWrite = 1000
+    restartWrite = 1000
+    fromRestart = false
+end parameters
+
+start boundaries
+    waterBox = [1612,1612,1612] #in nm
+end boundaries
+
+start molecules
+    A
+    R
+    PrA
+    PrR
+    RNR     # mRNA_R
+    RNA     # mRNA_A
+end molecules
+
+start reactions
+    # BIMOLECULAR CREATION #
+    # A + R -> C (1204 uM-1s-1) 
+    A(a) + R(r) <-> A(a!1).R(r!1)
+    onRate = 356262.9   #nm^3/us 
+    offRate =1.0 #1/s
+    sigma = 8 #nm
+    isCoupled = 14 #FORCE RXN NUM LISTED (rate=INF)
+    observeLabel = boundAR
+
+    # PrmA + A <-> PrmA_bound (602 uM-1s-1) (50 s-1)
+    PrA(a) + A(a) <-> PrA(a!1).A(a!1)
+    onRate = 4888.6   # 602 1/(uM * s)
+    offRate = 244.5 
+    sigma = 5
+
+    # PrmR + A <-> PrmR_bound (602 uM-1s-1) (100 s-1)
+    PrR(r) + A(a) <-> PrR(r!1).A(a!1)
+    onRate = 4888.6    # 602 1/(uM * s)
+    offRate = 489.02 
+    sigma = 5
+
+    # UNIMOLECULAR CREATION #
+    # PrmA -> PrmA + mRNA_A (50 s-1)
+    PrA(a) -> PrA(a) + RNA(a)
+    onRate = 50    # 1/s
+    observeLabel = mRNA
+
+    # PrmR -> PrmR + mRNA_R (0.01 s-1)
+    PrR(r) -> PrR(r) + RNR(r)
+    onRate = 0.01   # 1/s
+    observeLabel = mRNR
+
+    # mRNA_A -> mRNA_A + A (50 s-1)
+    RNA(a) -> RNA(a) + A(a)
+    onRate = 50     # 1/s
+    observeLabel = freeA
+
+    # mRNA_R -> mRNA_R + R (5 s-1)
+    RNR(r) -> RNR(r) + R(r)
+    onRate = 5      # 1/s
+    observeLabel = freeR
+
+    # PrmR_bound -> PrmR_bound + mRNA_A (500 s-1)
+    PrA(a!*).A(a!*) -> PrA(a!*).A(a!*) + RNA(a)
+    onRate = 500    # 1/s
+    observeLabel = mRNA
+
+    # PrmR_bound -> PrmR_bound + mRNA_R (50 s-1)
+    PrR(r!*).A(a!*) -> PrR(r!*).A(a!*) + RNR(r)
+    onRate = 50    # 1/s
+    observeLabel = mRNR
+
+    # DESTRUCTION #
+    # mRNA_A -> NULL (10 s-1)
+    RNA(a) -> null
+    onRate = 10     # 1/s
+    observeLabel = mRNA
+
+    # mRNA_R -> NULL (0.5 s-1)
+    RNR(r) -> null
+    onRate = 0.5    # 1/s
+    observeLabel = mRNR
+
+    # A -> NULL (1 s-1)
+    A(a) -> null
+    onRate = 1      # 1/s
+    observeLabel = freeA
+
+    # R -> NULL (0.2 s-1)
+    R(r) -> null
+    onRate = 0.2    # 1/s
+    observeLabel = freeR
+end reactions

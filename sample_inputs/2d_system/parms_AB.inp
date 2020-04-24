@@ -1,0 +1,30 @@
+# Input file
+
+start parameters
+    nItr = 10000000 #number of steps to take
+    timeStep = 0.1 #in us
+
+    timeWrite = 500 #print instantaneous properties
+    trajWrite = 100000 #print coordinates
+    restartWrite = 100000 #print restart file
+end parameters
+
+start boundaries
+     WaterBox = [500,500,10]
+     xBCtype = reflect
+     yBCtype = reflect
+     zBCtype = reflect
+end boundaries
+
+start molecules
+    A : 1000
+    B : 1000
+end molecules
+
+start reactions
+    A(a) + B(b) <-> A(a!1).B(b!1)
+    onRate3Dka = 10  #units of nm3/us, will divide by 2*sigma to get 2D rate
+    offRatekb = 1 #units of 1/s
+    sigma = 1 #units of nm
+    observeLabel = AB
+end reactions

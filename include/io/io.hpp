@@ -46,7 +46,7 @@ void write_xyz(std::string filename, const Parameters& params, const std::vector
  * \brief Writes/appends the coordinates of all Molecules in the system to the trajectory file.
  */
 void write_traj(int iter, std::ofstream& trajFile, const Parameters& params, const std::vector<Molecule>& moleculeList,
-		const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
 
 /*! \ingroup IO
  * \brief Debugging IO function to write an xyz file for a associating complexes.
@@ -89,21 +89,21 @@ void write_complex_components(int simItr, std::ofstream& complexFile, const Para
  * it anyway.
  */
 void write_restart(int simItr, std::ofstream& restartFile, const Parameters& params, const SimulVolume& simulVolume,
-                   const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
-                   const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
-                   const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
-                   const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
-                   const std::vector<int>& emptyComList, const Membrane &membraneObject);
+    const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
+    const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
+    const std::vector<int>& emptyComList, const Membrane& membraneObject, const copyCounters& counterArrays);
 
 /*! \ingroup IO
  * \brief Reads a restart file and sets up the simulation
  */
 void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& params, SimulVolume& simulVolume,
-                  std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                  std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
-                  std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
-                  std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
-                  std::vector<int>& emptyComList, Membrane &membraneObject);
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
+    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
+    std::vector<int>& emptyComList, Membrane& membraneObject, copyCounters& counterArrays);
 
 /*! \ingroup IO
  * \ingroup SpeciesTracker
@@ -116,7 +116,7 @@ void write_observables(
  * \brief Writes a pdb file for the current frame
  */
 void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
-	       const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
 
 /*! \ingroup IO
  * \brief first line description of the MONODIMER output file.
@@ -130,31 +130,31 @@ void print_dimers(std::vector<Complex>& complexList, std::ofstream& outfile, int
  * also bound via other interfaces to other proteins.
  */
 void init_NboundPairs(
-    copyCounters& counterArray, std::ofstream& outfile, Parameters params, std::vector<MolTemplate>& molTemplateList);
+    copyCounters& counterArray, std::ofstream& outfile, Parameters params, std::vector<MolTemplate>& molTemplateList, std::vector<Molecule>& moleculeList);
 
 /*! \ingroup IO
  * \brief write: Nbound pairs are counting all directly bound pairs of protein A and partner B. Does not matter if A or
  * B are also bound via other interfaces to other proteins.
  */
-void write_NboundPairs(copyCounters& counterArrays, std::ofstream& outfile, int it, const Parameters& params);
+void write_NboundPairs(copyCounters& counterArrays, std::ofstream& outfile, int it, const Parameters& params, std::vector<Molecule>& moleculeList);
 
 /*! \ingroup IO
  * \brief print calculated histogram of distinct types of complexes, based on protein/lipid composition.
  */
 double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
-			  std::vector<MolTemplate>& molTemplateList, int nImplicitLipids);
+    std::vector<MolTemplate>& molTemplateList, int nImplicitLipids);
 
 /*! \ingroup IO
  * \brief initialize array of counterArrays.copyNumSpecies, based on the initial molecule Species and their interface
  * States.
  */
-void init_counterCopyNums(copyCounters& counterArrays, std::vector<Molecule>& moleculeList, std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
+void init_counterCopyNums(copyCounters& counterArrays, std::vector<Molecule>& moleculeList, std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject, int totalSpeciesNum);
 
 /*! \ingroup IO
  * \brief writes out the names of species in the all_species.dat file.
  */
 
-void init_speciesFile(std::ofstream &speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList    ,std::vector<ForwardRxn>&forwardRxns);
+int init_speciesFile(std::ofstream& speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns);
 /*! \ingroup IO
  * \brief Writes all the species in the system, from a copyCounter object
  */

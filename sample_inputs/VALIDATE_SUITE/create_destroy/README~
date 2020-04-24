@@ -1,0 +1,19 @@
+
+0->A kc (M/s)
+A->0 kd (1/s)
+
+Analytical solution
+dA/dt=kc-kdA
+A(t=0)=0
+is
+A(t)=kc/kd[ 1-exp(-kd*t) ]
+
+equilibrates after ~5/kd seconds.
+
+Because currently the unimolecular reactions are treated as Poisson processes where each decision is performed one-at-a-time, (only 1 or 0 events per specie), there are small errors that can accumulate when 1-exp(-kd*t) is relatively large (i.e. 0.01).
+Hence the use of dt=0.5 us.
+
+This would be remedied by treating unimolecular reactions with choosing the number of events for the whole population, allowing the same accuracy at large steps. 
+
+
+NOTE: Simulations crash if initial copy numbers is 0. hence the addition of the dummy specie, Phos.mol

@@ -12,18 +12,39 @@ void find_which_reaction(int ifaceIndex1, int ifaceIndex2, int& rxnIndex, int& r
         int reactIndex1 { -1 };
         int reactIndex2 { -1 };
         for (int reactItr { 0 }; reactItr < oneRxn.reactantListNew.size(); ++reactItr) {
-            if (reactMol1.interfaceList[ifaceIndex1].index == oneRxn.reactantListNew[reactItr].absIfaceIndex) {
+            if (reactMol1.isImplicitLipid && molTemplateList[oneRxn.reactantListNew[reactItr].molTypeIndex].isImplicitLipid) {
                 if (reactIndex1 == -1) {
                     reactIndex1 = reactItr;
                     continue;
                 }
+            } else {
+                if (reactMol1.interfaceList[ifaceIndex1].index == oneRxn.reactantListNew[reactItr].absIfaceIndex) {
+                    if (reactIndex1 == -1) {
+                        reactIndex1 = reactItr;
+                        continue;
+                    }
+                }
             }
-            if (reactMol2.interfaceList[ifaceIndex2].index == oneRxn.reactantListNew[reactItr].absIfaceIndex) {
+            if (reactMol2.isImplicitLipid && molTemplateList[oneRxn.reactantListNew[reactItr].molTypeIndex].isImplicitLipid) {
                 if (reactIndex2 == -1) {
                     reactIndex2 = reactItr;
                     continue;
                 }
+            } else {
+                if (reactMol2.interfaceList[ifaceIndex2].index == oneRxn.reactantListNew[reactItr].absIfaceIndex) {
+                    if (reactIndex2 == -1) {
+                        reactIndex2 = reactItr;
+                        continue;
+                    }
+                }
             }
+        }
+
+        if (reactMol2.isImplicitLipid) {
+            reactIndex2 = 1;
+        }
+        if (reactMol1.isImplicitLipid) {
+            reactIndex1 = 1;
         }
 
         if (oneRxn.rxnType == ReactionType::biMolStateChange && (reactIndex1 == -1 || reactIndex2 == -1)) {

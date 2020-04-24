@@ -1,53 +1,53 @@
-#include "math/matrix.hpp"
 #include "boundary_conditions/reflect_functions.hpp"
+#include "math/matrix.hpp"
 
 void reflect_traj_complex_rad_rot(
-				  const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 9>& M, const Membrane &membraneObject)
+    const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 9>& M, const Membrane& membraneObject, double RS3Dinput)
 {
-	 // NOTE: it only works for a box system with the membrane surface located on the Z-bottom.
-	 
+    // NOTE: it only works for a box system with the membrane surface located on the Z-bottom.
+
     // for implicit-lipid model, the boundary surface must consider the reflecting-surface RS3D
-    // for explicit-lipid model, membraneObject.RS3D = 0. 
-    double RS3D = membraneObject.RS3D;
+    // for explicit-lipid model, RS3D = 0.
+    double RS3D = RS3Dinput;
     //    std::cout <<" RS3D: "<<membraneObject.RS3D<<std::endl;
     /*This routine updated March 2017 to test if a large complex that spans the box could extend out in both directions
     if so, it attempts to correct for this by resampling the complex's translational and rotational updates.
     */
-    double xtot{ 0 };
-    double ytot{ 0 };
-    double ztot{ 0 };
-    double currx{ targCom.comCoord.x + targCom.trajTrans.x };
-    double curry{ targCom.comCoord.y + targCom.trajTrans.y };
-    double currz{ targCom.comCoord.z + targCom.trajTrans.z };
+    double xtot { 0 };
+    double ytot { 0 };
+    double ztot { 0 };
+    double currx { targCom.comCoord.x + targCom.trajTrans.x };
+    double curry { targCom.comCoord.y + targCom.trajTrans.y };
+    double currz { targCom.comCoord.z + targCom.trajTrans.z };
 
     /*This is to test based on general size if it is close to boundaries, before doing detailed evaluation below.*/
 
-    bool canBeOutsideX{ false };
+    bool canBeOutsideX { false };
     double xchg = currx - membraneObject.waterBox.x / 2.0;
     if ((xchg + targCom.radius) > 0 || (xchg - targCom.radius) < -membraneObject.waterBox.x)
         canBeOutsideX = true;
 
-    bool canBeOutsideY{ false };
+    bool canBeOutsideY { false };
     double ychg = curry - membraneObject.waterBox.y / 2.0;
     if ((ychg + targCom.radius) > 0 || (ychg - targCom.radius) < -membraneObject.waterBox.y)
         canBeOutsideY = true;
 
-    bool canBeOutsideZ{ false };
+    bool canBeOutsideZ { false };
     double zchg = currz - membraneObject.waterBox.z / 2.0;
-    if ((zchg + targCom.radius) > 0 || (zchg - targCom.radius) < -(membraneObject.waterBox.z - RS3D) )
+    if ((zchg + targCom.radius) > 0 || (zchg - targCom.radius) < -(membraneObject.waterBox.z - RS3D))
         canBeOutsideZ = true;
 
     /*Now evaluate all interfaces distance from boundaries.*/
-    bool recheck{ false };
+    bool recheck { false };
     if (canBeOutsideX) {
-        bool outside{ false };
-        bool outsideNeg{ false };
-        bool outsidePos{ false };
+        bool outside { false };
+        bool outsideNeg { false };
+        bool outsidePos { false };
 
         double posWall = membraneObject.waterBox.x;
         double negWall = membraneObject.waterBox.x;
 
-        std::array<double, 3> row{};
+        std::array<double, 3> row {};
         row[0] = M[0];
         row[1] = M[1];
         row[2] = M[2];
@@ -56,9 +56,9 @@ void reflect_traj_complex_rad_rot(
         due to translation and rotation are*/
         for (auto& memMol : targCom.memberList) {
             /*measure each protein COM to z plane*/
-            Vector comVec{ moleculeList[memMol].comCoord - targCom.comCoord };
+            Vector comVec { moleculeList[memMol].comCoord - targCom.comCoord };
 
-            double dxrot{ row[0] * comVec.x + row[1] * comVec.y + row[2] * comVec.z };
+            double dxrot { row[0] * comVec.x + row[1] * comVec.y + row[2] * comVec.z };
             currx = targCom.comCoord.x + targCom.trajTrans.x + dxrot;
 
             if (membraneObject.waterBox.x / 2.0 - currx < posWall)
@@ -80,7 +80,7 @@ void reflect_traj_complex_rad_rot(
             }
             /*measure each interface to z plane*/
             for (auto& iface : moleculeList[memMol].interfaceList) {
-                Vector ifaceVec{ iface.coord - targCom.comCoord };
+                Vector ifaceVec { iface.coord - targCom.comCoord };
 
                 dxrot = row[0] * ifaceVec.x + row[1] * ifaceVec.y + row[2] * ifaceVec.z;
                 currx = targCom.comCoord.x + targCom.trajTrans.x + dxrot;
@@ -127,14 +127,14 @@ void reflect_traj_complex_rad_rot(
         }
     }
     if (canBeOutsideY > 0) {
-        bool outside{ false };
-        bool outsideNeg{ false };
-        bool outsidePos{ false };
+        bool outside { false };
+        bool outsideNeg { false };
+        bool outsidePos { false };
 
-        double poswall{ membraneObject.waterBox.y };
-        double negwall{ membraneObject.waterBox.y };
+        double poswall { membraneObject.waterBox.y };
+        double negwall { membraneObject.waterBox.y };
 
-        std::array<double, 3> row{};
+        std::array<double, 3> row {};
         row[0] = M[3];
         row[1] = M[4];
         row[2] = M[5];
@@ -144,7 +144,7 @@ void reflect_traj_complex_rad_rot(
         // for (i = 0; i < s1; i++) {
         for (auto& mp : targCom.memberList) {
             /*measure each protein COM to y plane*/
-            Vector comVec{ moleculeList[mp].comCoord - targCom.comCoord };
+            Vector comVec { moleculeList[mp].comCoord - targCom.comCoord };
 
             /*only need y component*/
             double dyrot = row[0] * comVec.x + row[1] * comVec.y + row[2] * comVec.z;
@@ -168,7 +168,7 @@ void reflect_traj_complex_rad_rot(
             }
             /*measure each interface to y plane*/
             for (auto& iface : moleculeList[mp].interfaceList) {
-                Vector ifaceVec{ iface.coord - targCom.comCoord };
+                Vector ifaceVec { iface.coord - targCom.comCoord };
 
                 /*only need y component*/
                 dyrot = row[0] * ifaceVec.x + row[1] * ifaceVec.y + row[2] * ifaceVec.z;
@@ -214,16 +214,16 @@ void reflect_traj_complex_rad_rot(
             }
         }
     }
-    
+
     if (canBeOutsideZ > 0) {
-        bool outside{ false };
-        bool outsideNeg{ false };
-        bool outsidePos{ false };
+        bool outside { false };
+        bool outsideNeg { false };
+        bool outsidePos { false };
 
-        double poswall{ membraneObject.waterBox.z };
-        double negwall{ membraneObject.waterBox.z };
+        double poswall { membraneObject.waterBox.z };
+        double negwall { membraneObject.waterBox.z };
 
-        std::array<double, 3> row{};
+        std::array<double, 3> row {};
         row[0] = M[6];
         row[1] = M[7];
         row[2] = M[8];
@@ -233,7 +233,7 @@ void reflect_traj_complex_rad_rot(
         // for (i = 0; i < s1; i++) {
         for (auto& memMol : targCom.memberList) {
             /*measure each protein COM to z plane*/
-            Vector comVec{ moleculeList[memMol].comCoord - targCom.comCoord };
+            Vector comVec { moleculeList[memMol].comCoord - targCom.comCoord };
 
             double dzrot = row[0] * comVec.x + row[1] * comVec.y + row[2] * comVec.z;
             currz = targCom.comCoord.z + targCom.trajTrans.z + dzrot;
@@ -248,15 +248,15 @@ void reflect_traj_complex_rad_rot(
                 outsidePos = true;
                 if (-zchg < ztot)
                     ztot = -zchg;
-            } else if (zchg < -(membraneObject.waterBox.z-RS3D)) {
+            } else if (zchg < -(membraneObject.waterBox.z - RS3D)) {
                 outside = true;
                 outsideNeg = true;
-                if (-(zchg + membraneObject.waterBox.z-RS3D) > ztot)
-                    ztot = -(zchg + membraneObject.waterBox.z-RS3D);
+                if (-(zchg + membraneObject.waterBox.z - RS3D) > ztot)
+                    ztot = -(zchg + membraneObject.waterBox.z - RS3D);
             }
             /*measure each interface to z plane*/
             for (auto& iface : moleculeList[memMol].interfaceList) {
-                Vector ifaceVec{ iface.coord - targCom.comCoord };
+                Vector ifaceVec { iface.coord - targCom.comCoord };
 
                 dzrot = row[0] * ifaceVec.x + row[1] * ifaceVec.y + row[2] * ifaceVec.z;
                 currz = targCom.comCoord.z + targCom.trajTrans.z + dzrot;
@@ -275,7 +275,7 @@ void reflect_traj_complex_rad_rot(
                 } else if (zchg < -(membraneObject.waterBox.z - RS3D)) {
                     outside = true;
                     outsideNeg = true;
-                    if (-(zchg + membraneObject.waterBox.z-RS3D) > ztot)
+                    if (-(zchg + membraneObject.waterBox.z - RS3D) > ztot)
                         ztot = -(zchg + membraneObject.waterBox.z - RS3D);
                 }
             }
@@ -313,6 +313,6 @@ void reflect_traj_complex_rad_rot(
          * rotation matrix.*/
         std::cout << "RECHECK THAT COMPLEX DOES NOT SPAN BOX IN SUBROUTINE REFLECT TRAJ COMPLEX RAD ROT. Complex: "
                   << targCom.index << " size:" << targCom.memberList.size() << '\n';
-        reflect_traj_check_span(xtot, ytot, ztot, params, targCom, moleculeList, M, membraneObject);
+        reflect_traj_check_span(xtot, ytot, ztot, params, targCom, moleculeList, M, membraneObject, RS3Dinput);
     }
 }

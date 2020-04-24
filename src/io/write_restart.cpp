@@ -1,18 +1,18 @@
 #include "io/io.hpp"
-#include <iomanip>
 #include <chrono>
 #include <ctime>
+#include <iomanip>
 
 void write_restart(int simItr, std::ofstream& restartFile, const Parameters& params, const SimulVolume& simulVolume,
-                   const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
-                   const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
-                   const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
-                   const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
-                   const std::vector<int>& emptyComList, const Membrane &membraneObject)
+    const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
+    const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
+    const std::vector<int>& emptyComList, const Membrane& membraneObject, const copyCounters& counterArrays)
 {
     // Write parameters
     {
-      restartFile << "#Parameters--update these for restart \n";
+        restartFile << "#Parameters--update these for restart \n";
         restartFile << "numItr = " << params.nItr << '\n';
         restartFile << "currItr = " << simItr << '\n';
         restartFile << "numMolTypes = " << params.numMolTypes << '\n';
@@ -24,14 +24,23 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
         restartFile << "max2DRxns = " << params.max2DRxns << '\n';
         restartFile << "simulDimensions = " << membraneObject.waterBox.x << ' ' << membraneObject.waterBox.y << ' ' << membraneObject.waterBox.z
                     << '\n';
-	restartFile << "membrane = " << membraneObject.implicitlipidIndex << ' ' << membraneObject.RS3D <<' '<<membraneObject.RD2D<< ' ' << membraneObject.nSites<<' '<<membraneObject.No_free_lipids<<' '<<membraneObject.No_protein<<' '<<membraneObject.totalSA<<'\n';
-	restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD<<' '<<membraneObject.isBox<<' '<<membraneObject.isSphere<<' '<<membraneObject.sphereRadius<<'\n';
-	restartFile << "ifaceOverlapSepLimit = " << params.overlapSepLimit << '\n';
+        restartFile << "membrane = " << membraneObject.implicitlipidIndex << ' ' << membraneObject.nSites << ' ' << membraneObject.nStates << ' ' << membraneObject.No_free_lipids << ' ' << membraneObject.No_protein << ' ' << membraneObject.totalSA << '\n';
+        restartFile << "implicitLipidStates = ";
+        for (int i = 0; i < membraneObject.nStates; i++) {
+            restartFile << membraneObject.numberOfFreeLipidsEachState[i];
+            if (i != membraneObject.nStates - 1) {
+                restartFile << ' ';
+            }
+        }
+        restartFile << '\n';
+        restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereRadius << '\n';
+        restartFile << "ifaceOverlapSepLimit = " << params.overlapSepLimit << '\n';
         restartFile << "rMaxLimit = " << std::fixed << params.rMaxLimit << '\n';
         restartFile << "timeWrite = " << params.timeWrite << '\n';
         restartFile << "trajWrite = " << params.trajWrite << '\n';
         restartFile << "restartWrite = " << params.restartWrite << '\n';
         restartFile << "pdbWrite = " << params.pdbWrite << '\n';
+        restartFile << "checkPoint = " << params.checkPoint << '\n';
     }
     /*
     // write Simulation Volume
@@ -57,7 +66,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
     */
     // write MolTemplates
     {
-      restartFile << "#MolTemplates \n";
+        restartFile << "#MolTemplates \n";
         restartFile << MolTemplate::numMolTypes;
         for (auto& num : MolTemplate::numEachMolType)
             restartFile << ' ' << num;
@@ -71,7 +80,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
         for (const auto& oneTemp : molTemplateList) {
             restartFile << oneTemp.molTypeIndex << ' ' << oneTemp.molName << '\n';
             restartFile << oneTemp.copies << ' ' << oneTemp.mass << ' ' << oneTemp.radius << '\n';
-            restartFile << oneTemp.isLipid << ' ' <<oneTemp.isImplicitLipid<<' '<< oneTemp.isRod << ' ' << oneTemp.isPoint << ' '
+            restartFile << oneTemp.isLipid << ' ' << oneTemp.isImplicitLipid << ' ' << oneTemp.isRod << ' ' << oneTemp.isPoint << ' '
                         << oneTemp.checkOverlap << '\n';
             restartFile << std::fixed << oneTemp.comCoord.x << ' ' << oneTemp.comCoord.y << ' ' << oneTemp.comCoord.z
                         << '\n';
@@ -120,23 +129,31 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
                     restartFile << '\n';
                 }
             }
+
+            //write ifacesWithStates
+            restartFile << oneTemp.ifacesWithStates.size();
+            for (auto elem : oneTemp.ifacesWithStates) {
+                restartFile << ' ' << elem;
+            }
+            restartFile << '\n';
         }
     }
 
     // write Reactions
     {
-            restartFile << "#Reactions \n";
+        restartFile << "#Reactions \n";
         restartFile << RxnBase::numberOfRxns << ' ' << forwardRxns.size() << ' ' << backRxns.size() << ' '
                     << createDestructRxns.size() << ' ' << RxnBase::totRxnSpecies << '\n';
 
         // forward reactions
         for (const auto& oneRxn : forwardRxns) {
-            restartFile << oneRxn.absRxnIndex << ' ' << oneRxn.relRxnIndex << '\n';
+            restartFile << oneRxn.absRxnIndex << ' ' << oneRxn.relRxnIndex << ' ' << oneRxn.rxnLabel << '\n';
             restartFile << static_cast<std::underlying_type<ReactionType>::type>(oneRxn.rxnType) << ' '
                         << oneRxn.isSymmetric << ' ' << oneRxn.isOnMem << ' ' << oneRxn.hasStateChange << '\n';
             restartFile << oneRxn.isObserved << ' ' << oneRxn.observeLabel << ' ' << oneRxn.productName << '\n';
-            restartFile << oneRxn.isReversible << ' ' << oneRxn.conjBackRxnIndex << ' ' << oneRxn.irrevRingClosure<<' '<<oneRxn.bindRadSameCom<<' '
-                        << oneRxn.loopCoopFactor<<'\n'<<oneRxn.length3Dto2D<<'\n';
+            restartFile << oneRxn.isReversible << ' ' << oneRxn.conjBackRxnIndex << ' ' << oneRxn.irrevRingClosure << ' ' << oneRxn.bindRadSameCom << ' '
+                        << oneRxn.loopCoopFactor << '\n'
+                        << oneRxn.length3Dto2D << '\n';
             restartFile << std::setprecision(12) << oneRxn.bindRadius << ' ' << oneRxn.assocAngles.theta1 << ' ' << oneRxn.assocAngles.theta2
                         << ' ' << oneRxn.assocAngles.phi1 << ' ' << oneRxn.assocAngles.phi2 << ' '
                         << oneRxn.assocAngles.omega << '\n';
@@ -144,7 +161,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << oneRxn.norm2.x << ' ' << oneRxn.norm2.y << ' ' << oneRxn.norm2.z << '\n';
             restartFile << oneRxn.isCoupled;
             if (oneRxn.isCoupled)
-	      restartFile <<' '<< oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.relRxnIndex << ' ' << oneRxn.rxnType;
+                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label;
             restartFile << '\n';
 
             // integer reactants
@@ -304,7 +321,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
                 //                     << anccIface.requiresState << ' ' << anccIface.requiresInteraction << '\n';
                 //     }
                 // }
-		//  restartFile << oneRate.otherIfaceLists.size() << '\n';
+                //  restartFile << oneRate.otherIfaceLists.size() << '\n';
                 for (const auto& otherIfaceList : oneRate.otherIfaceLists) {
                     restartFile << otherIfaceList.size() << '\n';
                     for (const auto& anccIface : otherIfaceList) {
@@ -319,12 +336,12 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
 
     // write Molecules
     {
-      restartFile << "#All Molecules and coordinates \n";
+        restartFile << "#All Molecules and coordinates \n";
         restartFile << moleculeList.size() << ' ' << Molecule::numberOfMolecules << '\n';
         for (auto& oneMol : moleculeList) {
             restartFile << oneMol.index << ' ' << oneMol.isEmpty << ' ' << oneMol.myComIndex << ' '
                         << oneMol.molTypeIndex << ' ' << oneMol.mySubVolIndex << '\n';
-            restartFile << oneMol.mass << ' ' << oneMol.isLipid << ' ' <<oneMol.isImplicitLipid<<' '<< oneMol.linksToSurface<<' '<<oneMol.isEmpty << '\n';
+            restartFile << oneMol.mass << ' ' << oneMol.isLipid << ' ' << oneMol.isImplicitLipid << ' ' << oneMol.linksToSurface << ' ' << oneMol.isEmpty << '\n';
 
             // center of mass
             restartFile << std::fixed << oneMol.comCoord.x << ' ' << oneMol.comCoord.y << ' ' << oneMol.comCoord.z
@@ -386,19 +403,19 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << '\n';
         }
 
-        restartFile << emptyMolList.size();
-        for (auto& index : emptyMolList)
+        restartFile << Molecule::emptyMolList.size();
+        for (auto& index : Molecule::emptyMolList)
             restartFile << ' ' << index;
         restartFile << '\n';
     }
 
     // write Complexes
     {
-      restartFile << "#All Complexes and their components \n";
+        restartFile << "#All Complexes and their components \n";
         restartFile << complexList.size() << ' ' << Complex::numberOfComplexes << '\n';
         for (const auto& oneCom : complexList) {
-	  restartFile << oneCom.index << ' ' << oneCom.isEmpty << ' ' << oneCom.radius << ' ' << oneCom.mass << '\n';
-	  restartFile << oneCom.linksToSurface << ' ' << oneCom.iLipidIndex << ' ' << oneCom.OnSurface << '\n';
+            restartFile << oneCom.index << ' ' << oneCom.isEmpty << ' ' << oneCom.radius << ' ' << oneCom.mass << '\n';
+            restartFile << oneCom.linksToSurface << ' ' << oneCom.iLipidIndex << ' ' << oneCom.OnSurface << '\n';
             restartFile << std::fixed << oneCom.comCoord.x << ' ' << oneCom.comCoord.y << ' ' << oneCom.comCoord.z
                         << '\n';
             restartFile << std::fixed << oneCom.D.x << ' ' << oneCom.D.y << ' ' << oneCom.D.z << '\n';
@@ -415,8 +432,8 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << '\n';
         }
 
-        restartFile << emptyComList.size();
-        for (auto& index : emptyComList)
+        restartFile << Complex::emptyComList.size();
+        for (auto& index : Complex::emptyComList)
             restartFile << ' ' << index;
         restartFile << '\n';
     }
@@ -426,4 +443,8 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
     restartFile << observablesList.size() << '\n';
     for (auto& observable : observablesList)
         restartFile << observable.first << ' ' << observable.second << '\n';
+
+    // Write counterArrays
+    restartFile << "#counterArrays.NLoops \n";
+    restartFile << counterArrays.nLoops << '\n';
 }

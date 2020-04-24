@@ -3,9 +3,7 @@
 ##
 
 Name = clat
-copies = 100
 checkOverlap = true
-mass = 1
 
 # translational diffusion constants
 D = [3.0, 3.0, 3.0]

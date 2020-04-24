@@ -16,9 +16,9 @@ start boundaries
 end boundaries
 
 start molecules
-    pip2
-    ap2
-    clat
+    pip2 : 500000
+    ap2 : 300
+    clat : 100
 end molecules
 
 start reactions

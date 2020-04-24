@@ -50,8 +50,8 @@ bool RxnIface::operator==(const Molecule::Iface& molIface) const
     //    return this->molTypeIndex == molIface.molTypeIndex && this->absIfaceIndex == molIface.index
     //        && this->requiresState == molIface.stateIden && this->requiresInteraction == molIface.isBound;
     // this can't check absIfaceIndex, since bound interfaces in the reactants can't have indexed bonds, yet
-        return this->molTypeIndex == molIface.molTypeIndex && this->relIfaceIndex == molIface.relIndex
-            && this->requiresState == molIface.stateIden && this->requiresInteraction == molIface.isBound;
+    return this->molTypeIndex == molIface.molTypeIndex && this->relIfaceIndex == molIface.relIndex
+        && this->requiresState == molIface.stateIden && this->requiresInteraction == molIface.isBound;
 }
 
 /* FORWARDRXN */
@@ -70,9 +70,10 @@ ForwardRxn::ForwardRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& mol
     loopCoopFactor = parsedRxn.loopCoopFactor;
     irrevRingClosure = parsedRxn.irrevRingClosure;
     length3Dto2D = parsedRxn.length3Dto2D;
+    rxnLabel = parsedRxn.rxnLabel;
     // set the product name for species output file headers
     productName = parsedRxn.productName;
-//    fullProductName = parsedRxn.fullProductName;
+    //    fullProductName = parsedRxn.fullProductName;
 
     // set reaction type
     rxnType = parsedRxn.rxnType;
@@ -93,7 +94,7 @@ ForwardRxn::ForwardRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& mol
 
     // create reactant and product lists
     rateList.emplace_back();
-    rateList.back().rate = parsedRxn.onRate;
+    rateList.back().rate = parsedRxn.onRate3Dka;
     rateList.back().otherIfaceLists = parsedRxn.otherIfaceLists;
     // reactants (and while we're in the loop, create the RateState otherIfaceList
     for (auto& mol : parsedRxn.reactantList) {
@@ -140,61 +141,70 @@ ForwardRxn::ForwardRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& mol
 
 void ForwardRxn::display() const
 {
-    std::cout << "Absolute index: " << absRxnIndex << '\n';
-    std::cout << "Type: " << rxnType << '\n';
+    std::cout << "Absolute index: " << absRxnIndex << std::endl;
+    std::cout << "Type: " << rxnType << std::endl;
 
     if (rxnType == ReactionType::bimolecular) {
         std::cout << "Reactants:\n";
         for (auto& reactant : reactantListNew)
-            std::cout << ' ' << reactant << '\n';
+            std::cout << ' ' << reactant << std::endl;
         std::cout << std::endl;
         std::cout << "Products:\n";
         for (auto& product : productListNew)
-            std::cout << ' ' << product << '\n';
+            std::cout << ' ' << product << std::endl;
         std::cout << std::endl;
     } else if (rxnType == ReactionType::biMolStateChange) {
         std::cout << "Facilitator: ";
         for (auto& reactant : reactantListNew) {
             if (reactant.absIfaceIndex != stateChangeIface.first.absIfaceIndex)
-                std::cout << reactant << '\n';
+                std::cout << reactant << std::endl;
         }
     }
 
     if (hasStateChange) {
-        std::cout << "State Change Reactant: " << stateChangeIface.first << '\n';
-        std::cout << "State Change Product: " << stateChangeIface.second << '\n';
+        std::cout << "State Change Reactant: " << stateChangeIface.first << std::endl;
+        std::cout << "State Change Product: " << stateChangeIface.second << std::endl;
     }
 
-    std::cout << "Rate(s):\n";
-    for (auto& rate : rateList) {
-        std::cout << "Rate " << &rate - &rateList[0] << ": " << rate.rate << '\n';
-        if (!rate.otherIfaceLists.empty()) {
-            std::cout << "Reactant 1 requires interfaces:\n";
-            for (auto& iface : rate.otherIfaceLists[0]) {
-                std::cout << ' ' << iface << '\n';
+    std::cout << "Rate(s):" << std::endl;
+    if (rxnType != ReactionType::uniMolStateChange) {
+        for (auto& rate : rateList) {
+            std::cout << "Rate " << &rate - &rateList[0] << ": " << rate.rate << std::endl;
+            if (!rate.otherIfaceLists.empty()) {
+                std::cout << "Reactant 1 requires interfaces:" << std::endl;
+                for (auto& iface : rate.otherIfaceLists[0]) {
+                    std::cout << ' ' << iface << std::endl;
+                }
+                std::cout << "Reactant 2 requires interfaces:" << std::endl;
+                for (auto& iface : rate.otherIfaceLists[1]) {
+                    std::cout << ' ' << iface << std::endl;
+                }
             }
-            std::cout << "Reactant 2 requires interfaces:\n";
-            for (auto& iface : rate.otherIfaceLists[1]) {
-                std::cout << ' ' << iface << '\n';
-            }
+        }
+    } else {
+        for (auto& rate : rateList) {
+            std::cout << "Rate " << &rate - &rateList[0] << ": " << rate.rate << std::endl;
         }
     }
 
     if (rxnType == ReactionType::bimolecular) {
         std::cout << "Sigma: " << bindRadius;
-        std::cout << '\n';
+        std::cout << std::endl;
         assocAngles.display();
-        std::cout << '\n';
+        std::cout << std::endl;
     }
 
-    std::cout << "Is On Membrane: " << std::boolalpha << isOnMem << std::endl;
-    std::cout << "bindRadSameCom " <<  bindRadSameCom << '\n';
-    std::cout << "loopCoopFactor " <<  loopCoopFactor << '\n';
-    std::cout << "length3Dto2D " <<  length3Dto2D << '\n';
-    std::cout << "isCoupled? " <<  isCoupled << '\n';
-    if(isCoupled)
-      std::cout << " coupledRxn Number: " <<  coupledRxn.absRxnIndex<<" type: "<<coupledRxn.rxnType << '\n';
+    std::cout << "label: " << rxnLabel << std::endl;
 
+    if (rxnType != ReactionType::uniMolStateChange) {
+        std::cout << "Is On Membrane: " << std::boolalpha << isOnMem << std::endl;
+        std::cout << "bindRadSameCom " << bindRadSameCom << std::endl;
+        std::cout << "loopCoopFactor " << loopCoopFactor << std::endl;
+        std::cout << "length3Dto2D " << length3Dto2D << std::endl;
+        std::cout << "isCoupled? " << isCoupled << std::endl;
+        if (isCoupled)
+            std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << std::endl;
+    }
 }
 
 void ForwardRxn::assoc_display(const std::vector<MolTemplate>& molTemplateList) const
@@ -233,7 +243,7 @@ ForwardRxn ForwardRxn::bngl_copy_rxn()
 }
 
 /* BACKRXN */
-BackRxn::BackRxn(double offRate, ForwardRxn& forwardRxn)
+BackRxn::BackRxn(double offRatekb, ForwardRxn& forwardRxn)
 {
     // set booleans
     isOnMem = forwardRxn.isOnMem;
@@ -246,6 +256,7 @@ BackRxn::BackRxn(double offRate, ForwardRxn& forwardRxn)
     bindRadSameCom = forwardRxn.bindRadSameCom;
     loopCoopFactor = forwardRxn.loopCoopFactor;
     length3Dto2D = forwardRxn.length3Dto2D;
+    rxnLabel = forwardRxn.rxnLabel;
     // set reaction type
     rxnType = forwardRxn.rxnType;
 
@@ -268,7 +279,7 @@ BackRxn::BackRxn(double offRate, ForwardRxn& forwardRxn)
     //            std::swap(reactantListNew[0], reactantListNew[1]);
     //        }
 
-    rateList.emplace_back(offRate, forwardRxn.rateList.back().otherIfaceLists);
+    rateList.emplace_back(offRatekb, forwardRxn.rateList.back().otherIfaceLists);
 }
 
 void BackRxn::display() const
@@ -325,6 +336,7 @@ CreateDestructRxn::CreateDestructRxn(ParsedRxn& parsedRxn, const std::vector<Mol
     isObserved = parsedRxn.isObserved;
     observeLabel = parsedRxn.observeLabel;
     creationRadius = parsedRxn.creationRadius;
+    rxnLabel = parsedRxn.rxnLabel;
 
     // set reaction type
     rxnType = parsedRxn.rxnType;
@@ -371,7 +383,7 @@ CreateDestructRxn::CreateDestructRxn(ParsedRxn& parsedRxn, const std::vector<Mol
     }
 
     rateList.emplace_back();
-    rateList.back().rate = parsedRxn.onRate;
+    rateList.back().rate = parsedRxn.onRate3Dka;
     rateList.back().otherIfaceLists = parsedRxn.otherIfaceLists;
 
     absRxnIndex = numberOfRxns;
@@ -398,8 +410,8 @@ void CreateDestructRxn::display() const
         std::cout << std::endl;
     }
     std::cout << "On Membrane? " << std::boolalpha << isOnMem << '\n';
-    std::cout <<" Number of rates: "<<rateList.size()<<" first rate: "<<rateList[0].rate<<'\n';
-    std::cout <<"otherIfaceListSize: "<<rateList[0].otherIfaceLists.size()<<'\n';
+    std::cout << " Number of rates: " << rateList.size() << " first rate: " << rateList[0].rate << '\n';
+    std::cout << "otherIfaceListSize: " << rateList[0].otherIfaceLists.size() << '\n';
     std::cout << "Rate(s):\n";
     for (auto& rate : rateList) {
         std::cout << "Rate " << &rate - &rateList[0] << ": " << rate.rate << '\n';
@@ -408,7 +420,7 @@ void CreateDestructRxn::display() const
             for (auto& iface : rate.otherIfaceLists[0]) {
                 std::cout << ' ' << iface << '\n';
             }
-	}
+        }
     }
-
+    std::cout << "label: " << rxnLabel << std::endl;
 }

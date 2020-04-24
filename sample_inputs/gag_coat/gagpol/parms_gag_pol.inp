@@ -1,0 +1,121 @@
+# Input file
+
+start parameters
+    nItr = 100000000
+    timestep = 0.1
+
+    timeWrite = 5000
+    trajWrite = 10000
+
+    restartWrite = 50000
+    overlapSepLimit = 0.7
+end parameters
+
+
+start boundaries
+    WaterBox = [500,500,500]
+    xBCtype = reflect
+    yBCtype = reflect
+    zBCtype = reflect
+end boundaries
+
+start molecules
+    gag : 2000
+    pol : 120
+end molecules
+
+start reactions
+    #gag-gag homodimerization
+    gag(homo) + gag(homo) <-> gag(homo!1).gag(homo!1)
+    onRate3Dka      = 10
+    offRatekb     = 1.0
+    sigma       = 1.0  #nm
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [1.490511181203157, 1.490511181203157, 0, 0, 0]
+
+    #gag-gag heterodimerization
+    gag(het2) + gag(het1) <-> gag(het2!1).gag(het1!1)
+    onRate3Dka      = 0.5
+    offRatekb     = 1.0
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [2.61799387799, 2.61799387799, pi, pi, 0]
+
+    #pol-pol homodimerization
+    pol(homo) + pol(homo) <-> pol(homo!1).pol(homo!1)
+    onRate3Dka      = 10
+    offRatekb     = 1.0
+    sigma       = 1.0  #nm
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [1.490511181203157, 1.490511181203157, 0, 0, 0]
+
+    #pol-pol heterodimerization
+    pol(het2) + pol(het1) <-> pol(het2!1).pol(het1!1)
+    onRate3Dka      = 0.5
+    offRatekb     = 1.0
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [2.61799387799, 2.61799387799, pi, pi, 0]
+
+    #gag-pol homodimer
+    pol(homo) + gag(homo) <-> pol(homo!1).gag(homo!1)
+    onRate3Dka      = 10
+    offRatekb     = 1.0
+    sigma       = 1.0  #nm
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [1.490511181203157, 1.490511181203157, 0, 0, 0]
+
+    #gag-pol heterodimer
+    gag(het2) + pol(het1) <-> gag(het2!1).pol(het1!1)
+    onRate3Dka      = 0.5
+    offRatekb     = 1.0
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [2.61799387799, 2.61799387799, pi, pi, 0]
+
+    #pol-gag heterodimer
+    pol(het2) + gag(het1) <-> pol(het2!1).gag(het1!1)
+    onRate3Dka      = 0.5
+    offRatekb     = 1.0
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    length3Dto2D = 2 # in nm (default is 2*sigma)
+    assocAngles = [2.61799387799, 2.61799387799, pi, pi, 0]
+    
+
+    # ## GAG CREATION ##
+#    0 -> gag(homo,mem,rna,het1,het2)
+#    onRate3Dka = 0.000033 #M/s
+
+
+    ## GAG RECYCLING ##
+#    gag(homo,mem,rna,het1,het2) -> 0
+#    onRate3Dka = 1
+end reactions

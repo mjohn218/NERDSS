@@ -2,12 +2,9 @@
 # pip2 molecule information file
 ##
 
-Name    = pip2 
-copies  = 6000
-isRod   = true
+Name    = pip2
 isLipid = true
 checkOverlap = false
-mass    = 1
 
 # translational diffusion constants
 D = [1.0, 1.0, 0.0]

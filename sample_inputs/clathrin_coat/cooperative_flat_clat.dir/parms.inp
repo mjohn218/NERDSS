@@ -22,7 +22,7 @@ start boundaries
 end boundaries
 
 start molecules
-    clat
+    clat : 100
 end molecules
 
 # start observables
@@ -32,8 +32,8 @@ end molecules
 start reactions
     ### MONOMER - MONOMER ###
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd2,cd3)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -42,8 +42,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1,cd2!1,cd3)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -52,8 +52,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd1,cd2,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -62,8 +62,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1,cd2!1,cd3)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -72,8 +72,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1,cd2,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -82,8 +82,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1,cd2,cd3) + clat(cd1,cd2,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1,cd2,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -94,174 +94,174 @@ start reactions
     ### MONOMER -- NON-MONOMER ###
     ## CD1 - CD1 ##
     clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd2!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1!1,cd2,cd3).clat(cd1!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD2 - CD2 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1,cd2!1,cd3).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1,cd2!1,cd3).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD3 - CD3 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1,cd2,cd3!1).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD1 - CD2 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1!1,cd2,cd3).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1!1,cd2,cd3).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD1 - CD3 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1!1,cd2,cd3).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD2 - CD1 ##
     clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1,cd2!1,cd3).clat(cd1!1,cd2!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1,cd2!1,cd3).clat(cd1!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD2 - CD3 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2!*,cd3) <-> clat(cd1,cd2!1,cd3).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD3 - CD2 ##
     clat(cd1,cd2,cd3) + clat(cd1!*,cd2) <-> clat(cd1,cd2,cd3!1).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd2,cd3!*) <-> clat(cd1,cd2,cd3!1).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD3 - CD1 ##
     clat(cd1,cd2,cd3) + clat(cd1,cd2!*) <-> clat(cd1,cd2,cd3!1).clat(cd1!1,cd2!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2,cd3) + clat(cd1,cd3!*) <-> clat(cd1,cd2,cd3!1).clat(cd1!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## NON-MONOMER - NON-MONOMER ##
     ## CD1 - CD1 ##
     clat(cd1,cd2!*) + clat(cd1,cd2!*) <-> clat(cd1!1,cd2!*).clat(cd1!1,cd2!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2!*) + clat(cd1,cd3!*) <-> clat(cd1!1,cd2!*).clat(cd1!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd3!*) + clat(cd1,cd3!*) <-> clat(cd1!1,cd3!*).clat(cd1!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
 
     ## CD2 - CD2 ##
     clat(cd1!*,cd2) + clat(cd1!*,cd2) <-> clat(cd1!*,cd2!1).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd2,cd3!*) + clat(cd2,cd3!*) <-> clat(cd2!1,cd3!*).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1!*,cd2) + clat(cd2,cd3!*) <-> clat(cd1!*,cd2!1).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD3 - CD3 ##
     clat(cd1!*,cd3) + clat(cd1!*,cd3) <-> clat(cd1!*,cd3!1).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd2!*,cd3) + clat(cd2!*,cd3) <-> clat(cd2!*,cd3!1).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1!*,cd3) + clat(cd2!*,cd3) <-> clat(cd1!*,cd3!1).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD1 - CD2 ##
     clat(cd1,cd2!*) + clat(cd1!*,cd2) <-> clat(cd1!1,cd2!*).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd3!*) + clat(cd1!*,cd2) <-> clat(cd1!1,cd3!*).clat(cd1!*,cd2!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2!*) + clat(cd2,cd3!*) <-> clat(cd1!1,cd2!*).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd3!*) + clat(cd2,cd3!*) <-> clat(cd1!1,cd3!*).clat(cd2!1,cd3!*)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD1 - CD3 ##
     clat(cd1,cd2!*) + clat(cd1!*,cd3) <-> clat(cd1!1,cd2!*).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd2!*) + clat(cd2!*,cd3) <-> clat(cd1!1,cd2!*).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd3!*) + clat(cd1!*,cd3) <-> clat(cd1!1,cd3!*).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1,cd3!*) + clat(cd2!*,cd3) <-> clat(cd1!1,cd3!*).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     ## CD2 - CD3 ##
     clat(cd1!*,cd2) + clat(cd1!*,cd3) <-> clat(cd1!*,cd2!1).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd1!*,cd2) + clat(cd2!*,cd3) <-> clat(cd1!*,cd2!1).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd2,cd3!*) + clat(cd1!*,cd3) <-> clat(cd2!1,cd3!*).clat(cd1!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 
     clat(cd2,cd3!*) + clat(cd2!*,cd3) <-> clat(cd2!1,cd3!*).clat(cd2!*,cd3!1)
-    onRate = 0.00332
-    offRate = 1.00022
+    onRate3Dka = 0.00332
+    offRatekb = 1.00022
 end reactions

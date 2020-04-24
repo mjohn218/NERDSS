@@ -20,9 +20,9 @@
  */
 #pragma once
 
+#include "classes/class_Membrane.hpp"
 #include "classes/class_MolTemplate.hpp"
 #include "classes/class_Vector.hpp"
-#include "classes/class_Membrane.hpp"
 
 #include <array>
 #include <cmath>
@@ -35,7 +35,7 @@
 
 extern int propCalled;
 
-enum class TrajStatus : int{
+enum class TrajStatus : int {
     none = 0,
     dissociated = 1,
     associated = 2,
@@ -53,11 +53,11 @@ struct Molecule {
      * \brief Storage for information on Molecules this Molecule encounters during a timestep
      */
     struct Encounter {
-        size_t theirIndex{0}; //!< the encountered Molecule's index in moleculeList
-        size_t myIface{ 0 }; //!< this Molecule's interface which encountered the Molecule
-        size_t theirIface{ 0 }; //!< the encountered Molecule's interface which encountered this Molecule
-        size_t rxnItr {0};
-        double probability {0};
+        size_t theirIndex { 0 }; //!< the encountered Molecule's index in moleculeList
+        size_t myIface { 0 }; //!< this Molecule's interface which encountered the Molecule
+        size_t theirIface { 0 }; //!< the encountered Molecule's interface which encountered this Molecule
+        size_t rxnItr { 0 };
+        double probability { 0 };
 
         Encounter() = default;
         Encounter(size_t theirIndex, size_t myIface, size_t theirIface, size_t rxnItr, double probability)
@@ -76,9 +76,9 @@ struct Molecule {
     struct Interaction {
 
         // TODO: change to int and make default to -1
-        int partnerIndex{ -1 }; //!< bound partner index in moleculeList
-        int partnerIfaceIndex{ -1 }; //!< interface index of the Molecule's partner
-        int conjBackRxn{ -1 }; //!< back reaction of the forward reaction that formed this Interaction
+        int partnerIndex { -1 }; //!< bound partner index in moleculeList
+        int partnerIfaceIndex { -1 }; //!< interface index of the Molecule's partner
+        int conjBackRxn { -1 }; //!< back reaction of the forward reaction that formed this Interaction
 
         /*!
          * \brief Sets all the Interaction indices to 0. Used in break_interaction().
@@ -106,13 +106,13 @@ struct Molecule {
          * \brief Holds the interface coordinate and the interface's state
          */
 
-        Coord coord{ 0, 0, 0 }; //!< Coordinate of the interface (absolute, not relative)
-        char stateIden{ '\0' }; //!< current state of the interface.
-        int stateIndex {-1}; //!< index of the current state in MolTemplate::Interface::stateList
-        int index{ -1 }; //!< this interface's absolute index (i.e. the index of its current state)
+        Coord coord { 0, 0, 0 }; //!< Coordinate of the interface (absolute, not relative)
+        char stateIden { '\0' }; //!< current state of the interface.
+        int stateIndex { -1 }; //!< index of the current state in MolTemplate::Interface::stateList
+        int index { -1 }; //!< this interface's absolute index (i.e. the index of its current state)
         int relIndex { -1 }; //!< this interface's relative index (index in Molecule::interfaceList)
-        int molTypeIndex{ -1 }; //!< index of this interface's parent Molecule's MolTemplate (makes comparisons easier)
-        bool isBound{ false }; //!< is this interface bound
+        int molTypeIndex { -1 }; //!< index of this interface's parent Molecule's MolTemplate (makes comparisons easier)
+        bool isBound { false }; //!< is this interface bound
 
         Interaction interaction;
 
@@ -135,9 +135,9 @@ struct Molecule {
         }
         Iface(char state, int index, int molTypeIndex, bool isBound)
             : stateIden(state)
-              , index(index)
-              , molTypeIndex(molTypeIndex)
-              , isBound(isBound)
+            , index(index)
+            , molTypeIndex(molTypeIndex)
+            , isBound(isBound)
         {
         }
         Iface(const Coord& coord, char state, int index, int molTypeIndex, bool isBound)
@@ -149,33 +149,33 @@ struct Molecule {
         {
         }
     };
-    
-    int myComIndex{ -1 }; //!< which complex does the molecule belong to
-    int molTypeIndex{ -1 }; //!< index of the Molecule's MolTemplate in molTemplateList
-    int mySubVolIndex{ -1 };
-    int index{ -1 }; //!< index of the Molecule in moleculeList
-    double mass{ -1 }; //!< mass of this molecule
-    bool isLipid{ false }; //!< is the molecule a lipid 
+
+    int myComIndex { -1 }; //!< which complex does the molecule belong to
+    int molTypeIndex { -1 }; //!< index of the Molecule's MolTemplate in molTemplateList
+    int mySubVolIndex { -1 };
+    int index { -1 }; //!< index of the Molecule in moleculeList
+    double mass { -1 }; //!< mass of this molecule
+    bool isLipid { false }; //!< is the molecule a lipid
     Coord comCoord; //!< center of mass coordinate
     std::vector<Iface> interfaceList; //!< interface coordinates
-    bool isEmpty{ false }; //!< true if the molecule has been destroyed and is void
-    TrajStatus trajStatus{TrajStatus::none}; //!< Status of the molecule in that timestep
-    
+    bool isEmpty { false }; //!< true if the molecule has been destroyed and is void
+    TrajStatus trajStatus { TrajStatus::none }; //!< Status of the molecule in that timestep
+
     bool isImplicitLipid = false;
-    int linksToSurface {0};//!<store each proteins links to surface, to ease updating complex.
+    int linksToSurface { 0 }; //!<store each proteins links to surface, to ease updating complex.
     // static variables
     static int numberOfMolecules; //!< counter for the number of molecules in the system
     static std::vector<int> emptyMolList; //!< list of indices to empty Molecules in moleculeList
 
     // association variables
     // temporary positions
-    Coord tmpComCoord{}; //!< temporary center of mass coordinates for association
-    std::vector<Coord> tmpICoords{}; //!< temporary interface coordinates for association
+    Coord tmpComCoord {}; //!< temporary center of mass coordinates for association
+    std::vector<Coord> tmpICoords {}; //!< temporary interface coordinates for association
 
     // New Encounter lists
-//    std::vector<Interaction> interactionList; //!< list of interactions the Molecule is participating in
-//    std::vector<Encounter> encounterList; //!< list of Molecule Encounters during a timestep
-//    std::vector<Encounter> prevEncounterList; //!< list of Molecule Encounters during a timestep
+    //    std::vector<Interaction> interactionList; //!< list of interactions the Molecule is participating in
+    //    std::vector<Encounter> encounterList; //!< list of Molecule Encounters during a timestep
+    //    std::vector<Encounter> prevEncounterList; //!< list of Molecule Encounters during a timestep
 
     // Legacy encounter lists
     /*Vectors for possible association reactions*/
@@ -185,14 +185,14 @@ struct Molecule {
     std::vector<int> bndpartner; // It if is bound, who is it bound to? Make this have the same numbering !!
     std::vector<int> bndRxnList;
     std::vector<int> bndiface; // If it is bound, though which interface!
-//    int ncross = 0;
-//    int movestat = 0;
+    //    int ncross = 0;
+    //    int movestat = 0;
     std::vector<double> probvec;
     std::vector<int> crossbase; // proteins base encountered
     std::vector<int> mycrossint; // interfaces base encountered other proteins with
-//    std::vector<int> crossrxn;
+    //    std::vector<int> crossrxn;
     std::vector<std::array<int, 3>> crossrxn;
-    
+
     std::vector<double> probvec_dissociate;
 
     /*Vectors for reweighting!*/
@@ -221,11 +221,11 @@ struct Molecule {
     void clear_tmp_association_coords();
 
     // other reaction member functions
-    void create_random_coords(const MolTemplate& molTemplate, const Membrane &membraneObject);
+    void create_random_coords(const MolTemplate& molTemplate, const Membrane& membraneObject);
     void destroy(std::vector<int>& emptyMolList);
 
     void display(const MolTemplate& molTemplate) const;
-  void display_all() const;
+    void display_all() const;
     void display_my_coords(const std::string& name);
 
     bool operator==(const Molecule& rhs) const;
@@ -247,15 +247,15 @@ struct Complex {
 
 public:
     Coord comCoord; //!< Complex's center of mass coordinate
-    int index{ 0 }; //!< index of this Complex in complexList
-    double radius{}; //!< radius of the Complex's bounding sphere
+    int index { 0 }; //!< index of this Complex in complexList
+    double radius {}; //!< radius of the Complex's bounding sphere
     double mass {};
-    std::vector<int> memberList{}; //!< list of member Molecule's indices
-    std::vector<int> numEachMol{}; //!< list of the number of each Molecules in this complex
-    Coord D{ 0, 0, 0 }; //!< Complex's translational diffusion constants
-    Coord Dr{ 0, 0, 0 }; //!< Complex's rotational diffusion constants
-    bool isEmpty{ false }; //!< true if the complex has been destroyed and is a void
-    bool OnSurface{ false }; // to check whether on the implicit-lipid membrane.
+    std::vector<int> memberList {}; //!< list of member Molecule's indices
+    std::vector<int> numEachMol {}; //!< list of the number of each Molecules in this complex
+    Coord D { 0, 0, 0 }; //!< Complex's translational diffusion constants
+    Coord Dr { 0, 0, 0 }; //!< Complex's rotational diffusion constants
+    bool isEmpty { false }; //!< true if the complex has been destroyed and is a void
+    bool OnSurface { false }; // to check whether on the implicit-lipid membrane.
 
     // static variables
     static int numberOfComplexes; //!< total number of complexes in the system. starts out equal to numberOfMolecules
@@ -265,13 +265,13 @@ public:
 
     // TODO: TEMPORARY
     static std::vector<int> obs; //!< TEMPORARY observables vector
-  //std::vector<int> NofEach;//!< number of each protein type in this complex
+    //std::vector<int> NofEach;//!< number of each protein type in this complex
     int linksToSurface = 0; //!< for an adsorbing surface, number of bonds/links formed between this complex and the surface.
-    int iLipidIndex = 0;//!< If you need to look up the implicit lipid, this is its molecule index
+    int iLipidIndex = 0; //!< If you need to look up the implicit lipid, this is its molecule index
     // Simulation status parameters
-    int ncross{ 0 };
-//    int movestat{ 0 };
-    TrajStatus trajStatus {TrajStatus::none};
+    int ncross { 0 };
+    //    int movestat{ 0 };
+    TrajStatus trajStatus { TrajStatus::none };
     Vector trajTrans;
     Coord trajRot;
     Coord tmpComCoord;
@@ -283,16 +283,41 @@ public:
     void display(const std::string& name);
     Complex create(const Molecule& mol, const MolTemplate& molTemp);
     void destroy(std::vector<Molecule>& moleculeList, std::vector<int>& emptyMolList,
-                     std::vector<int>& emptyComList);
+        std::vector<Complex>& complexList, std::vector<int>& emptyComList);
     void put_back_into_SimulVolume(
-        int& itr, Molecule& errantMol, const Membrane &membraneObject, std::vector<Molecule>& moleculeList);
+        int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList);
     void translate(Vector transVec, std::vector<Molecule>& moleculeList);
     void propagate(std::vector<Molecule>& moleculeList);
 
     Complex() = default;
-//    Complex(Molecule mol, Coord D, Coord Dr);
+    //    Complex(Molecule mol, Coord D, Coord Dr);
     Complex(const Molecule& mol, const MolTemplate& oneTemp);
     Complex(int _index, const Molecule& _memMol, const MolTemplate& _molTemp);
     Complex(Coord comCoord, Coord D, Coord Dr);
-};
 
+    /*
+    void operator=(const Complex com)
+    {
+        this->comCoord = com.comCoord;
+        this->index = com.index;
+        this->radius = com.radius;
+        this->mass = com.mass;
+        for (auto member : com.memberList) {
+            this->memberList.push_back(member);
+        }
+        for (auto num : com.numEachMol) {
+            this->numEachMol.push_back(num);
+        }
+        this->D = com.D;
+        this->Dr = com.Dr;
+        this->isEmpty = com.isEmpty;
+        this->OnSurface = com.OnSurface;
+        this->linksToSurface = com.linksToSurface;
+        this->iLipidIndex = com.iLipidIndex;
+        this->ncross = com.ncross;
+        this->trajStatus = com.trajStatus;
+        this->trajTrans = com.trajTrans;
+        this->trajRot = com.trajRot;
+        this->tmpComCoord = com.tmpComCoord;
+    }*/
+};

@@ -3,7 +3,7 @@
 
 void generate_coordinates(const Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
-			  const std::vector<ForwardRxn>& forwardRxns, const Membrane &membraneObject)
+    const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
     // First create all the molecules and their corresponding complexes, with random center of mass coordinates
     for (const auto& oneTemp : molTemplateList) {
@@ -12,20 +12,20 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
                 moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
                 complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
             }
-        }
-        else {
+        } else {
             moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
             complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
         }
     }
-    std::cout <<"NUMBER OF MOLECULES IN GEN COORDS: "<<moleculeList.size()<<std::endl;
-    
+    std::cout << "NUMBER OF MOLECULES IN GEN COORDS: " << moleculeList.size() << std::endl;
+
     if (moleculeList.size() == 0 && params.numTotalUnits == 0) {
         std::cout << "No molecules present, skipping coordinate generation.\n";
         return;
     }
 
-    std::cout << bon << "Finding and fixing overlapping proteins.\n" << boff;
+    std::cout << bon << "Finding and fixing overlapping proteins.\n"
+              << boff;
     int currItr { 0 };
     while (currItr < 50) {
         bool hasOverlap { false };
@@ -39,8 +39,8 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
             for (unsigned long mol2Itr { 0 }; mol2Itr < molListSize; ++mol2Itr) {
                 auto& mol2 = moleculeList[mol2Itr];
                 const MolTemplate& mol2Temp { molTemplateList[mol2.molTypeIndex] };
-                
-                if ( (mol1Itr != mol2Itr) && areInVicinity(mol1, mol2, molTemplateList)) {
+
+                if ((mol1Itr != mol2Itr) && areInVicinity(mol1, mol2, molTemplateList)) {
                     for (unsigned int iface1Itr { 0 }; iface1Itr < mol1.interfaceList.size(); ++iface1Itr) {
                         auto& iface1 = mol1.interfaceList[iface1Itr];
                         for (unsigned int iface2Itr { 0 }; iface2Itr < mol2.interfaceList.size(); ++iface2Itr) {

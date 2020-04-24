@@ -3,11 +3,8 @@
 ##
 
 Name    = IL
-copies  = 8900
-isRod   = true
 isImplicitLipid = true
 checkOverlap = false
-mass    = 1
 
 # translational diffusion constants
 D = [0.5, 0.5, 0.0]

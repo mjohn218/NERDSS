@@ -3,9 +3,6 @@
 ##
 
 Name    = A
-copies  = 100
-isRod   = true
-mass    = 1
 
 # translational diffusion constants
 D       = [24.0,24.0,24.0]

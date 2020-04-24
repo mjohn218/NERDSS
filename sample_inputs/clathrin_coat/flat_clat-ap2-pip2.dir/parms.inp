@@ -17,16 +17,16 @@ start boundaries
 end boundaries
 
 start molecules
-    pip2
-    ap2
-    clat
+    pip2 : 500000
+    ap2 : 300
+    clat : 100
 end molecules
 
 start reactions
     #### PIP2 - AP2 ####
     pip2(head) + ap2(m2muh) <-> pip2(head!1).ap2(m2muh!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     sigma = 1.0
     norm1 = [0,1,0]
     norm2 = [0,1,0]
@@ -34,24 +34,24 @@ start reactions
 
     #### AP2 - CLAT ####
     ap2(b2clat) + clat(td1) <-> ap2(b2clat!1).clat(td1!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     sigma = 1.0
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     assocAngles = [M_PI, 2.2455, nan, M_PI, nan]
 
     ap2(b2clat) + clat(td2) <-> ap2(b2clat!1).clat(td2!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     sigma = 1.0
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     assocAngles = [M_PI, 2.2455, nan, M_PI, nan]
 
     ap2(b2clat) + clat(td3) <-> ap2(b2clat!1).clat(td3!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     sigma = 1.0
     norm1 = [0,0,1]
     norm2 = [0,0,1]
@@ -59,8 +59,8 @@ start reactions
 
     ### CLAT - CLAT ###
     clat(cd1) + clat(cd2) <-> clat(cd1!1).clat(cd2!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -68,8 +68,8 @@ start reactions
     observeLabel = leg
 
     clat(cd1) + clat(cd3) <-> clat(cd1!1).clat(cd3!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -77,8 +77,8 @@ start reactions
     observeLabel = leg
 
     clat(cd2) + clat(cd3) <-> clat(cd2!1).clat(cd3!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -86,8 +86,8 @@ start reactions
     observeLabel = leg
 
     clat(cd1) + clat(cd1) <-> clat(cd1!1).clat(cd1!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -95,8 +95,8 @@ start reactions
     observeLabel = leg
 
     clat(cd2) + clat(cd2) <-> clat(cd2!1).clat(cd2!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -104,8 +104,8 @@ start reactions
     observeLabel = leg
 
     clat(cd3) + clat(cd3) <-> clat(cd3!1).clat(cd3!1)
-    onRate = 1000
-    offRate = 1
+    onRate3Dka = 1000
+    offRatekb = 1
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0

@@ -3,8 +3,6 @@
 ##
 
 Name = clat
-copies = 100
-mass = 1
 
 # translational diffusion constants
 D = [3.0, 3.0, 3.0]

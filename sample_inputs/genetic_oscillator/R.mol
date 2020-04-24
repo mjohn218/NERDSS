@@ -3,9 +3,6 @@
 ##
 
 Name    = R
-copies  = 0
-isPoint   = true
-mass    = 1
 
 # translational diffusion constants
 D       = [10.0,10.0,10.0]

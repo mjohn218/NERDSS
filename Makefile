@@ -57,8 +57,8 @@ PARSOURCES = $(patsubst %,$(EPDIR)/%,$(_PARSOURCES))
 
 
 
-all: dirs $(EXECUTABLES)
-##$(PAREXECUTABLES)
+all: dirs $(EXECUTABLES) 
+#$(PAREXECUTABLES)
 
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	@echo "Compiling $<"

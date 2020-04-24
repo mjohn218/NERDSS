@@ -1,6 +1,5 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
-#include "reactions/bimolecular/bimolecular_reactions.hpp"
 
 void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
@@ -44,6 +43,8 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             /*Evaluate probability of reaction, with reweighting*/
             // Generate 2D tables unless they were not before
             double ktemp { forwardRxns[rxnIndex].rateList[rateIndex].rate / forwardRxns[rxnIndex].length3Dto2D };
+            if (forwardRxns[rxnIndex].isSymmetric == true)
+                ktemp *= 2.0; // for A(a)+A(a)->A(a!).A(a!) case
 
             for (int l = 0; l < DDTableIndex; ++l) {
                 if (std::abs(tableIDs[l] - ktemp) < 1e-8 && std::abs(tableIDs[params.max2DRxns + l] - biMolData.Dtot) < 1E-4) {

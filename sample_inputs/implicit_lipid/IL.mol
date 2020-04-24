@@ -4,10 +4,7 @@
 ##
 
 Name    =  IL
-copies  = 300
 isImplicitLipid   = true
-isRod = true
-mass    = 1
 
 # translational diffusion constants
 D       = [0.5,0.5,0]

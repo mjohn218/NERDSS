@@ -18,7 +18,6 @@
 #include "math/rand_gsl.hpp"
 #include "parser/parser_functions.hpp"
 
-
 #include <cmath>
 #include <iomanip>
 #include <numeric>
@@ -137,7 +136,7 @@ void Molecule::display(const MolTemplate& molTemplate) const
             std::cout << "\tRelative index: " << iface.relIndex << '\n';
             std::cout << "\tAbsolute index: " << iface.index << '\n';
             std::cout << "\tInterface name: "
-                       << molTemplate.interfaceList[iface.relIndex].name << '\n';
+                      << molTemplate.interfaceList[iface.relIndex].name << '\n';
             std::cout << "\tCoordinate: " << iface.coord << '\n';
             if (iface.stateIden != '\0')
                 std::cout << "\tCurrent state: " << iface.stateIden << '\n';
@@ -188,11 +187,10 @@ void Molecule::display_assoc_icoords(const std::string& name)
 void Molecule::display_my_coords(const std::string& name)
 {
     std::cout << name << ':' << std::endl;
-    std::cout <<comCoord<<'\n';
+    std::cout << comCoord << '\n';
     for (const auto& iface : interfaceList) {
-	std::cout <<  iface.coord << '\n';
+        std::cout << iface.coord << '\n';
     }
-
 }
 
 void Molecule::write_crd_file(std::ofstream& os) const
@@ -205,7 +203,7 @@ void Molecule::write_crd_file_cout() const
 {
     std::cout << comCoord << std::endl;
     for (auto& iface : interfaceList)
-	std::cout << iface.coord << std::endl;
+        std::cout << iface.coord << std::endl;
 }
 
 void Molecule::set_tmp_association_coords()
@@ -259,7 +257,7 @@ void Molecule::destroy(std::vector<int>& emptyMolList)
     isEmpty = true;
 }
 
-void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membrane &membraneObject)
+void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membrane& membraneObject)
 {
     /*!
      * \brief Create random coordinates for a Molecule
@@ -315,7 +313,7 @@ void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membra
             interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
             interfaceList[ifaceItr].relIndex = ifaceItr;
             interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
-            interfaceList[ifaceItr].stateIndex = 0;
+            interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
             interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
         }
     }
@@ -377,7 +375,7 @@ void Complex::update_properties(
 {
     // update center of mass
     //update links to Surface
-    linksToSurface=0;
+    linksToSurface = 0;
     double totMass { 0 };
     comCoord.zero_crds();
     for (auto& memMol : memberList) {
@@ -385,7 +383,7 @@ void Complex::update_properties(
         comCoord.x += moleculeList[memMol].comCoord.x * moleculeList[memMol].mass;
         comCoord.y += moleculeList[memMol].comCoord.y * moleculeList[memMol].mass;
         comCoord.z += moleculeList[memMol].comCoord.z * moleculeList[memMol].mass;
-	linksToSurface+=moleculeList[memMol].linksToSurface;
+        linksToSurface += moleculeList[memMol].linksToSurface;
     }
     comCoord /= totMass;
     mass = totMass;
@@ -407,7 +405,7 @@ void Complex::update_properties(
       for Dr=c_avg/radius^3, where c_avg is a weighted average based on ci=radi^3*Dri for each protein, weighted by 1/radi^3
      
     */
-    double currRad=radius;
+    double currRad = radius;
     //std::cout <<" curr radius of complex: "<<index<<" radius: "<<radius<<std::endl;
     //    Coord sumD {};
     //Coord sumDr {};
@@ -448,49 +446,47 @@ void Complex::update_properties(
     Coord sumD {};
     Coord sumDr {};
     for (int memMol : memberList) {
-      const MolTemplate& oneTemp { molTemplateList[moleculeList[memMol].molTypeIndex] };
-      // Rotational diffusion constants
-      sumDr.x += (oneTemp.Dr.x != 0) ? (1.0 / pow(oneTemp.Dr.x, 1.0 / 3.0)) : inf;
-      sumDr.y += (oneTemp.Dr.y != 0) ? (1.0 / pow(oneTemp.Dr.y, 1.0 / 3.0)) : inf;
-      sumDr.z += (oneTemp.Dr.z != 0) ? (1.0 / pow(oneTemp.Dr.z, 1.0 / 3.0)) : inf;
+        const MolTemplate& oneTemp { molTemplateList[moleculeList[memMol].molTypeIndex] };
+        // Rotational diffusion constants
+        sumDr.x += (oneTemp.Dr.x != 0) ? (1.0 / pow(oneTemp.Dr.x, 1.0 / 3.0)) : inf;
+        sumDr.y += (oneTemp.Dr.y != 0) ? (1.0 / pow(oneTemp.Dr.y, 1.0 / 3.0)) : inf;
+        sumDr.z += (oneTemp.Dr.z != 0) ? (1.0 / pow(oneTemp.Dr.z, 1.0 / 3.0)) : inf;
 
-      // Translational diffusion constants
-      sumD.x += (oneTemp.D.x != 0) ? (1.0 / oneTemp.D.x) : inf;
-      sumD.y += (oneTemp.D.y != 0) ? (1.0 / oneTemp.D.y) : inf;
-      sumD.z += (oneTemp.D.z != 0) ? (1.0 / oneTemp.D.z) : inf;
+        // Translational diffusion constants
+        sumD.x += (oneTemp.D.x != 0) ? (1.0 / oneTemp.D.x) : inf;
+        sumD.y += (oneTemp.D.y != 0) ? (1.0 / oneTemp.D.y) : inf;
+        sumD.z += (oneTemp.D.z != 0) ? (1.0 / oneTemp.D.z) : inf;
     }
     /*If linksToSurface>0, add in diffusion due to implicit lipids.*/
-    for(int i=0;i<linksToSurface;i++){
-      //	std::cout<<" complex:" <<index<<" has links to surface: "<<linksToSurface<<std::endl;
-	//find the protein that is the Implicit Lipid.
-	const MolTemplate& oneTemp { molTemplateList[moleculeList[iLipidIndex].molTypeIndex] };
-	sumDr.x += (oneTemp.Dr.x != 0) ? (1.0 / pow(oneTemp.Dr.x, 1.0 / 3.0)) : inf;
-	sumDr.y += (oneTemp.Dr.y != 0) ? (1.0 / pow(oneTemp.Dr.y, 1.0 / 3.0)) : inf;
-	sumDr.z += (oneTemp.Dr.z != 0) ? (1.0 / pow(oneTemp.Dr.z, 1.0 / 3.0)) : inf;
-	
-	// Translational diffusion constants
-	sumD.x += (oneTemp.D.x != 0) ? (1.0 / oneTemp.D.x) : inf;
-	sumD.y += (oneTemp.D.y != 0) ? (1.0 / oneTemp.D.y) : inf;
-	sumD.z += (oneTemp.D.z != 0) ? (1.0 / oneTemp.D.z) : inf;
-	
+    for (int i = 0; i < linksToSurface; i++) {
+        //	std::cout<<" complex:" <<index<<" has links to surface: "<<linksToSurface<<std::endl;
+        //find the protein that is the Implicit Lipid.
+        const MolTemplate& oneTemp { molTemplateList[moleculeList[iLipidIndex].molTypeIndex] };
+        sumDr.x += (oneTemp.Dr.x != 0) ? (1.0 / pow(oneTemp.Dr.x, 1.0 / 3.0)) : inf;
+        sumDr.y += (oneTemp.Dr.y != 0) ? (1.0 / pow(oneTemp.Dr.y, 1.0 / 3.0)) : inf;
+        sumDr.z += (oneTemp.Dr.z != 0) ? (1.0 / pow(oneTemp.Dr.z, 1.0 / 3.0)) : inf;
+
+        // Translational diffusion constants
+        sumD.x += (oneTemp.D.x != 0) ? (1.0 / oneTemp.D.x) : inf;
+        sumD.y += (oneTemp.D.y != 0) ? (1.0 / oneTemp.D.y) : inf;
+        sumD.z += (oneTemp.D.z != 0) ? (1.0 / oneTemp.D.z) : inf;
     }
     Dr.x = 1.0 / (sumDr.x * sumDr.x * sumDr.x);
     Dr.y = 1.0 / (sumDr.y * sumDr.y * sumDr.y);
     Dr.z = 1.0 / (sumDr.z * sumDr.z * sumDr.z);
 
     if (Dr.x < 1E-50)
-      Dr.x = 0;
+        Dr.x = 0;
     if (Dr.y < 1E-50)
-      Dr.y = 0;
+        Dr.y = 0;
     if (Dr.z < 1E-50)
-      Dr.z = 0;
+        Dr.z = 0;
 
     // upate translational diffusion constants
     D.x = 1.0 / sumD.x;
     D.y = 1.0 / sumD.y;
     D.z = 1.0 / sumD.z;
-    
-    
+
     //std::cout<<" Drx: "<<Dr.x<<" Dx: "<<D.x<<std::endl;
     if (D.z < 1E-50) {
         /*On the membrane. Only allow 2D. diffusion at certain intervals, to avoid generating too many 2D. Tables.*/
@@ -505,7 +501,7 @@ void Complex::update_properties(
             dtmp = D.x * 100;
         else
             dtmp = D.x * 100;
-	
+
         /*Keep only one sig fig for <0.1, 2 for 0.1<d<10, 3 for 10<d<100, etc*/
         int d_ones = int(round(dtmp));
         //        std::cout << "FORCED. D._2D. to fewer sig-figs, starting value: " << D.x << " final value: ";
@@ -529,7 +525,6 @@ void Complex::update_properties(
         D.y = 0;
     if (D.z < 1E-50)
         D.z = 0;
-
 
     // update number of each constituent molecule
     numEachMol.clear();
@@ -564,7 +559,7 @@ void Complex::display(const std::string& name)
 }
 
 void Complex::destroy(
-    std::vector<Molecule>& moleculeList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList)
+    std::vector<Molecule>& moleculeList, std::vector<int>& emptyMolList, std::vector<Complex>& complexList, std::vector<int>& emptyComList)
 {
     /*! \ingroup Reactions
      * \brief This function destroys its parent Complex.
@@ -594,10 +589,29 @@ void Complex::destroy(
     // iterate down the number of complexes in the system.
     trajStatus = TrajStatus::empty;
     --Complex::numberOfComplexes;
+    /*
+    // put the last non-empty complex in the list to the non-last empty slot
+    int slotIndex { Complex::emptyComList.back() };
+    int previousIndex { complexList.back().index };
+    // if the empty one is the last, just pop it
+    if (slotIndex == previousIndex) {
+        complexList.pop_back();
+        Complex::emptyComList.pop_back();
+    } else {
+        complexList[slotIndex] = complexList.back();
+        complexList[slotIndex].index = slotIndex;
+        complexList.pop_back();
+        Complex::emptyComList.pop_back();
+
+        // change the mol.myComIndex with previousIndex to slotIndex
+        for (auto& mp : complexList[slotIndex].memberList) {
+            moleculeList[mp].myComIndex = slotIndex;
+        }
+    }*/
 }
 
 void Complex::put_back_into_SimulVolume(
-    int& itr, Molecule& errantMol, const Membrane &membraneObject, std::vector<Molecule>& moleculeList)
+    int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList)
 {
     std::cout << "Attempting to put complex " << index << " back into simulation volume...\n";
     display();

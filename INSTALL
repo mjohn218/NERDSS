@@ -6,7 +6,7 @@ To build NERDSS requires:
 2. Gnu Scientific Library installed (gsl  version 1.0 or higher)
    this can be downloaded from here: ftp://ftp.gnu.org/gnu/gsl/
 *3. EIther cmake (version 3.0 or higher) OR can be compiled directly using our Makefile--does not require cmake.
-    cmake can be downloaded from here: https://cmake.org/download/
+    this can be downloaded from here: https://cmake.org/download/
 
 3a. To compile using cmake:
     ## Quick Build
@@ -16,9 +16,9 @@ To build NERDSS requires:
     5. The executable is now in the build directory, entitled `nerdss`
 
 3b. To compile using make:
-    1. Move to the main directory NERDSS
+    1. Move to the main directory NERDSS_beta
     2. Type 'make'
-    3. Executable will be placed in the directory NERDSS/bin
+    3. Executable will be placed in the directory NERDSS_beta/bin
 
 
 

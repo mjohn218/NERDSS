@@ -9,7 +9,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
 {
     /*3D reaction*/
     double Dr1 {};
-    if (complexList[biMolData.com1Index].D.z == 0) {
+    if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10) {
         double cf = cos(sqrt(2.0 * complexList[biMolData.com1Index].Dr.z * params.timeStep));
         Dr1 = 2.0 * biMolData.magMol1 * (1.0 - cf);
         biMolData.Dtot += Dr1 / (4.0 * params.timeStep);
@@ -20,7 +20,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     }
 
     double Dr2;
-    if (complexList[biMolData.com2Index].D.z == 0) {
+    if (std::abs(complexList[biMolData.com2Index].D.z - 0) < 1E-10) {
         double cf = cos(sqrt(2.0 * complexList[biMolData.com2Index].Dr.z * params.timeStep));
         Dr2 = 2.0 * biMolData.magMol2 * (1.0 - cf);
         biMolData.Dtot += Dr2 / (4.0 * params.timeStep);
@@ -81,8 +81,11 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             double kdiff { 4 * M_PI * biMolData.Dtot * forwardRxns[rxnIndex].bindRadius };
             double kact { forwardRxns[rxnIndex].rateList[rateIndex].rate };
 
-            if (complexList[biMolData.com1Index].D.z == 0 || complexList[biMolData.com2Index].D.z == 0)
+            if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10 || std::abs(complexList[biMolData.com2Index].D.z - 0) < 1E-10)
                 kact *= 2.0;
+
+            if (forwardRxns[rxnIndex].isSymmetric == true)
+                kact *= 2.0; // for A(a)+A(a)->A(a!).A(a!) case
 
             double fact { 1.0 + kact / kdiff };
             double alpha { fact * sqrt(biMolData.Dtot) / forwardRxns[rxnIndex].bindRadius };
@@ -127,7 +130,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
                 // std::cout << "calculating probvec1 for pros " << pro1 << ' ' << pro2
                 // <<
                 // '\n';
-                rxnProb = passocF(R1, params.timeStep, biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha, kact/(kact+kdiff));
+                rxnProb = passocF(R1, params.timeStep, biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha, kact / (kact + kdiff));
             } else {
                 /*Proteins are in the same complex!*/
                 /*If these proteins are at contact (sep=0) or close to at contact

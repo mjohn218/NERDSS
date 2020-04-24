@@ -8,9 +8,8 @@
 #include "classes/class_Coord.hpp"
 #include <classes/class_Parameters.hpp>
 
-
-
 #include <array>
+#include <cmath>
 #include <iomanip>
 #include <vector>
 
@@ -47,6 +46,24 @@ double roundv(double var)
     // if-else is because neg and pos values will round differently
     double val = (int)(var > 0 ? var * 10000 + 0.5 : var * 10000 - 0.5);
     return val / 10000;
+}
+
+bool is_co_linear(const Coord& c1, const Coord& c2, const Coord& c3)
+{
+    bool isCoLinear { false };
+    //Heron's formula: S^2=p(p-a)(p-b)(p-c); if the three points co-linear, the S^2 == 0
+    double a { 0.0 };
+    double b { 0.0 };
+    double c { 0.0 };
+    a = pow((c1.x - c2.x) * (c1.x - c2.x) + (c1.y - c2.y) * (c1.y - c2.y) + (c1.z - c2.z) * (c1.z - c2.z), 0.5);
+    b = pow((c1.x - c3.x) * (c1.x - c3.x) + (c1.y - c3.y) * (c1.y - c3.y) + (c1.z - c3.z) * (c1.z - c3.z), 0.5);
+    c = pow((c3.x - c2.x) * (c3.x - c2.x) + (c3.y - c2.y) * (c3.y - c2.y) + (c3.z - c2.z) * (c3.z - c2.z), 0.5);
+    double p { (a + b + c) / 2.0 };
+    double S { pow(p * (p - a) * (p - b) * (p - c), 0.5) };
+    if (std::abs(S - 0.0) < 1E-8) {
+        isCoLinear = true;
+    }
+    return isCoLinear;
 }
 
 // OPERATORS //

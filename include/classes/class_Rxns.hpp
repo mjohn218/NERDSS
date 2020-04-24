@@ -88,13 +88,18 @@ public:
     };
 
     struct CoupledRxn {
-        int absRxnIndex { 0 }; //!< absolute index of coupled reaction
-        int relRxnIndex { 0 }; //!< relative index of the coupled reaction
+        int absRxnIndex { -1 }; //!< absolute index of coupled reaction
+        int relRxnIndex { -1 }; //!< relative index of the coupled reaction
         ReactionType rxnType { ReactionType::none }; //!< type of the coupled reaction
+        std::string label { "none" }; //!< label of the coupled reaction
 
         CoupledRxn() = default;
         CoupledRxn(int _absRxnIndex)
             : absRxnIndex(_absRxnIndex)
+        {
+        }
+        CoupledRxn(std::string _label)
+            : label(_label)
         {
         }
     };
@@ -103,9 +108,9 @@ public:
     bool isObserved { false }; //!< is the product observed?
     std::string observeLabel {}; //!< label under which the product is written to the observables file
     // below should be per each reaction rate.
-  double loopCoopFactor { 1.0 }; //!< multiple the rate by this factor, used only when closing loops
-  double bindRadSameCom { 1.1 }; //!< distance between two reactants to force reaction within the same complex
-  /**< reactant and product arrays*/
+    double loopCoopFactor { 1.0 }; //!< multiple the rate by this factor, used only when closing loops
+    double bindRadSameCom { 1.1 }; //!< distance between two reactants to force reaction within the same complex
+    /**< reactant and product arrays*/
     bool isSymmetric { false }; //!< are both reactants of the reaction identical (interfaces and states)
     bool isOnMem { false }; //!< does the reaction occur only on the membrane
     bool hasStateChange { false }; //!< does this reaction include a state change
@@ -113,9 +118,11 @@ public:
     int absRxnIndex { 0 }; //!< absolute index of the reaction
     int relRxnIndex { 0 }; //!< absolute index of the reaction
     bool isCoupled { false };
-  double length3Dto2D { -1 }; //!< in nm, length scale to convert 3D rate to 2D rate, by default will be set to 2* bindrad if not read in from file.
-  CoupledRxn coupledRxn;
-  
+    double length3Dto2D { -1 }; //!< in nm, length scale to convert 3D rate to 2D rate, by default will be set to 2* bindrad if not read in from file.
+    std::string rxnLabel { "nonspecified" }; //!< label of the reaction, used for coupled; default value is nonspecified
+    std::string coupledRxnLabel { "none" }; //!< lable of the coupled reaction, default value is none
+    CoupledRxn coupledRxn;
+
     std::vector<int> intProductList {}; //!< list of absolute interface state indices of the product(s)
     std::vector<int> intReactantList {}; //!< list of absolute interface state indices of the reactant(s)
 
@@ -123,9 +130,9 @@ public:
     static int totRxnSpecies; //!< total number of unique reactants and products
 
     std::vector<RxnIface> productListNew {}; //!< list of the product interfaces. indexed to  0 and 1, even for single
-                                             //!< products (enters duplicate as dummy)
+        //!< products (enters duplicate as dummy)
     std::vector<RxnIface> reactantListNew {}; //!< list of the reactant interfaces. indexed to 0 and 1, even for single
-                                              //!< reactants (enters duplicate as dummy)
+        //!< reactants (enters duplicate as dummy)
 
     std::vector<RateState> rateList {}; //!< list of rates for the reaction
     std::pair<RxnIface, RxnIface> stateChangeIface; //!< interfaces which don't change interaction but change state
@@ -157,7 +164,7 @@ public:
         double phi1; //!< reactant 1 sigma-center of mass-interface-norm dihedral
         double phi2; //!< reactant 1 sigma-center of mass-interface-norm dihedral
         double omega; //!< (reactant 1 center of mass)-(reactant1 interface)-(sigma)-(reactant 2 center of
-                      //!< mass)-(reactant 2
+            //!< mass)-(reactant 2
         //!< interface)
 
         // TODO: make it so that no angle can be -M_PI
@@ -194,21 +201,16 @@ public:
     int conjBackRxnIndex { -1 }; //!< index of the ForwardRxn's BackRxn, if it is reversible
     bool irrevRingClosure { false }; //!< when true, reaction probability within sigma in same complex is unity
     std::vector<RxnBase>::iterator conjBackRxn; //!< iterator the reaction's BackRxn, if reversible (not implemented)
-    std::string productName {}; //!< the product as a string (just the reacting interfaces), for writing to species file
-//    std::string fullProductName {}; //!< the full product as written in the parameters file
+    std::string productName { "default" }; //!< the product as a string (just the reacting interfaces), for writing to species file
+    //    std::string fullProductName {}; //!< the full product as written in the parameters file
 
     // arrays for association
     double bindRadius { 1.0 };
 
-    Vector norm1 {
-        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-        std::numeric_limits<double>::quiet_NaN()
-    }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 1
-    Vector norm2 {
-        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-        std::numeric_limits<double>::quiet_NaN()
-    }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 2
-    Angles assocAngles { 0, 0, 0, 0, 0 }; //!< Angles relative to sigma for association
+    Vector norm1 { 0, 0, 1 }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 1
+    Vector norm2 { 0, 0, 1 }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 2
+
+    Angles assocAngles { std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN() }; //!< Angles relative to sigma for association
 
     void display() const override;
     void assoc_display(const std::vector<MolTemplate>& molTemplateList) const;
@@ -257,7 +259,7 @@ struct BackRxn : public RxnBase {
     /*!
      * \brief This constructor creates a conjugate BackRxn from a reversible ForwardRxn
      */
-    explicit BackRxn(double offRate, ForwardRxn& forwardRxn);
+    explicit BackRxn(double offRatekb, ForwardRxn& forwardRxn);
 };
 
 /*******************/

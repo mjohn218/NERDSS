@@ -1,20 +1,21 @@
 #include "error_handling.hpp"
 #include "io/io.hpp"
 #include "parser/parser_functions.hpp"
+#include <cmath>
 
 void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvidedRxns,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::map<std::string, int>& observablesList)
+    std::vector<CreateDestructRxn>& createDestructRxns, std::map<std::string, int>& observablesList, Membrane& membraneObject)
 {
     /* NOTE: need to edit both this and enum class RxnKeyword if you want to add keywords  */
-    std::map<const std::string, RxnKeyword> rxnKeywords = { { "onrate", RxnKeyword::onRate },
-        { "offrate", RxnKeyword::offRate }, { "norm1", RxnKeyword::norm1 }, { "norm2", RxnKeyword::norm2 },
+    std::map<const std::string, RxnKeyword> rxnKeywords = { { "onrate3dka", RxnKeyword::onRate3Dka }, { "onrate3dmacro", RxnKeyword::onRate3DMacro },
+        { "offratekb", RxnKeyword::offRatekb }, { "offratemacro", RxnKeyword::offRateMacro }, { "norm1", RxnKeyword::norm1 }, { "norm2", RxnKeyword::norm2 },
         { "sigma", RxnKeyword::sigma }, { "assocangles", RxnKeyword::assocAngles }, { "onmem", RxnKeyword::onMem },
         { "rate", RxnKeyword::rate }, { "iscoupled", RxnKeyword::isCoupled }, { "isobserved", RxnKeyword::isObserved },
         { "observelabel", RxnKeyword::observeLabel }, { "bindradsamecom", RxnKeyword::bindRadSameCom },
         { "irrevringclosure", RxnKeyword::irrevRingClosure },
-	{ "creationradius", RxnKeyword::creationRadius }, { "loopcoopfactor", RxnKeyword::loopCoopFactor },
-        { "length3dto2d", RxnKeyword::length3Dto2D } };
+        { "creationradius", RxnKeyword::creationRadius }, { "loopcoopfactor", RxnKeyword::loopCoopFactor },
+        { "length3dto2d", RxnKeyword::length3Dto2D }, { "rxnlabel", RxnKeyword::rxnLabel }, { "coupledrxnlabel", RxnKeyword::coupledRxnLabel } };
 
     // Parse reaction
     ParsedRxn parsedRxn;
@@ -23,7 +24,8 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
     std::string reaction;
     getline(reactionFile, reaction);
     remove_comment(reaction);
-    std::cout << llinebreak << "Parsing new reaction with form:\n" << reaction << '\n';
+    std::cout << llinebreak << "Parsing new reaction with form:\n"
+              << reaction << '\n';
 
     // temporary storage containers
     std::string productSide;
@@ -208,6 +210,9 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         }
     }
 
+    parsedRxn.norm1.calc_magnitude();
+    parsedRxn.norm2.calc_magnitude();
+
     // get the indices of each iface in the reactants and products
     for (auto& reactant : parsedRxn.reactantList) {
         determine_iface_indices(
@@ -279,17 +284,132 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         parsedRxn.productName = react1 + '.' + react2;
     }
     if (parsedRxn.rxnType == ReactionType::biMolStateChange) {
-      parsedRxn.productName = "twoStates";
+        parsedRxn.productName = "twoStates";
     }
-    
-    if (parsedRxn.rxnType == ReactionType::bimolecular || parsedRxn.rxnType == ReactionType::biMolStateChange) {
-      	/*for all bimolecular reactions, they might take place in 2D, need to assign 3Dto2D length. By default,
-	  if it is not read in, it will be set to 2*sigma*/
-	
-	if(parsedRxn.length3Dto2D == -1)
-	  parsedRxn.length3Dto2D = 2.0*parsedRxn.bindRadius ;
+    if (parsedRxn.rxnType == ReactionType::uniMolStateChange) {
+        parsedRxn.productName = "oneStates";
+    }
+    if (parsedRxn.rxnType == ReactionType::zerothOrderCreation) {
+        parsedRxn.productName = "zerothOrderCreation";
+    }
+    if (parsedRxn.rxnType == ReactionType::destruction) {
+        parsedRxn.productName = "destruction";
+    }
+    if (parsedRxn.rxnType == ReactionType::uniMolCreation) {
+        parsedRxn.productName = "uniMolCreation";
+    }
 
+    if (parsedRxn.rxnType == ReactionType::bimolecular || parsedRxn.rxnType == ReactionType::biMolStateChange) {
+        /*for all bimolecular reactions, they might take place in 2D, need to assign 3Dto2D length. By default,
+	  if it is not read in, it will be set to 2*sigma*/
+
+        if (parsedRxn.length3Dto2D == -1)
+            parsedRxn.length3Dto2D = 2.0 * parsedRxn.bindRadius;
     }
+
+    if (parsedRxn.rxnType == ReactionType::bimolecular || parsedRxn.rxnType == ReactionType::biMolStateChange) {
+        // set the micro rate according to the macro rate
+        // for 3D reaction, Dz != 0 for each reactant; for 3D->2D, Dz == 0 for one reactant. determine this first
+        bool to2D = false;
+        bool is2D = true;
+        bool isSelf = false; // is a A(a)+A(a) -> A(a!).A(a!) ?
+        for (auto& reactant : parsedRxn.reactantList) {
+            if (std::abs(molTemplateList[reactant.molTypeIndex].D.z - 0.0) < 1E-10) {
+                to2D = true;
+            } else {
+                is2D = false;
+            }
+        }
+        if (parsedRxn.rxnType == ReactionType::bimolecular) {
+            if (parsedRxn.isSymmetric == true) {
+                isSelf = true; // is a A(a)+A(a) -> A(a!).A(a!)
+            }
+        }
+
+        if (isSelf == true) { //Self reaction
+            if (std::isnan(parsedRxn.onRate3Dka) == true) {
+                if (std::isnan(parsedRxn.onRate3DMacro) == false) {
+                    //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
+                    double Dtot { 0.0 };
+                    for (auto& reactant : parsedRxn.reactantList) {
+                        Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
+                    }
+                    parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                }
+                if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
+                    if (std::isnan(parsedRxn.offRateMacro) == false) {
+                        parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                    }
+                }
+            }
+        } else {
+            if (is2D == true) { //2D reaction
+                if (std::isnan(parsedRxn.onRate3Dka) == true) {
+                    if (std::isnan(parsedRxn.onRate3DMacro) == false) {
+                        //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
+                        double Dtot { 0.0 };
+                        for (auto& reactant : parsedRxn.reactantList) {
+                            Dtot += (1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.y);
+                        }
+                        double tempVariable { 0.0 };
+                        double maxN { 0.0 };
+                        for (auto& reactant : parsedRxn.reactantList) {
+                            if (molTemplateList[reactant.molTypeIndex].copies > maxN) {
+                                maxN = molTemplateList[reactant.molTypeIndex].copies;
+                            }
+                        }
+                        double area { 0.0 };
+                        area = 1.0 * membraneObject.waterBox.x * membraneObject.waterBox.y;
+                        double b { 0.0 };
+                        double sigma { parsedRxn.bindRadius };
+                        b = 2.0 * pow(area / (M_PI * maxN) + parsedRxn.bindRadius * parsedRxn.bindRadius, 0.5);
+                        tempVariable = 4.0 * log(b / sigma) / pow(1.0 - pow(sigma / b, 2.0), 2.0) - 2.0 / (1.0 - pow(sigma / b, 2.0)) - 1.0;
+                        parsedRxn.onRate3Dka = 2.0 * parsedRxn.bindRadius / (1.0 / (1.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (8.0 * M_PI * Dtot) * tempVariable);
+                    }
+                    if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
+                        if (std::isnan(parsedRxn.offRateMacro) == false) {
+                            parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / (2.0 * parsedRxn.bindRadius) / parsedRxn.onRate3DMacro;
+                        }
+                    }
+                }
+            } else {
+                if (to2D == false) { // 3D reaction
+                    if (std::isnan(parsedRxn.onRate3Dka) == true) {
+                        if (std::isnan(parsedRxn.onRate3DMacro) == false) {
+                            //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
+                            double Dtot { 0.0 };
+                            for (auto& reactant : parsedRxn.reactantList) {
+                                Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
+                            }
+                            parsedRxn.onRate3Dka = 1.0 / (1.0 / (parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                        }
+                        if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
+                            if (std::isnan(parsedRxn.offRateMacro) == false) {
+                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                            }
+                        }
+                    }
+                } else { // 3D->2D
+                    if (std::isnan(parsedRxn.onRate3Dka) == true) {
+                        if (std::isnan(parsedRxn.onRate3DMacro) == false) {
+                            //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
+                            double Dtot { 0.0 };
+                            for (auto& reactant : parsedRxn.reactantList) {
+                                Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
+                            }
+                            parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                        }
+                        if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
+                            if (std::isnan(parsedRxn.offRateMacro) == false) {
+                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Done parsing, set up the reaction(s) and place into their correct vectors
     if (parsedRxn.willBeMultipleRxns) {
         // if there is an interface that is missing a state (on purpose), we need to create a different forward

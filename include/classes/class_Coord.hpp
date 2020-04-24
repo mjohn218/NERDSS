@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include "classes/class_Parameters.hpp"
 #include "classes/class_Membrane.hpp"
+#include "classes/class_Parameters.hpp"
 
 #include <array>
 #include <iostream>
@@ -18,9 +18,9 @@
  */
 struct Coord {
 public:
-    double x{ 0 };
-    double y{ 0 };
-    double z{ 0 };
+    double x { 0 };
+    double y { 0 };
+    double z { 0 };
 
     // operator overloads
     void operator+=(const Coord& coord);
@@ -38,6 +38,12 @@ public:
         this->y = arr[1];
         this->z = arr[2];
     }
+    //   void operator=(Coord& c)
+    //   {
+    //       this->x = c.x;
+    //       this->y = c.y;
+    //       this->z = c.z;
+    //   }
     Coord& operator-=(Coord& c)
     {
         this->x -= c.x;
@@ -70,3 +76,4 @@ Coord operator*(Scal scal, const Coord& coord)
     return { scal * coord.x, scal * coord.y, scal * coord.z };
 }
 
+bool is_co_linear(const Coord& c1, const Coord& c2, const Coord& c3);

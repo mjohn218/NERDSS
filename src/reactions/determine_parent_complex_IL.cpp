@@ -1,7 +1,7 @@
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
 
 bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, std::vector<Molecule>& moleculeList,
-				 std::vector<Complex>& complexList, int ILindexMol)
+    std::vector<Complex>& complexList, int ILindexMol)
 {
     // TODO: clean this up
     int c1 { moleculeList[pro1Index].myComIndex };
@@ -12,13 +12,13 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
     // determine if any two molecules are doubly bound
     bool boundTwice { false };
     for (auto& mp : origlist) {
-      std::vector<int> tmppartvec{};
-      
-      for(auto pp : moleculeList[mp].bndpartner){
-	if(pp != ILindexMol)
-	  tmppartvec.push_back(pp);//exclude bound partners!
-      }
-      if (std::find(tmppartvec.begin(), tmppartvec.end(), pro1Index) != tmppartvec.end()
+        std::vector<int> tmppartvec {};
+
+        for (auto pp : moleculeList[mp].bndpartner) {
+            if (pp != ILindexMol)
+                tmppartvec.push_back(pp); //exclude bound partners!
+        }
+        if (std::find(tmppartvec.begin(), tmppartvec.end(), pro1Index) != tmppartvec.end()
             && std::find(tmppartvec.begin(), tmppartvec.end(), pro2Index) != tmppartvec.end()) {
             std::cout << "Molecule " << mp << " is bound to both dissociating molecules. Keeping as one complex.\n";
             boundTwice = true;
@@ -72,7 +72,7 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
             auto last = std::unique(recheck.begin(), recheck.end());
             recheck.erase(last, recheck.end());
         }
-	//        std::cout << "HERE DETERMINE PARENT COMPLEX\n";
+        //        std::cout << "HERE DETERMINE PARENT COMPLEX\n";
         // what this SHOULD do is take each protein in the bndlist of the protein to recheck (a)
         // and check each of those proteins' (b) bndlists (c) for target proteins for the dissociating proteins
         // if they're not found, it goes in another layer and looks at the bndlists of (c),
@@ -84,18 +84,18 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
             int com_flag { 0 };
             int no { 0 };
             bool doneChecking { false };
-	    //	    std::cout <<" NEED to check protein: "<<molIndex<<" boundpartners: ";
-	    /*leave out ILs as bound partners, since they are not in the complex list.*/
-            std::vector<int> testList { };
-	    for(auto mp : moleculeList[molIndex].bndpartner){
-	      if(mp != ILindexMol)
-		testList.push_back(mp);//exclude bound partners!
-	    }
+            //	    std::cout <<" NEED to check protein: "<<molIndex<<" boundpartners: ";
+            /*leave out ILs as bound partners, since they are not in the complex list.*/
+            std::vector<int> testList {};
+            for (auto mp : moleculeList[molIndex].bndpartner) {
+                if (mp != ILindexMol)
+                    testList.push_back(mp); //exclude bound partners!
+            }
             std::vector<int> checkedList; // these are the moleculeList that have been checked
-	    // for(int pp=0;pp<testList.size();pp++)
-	    //   std::cout <<testList[pp]<<'\t';
-	    // std::cout<<std::endl;
-	    
+            // for(int pp=0;pp<testList.size();pp++)
+            //   std::cout <<testList[pp]<<'\t';
+            // std::cout<<std::endl;
+
             while (!doneChecking) {
                 testList.erase(std::remove(testList.begin(), testList.end(), -1), testList.end());
                 std::vector<int> testlist2;
@@ -103,9 +103,9 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
                     int ppart { testList[j] };
                     checkedList.push_back(ppart);
                     for (auto& ppart2 : moleculeList[ppart].bndpartner) {
-		      if(ppart2 == ILindexMol)
-			continue;//skip IL partners
-		      testlist2.push_back(ppart2);
+                        if (ppart2 == ILindexMol)
+                            continue; //skip IL partners
+                        testlist2.push_back(ppart2);
                         if (ppart != molIndex) {
                             if (ppart2 == pro1Index) {
                                 tmpc1.push_back(molIndex);
@@ -113,7 +113,7 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
                                 com_flag++;
                             } else if (ppart2 == pro2Index) {
                                 tmpc2.push_back(molIndex);
-				//     std::cout << "base " << molIndex << " belongs to complex c2." << std::endl;
+                                //     std::cout << "base " << molIndex << " belongs to complex c2." << std::endl;
                                 com_flag++;
                             }
                         }
@@ -124,8 +124,8 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
                             return true;
                         } else if (com_flag == 0) {
                             // neither pro1Index or pro2Index found, move to the next set of test subjects
-			  //std::cout <<" did not find either for prote "<<molIndex<<std::endl;
-			  no++;
+                            //std::cout <<" did not find either for prote "<<molIndex<<std::endl;
+                            no++;
                         } else {
                             no = 0;
                             break;
@@ -147,7 +147,7 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
                     //                                        testList.erase(testList.begin()); // I cannot remember why
                     //                                        this is here
                 } else {
-		  //std::cout <<" done checking protein: "<<molIndex<<std::endl;
+                    //std::cout <<" done checking protein: "<<molIndex<<std::endl;
                     doneChecking = true;
                     recheck.erase(i);
                 }
@@ -159,7 +159,7 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
             }
         }
 
-	//        std::cout << "HERE DETERMINE PARENT COMPLEX2\n";
+        //        std::cout << "HERE DETERMINE PARENT COMPLEX2\n";
         // Check for shared members between the old complex and new one
         for (auto& mp : tmpc1) {
             if (find(tmpc2.begin(), tmpc2.end(), mp) != tmpc2.end()) {
@@ -169,9 +169,9 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
             }
 
             for (auto& ppart : moleculeList[mp].bndpartner) {
-	      if(ppart ==ILindexMol)
-		continue;
-	      if (find(tmpc2.begin(), tmpc2.end(), ppart) != tmpc2.end()) {
+                if (ppart == ILindexMol)
+                    continue;
+                if (find(tmpc2.begin(), tmpc2.end(), ppart) != tmpc2.end()) {
                     std::cout << "Complex is a closed loop.\n";
                     moleculeList[pro1Index].myComIndex = c1;
                     moleculeList[pro2Index].myComIndex = c1;
@@ -181,21 +181,21 @@ bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, 
         }
 
         if (tmpc1.size() + tmpc2.size() != complexList[c1].memberList.size()) {
-	  std::cout <<" complex sizes don't match the parent! "<<tmpc1.size()<<' '<<tmpc2.size()<<" original size: "<<complexList[c1].memberList.size()<<std::endl;
-	  std::cout <<" pros in c1: "<<std::endl;
-	  for (auto memMol : tmpc1) 
-	    std::cout <<memMol<<'\t';
-	  std::cout <<" pros in c2: "<<std::endl;
-	  for (auto memMol : tmpc2) 
-	    std::cout <<memMol<<'\t';
-	  std::cout <<"display molecules "<<std::endl;
-	  for (auto mp : tmpc1) 
-	    moleculeList[mp].display_all();
-	  std::cout <<" pros in c2: "<<std::endl;
-	  for (auto mp : tmpc2) 
-	    moleculeList[mp].display_all();
-	  
-	  std::cerr
+            std::cout << " complex sizes don't match the parent! " << tmpc1.size() << ' ' << tmpc2.size() << " original size: " << complexList[c1].memberList.size() << std::endl;
+            std::cout << " pros in c1: " << std::endl;
+            for (auto memMol : tmpc1)
+                std::cout << memMol << '\t';
+            std::cout << " pros in c2: " << std::endl;
+            for (auto memMol : tmpc2)
+                std::cout << memMol << '\t';
+            std::cout << "display molecules " << std::endl;
+            for (auto mp : tmpc1)
+                moleculeList[mp].display_all();
+            std::cout << " pros in c2: " << std::endl;
+            for (auto mp : tmpc2)
+                moleculeList[mp].display_all();
+
+            std::cerr
                 << "ERROR: Combined size of dissociated complexes does not match the parent complex. Exiting...\n";
             exit(1);
         }

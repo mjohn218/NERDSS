@@ -6,7 +6,7 @@ MolTemplate parse_molFile(std::string& mol)
     std::map<const std::string, MolKeyword> molKeywords = { { "name", MolKeyword::name },
         { "copies", MolKeyword::copies }, { "isrod", MolKeyword::isRod }, { "islipid", MolKeyword::isLipid },
         { "d", MolKeyword::d }, { "dr", MolKeyword::dr }, { "com", MolKeyword::com }, { "state", MolKeyword::state },
-							    { "mass", MolKeyword::mass }, { "checkoverlap", MolKeyword::checkOverlap }, { "bonds", MolKeyword::bonds }, {"isimplicitlipid", MolKeyword::isImplicitLipid },
+        { "mass", MolKeyword::mass }, { "checkoverlap", MolKeyword::checkOverlap }, { "bonds", MolKeyword::bonds }, { "isimplicitlipid", MolKeyword::isImplicitLipid },
         { "ispoint", MolKeyword::isPoint } };
 
     std::cout << mol + ".mol" << '\n';
@@ -102,6 +102,8 @@ MolTemplate parse_molFile(std::string& mol)
         if (tmpVec.magnitude > tmpTemplate.radius)
             tmpTemplate.radius = tmpVec.magnitude;
     }
-    
+    // set mass to radius
+    tmpTemplate.mass = tmpTemplate.radius;
+
     return tmpTemplate;
 }

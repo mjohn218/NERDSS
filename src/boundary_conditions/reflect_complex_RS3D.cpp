@@ -12,20 +12,20 @@
  */
 #include "boundary_conditions/reflect_functions.hpp"
 
-void reflect_complex_RS3D(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList)
+void reflect_complex_RS3D(double RS3Dinput, Complex& targCom, std::vector<Molecule>& moleculeList)
 {
-     Vector vec {};
-     vec.x = 0;
-     vec.y = 0;
-     vec.z = membraneObject.RS3D;
-     targCom.comCoord += vec;
-     for (auto& mol:targCom.memberList){
-         moleculeList[mol].comCoord += vec;
-         for (auto& iface : moleculeList[mol].interfaceList){
-             iface.coord += vec;
-         }
-     } 
-     /*
+    Vector vec {};
+    vec.x = 0;
+    vec.y = 0;
+    vec.z = RS3Dinput;
+    targCom.comCoord += vec;
+    for (auto& mol : targCom.memberList) {
+        moleculeList[mol].comCoord += vec;
+        for (auto& iface : moleculeList[mol].interfaceList) {
+            iface.coord += vec;
+        }
+    }
+    /*
     double currx{ targCom.comCoord.x + targCom.trajTrans.x };
     double curry{ targCom.comCoord.y + targCom.trajTrans.y };
     double currz{ targCom.comCoord.z + targCom.trajTrans.z }; 

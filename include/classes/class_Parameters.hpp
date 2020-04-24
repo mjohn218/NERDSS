@@ -46,8 +46,9 @@ enum class ParamKeyword : int {
     restartWrite = 10, //!< interval to write to restart file
     pdbWrite = 11, //!< interval to write pdb for non-equilibrium trajectories
     overlapSepLimit = 12, //!< distance limit between centers of mass. if less than this for any proteins in a complex,
-                          //!< association is canceled
+    //!< association is canceled
     name = 13, //!< name of the simulation
+    checkPoint = 14, //!< interval to write checkpoint
 };
 
 /*! \enum MolKeyword
@@ -67,7 +68,7 @@ enum class MolKeyword : int {
     checkOverlap = 9, //!< is overlap checked for during association
     bonds = 10, //!< optional bond definitions for PSF
     isPoint = 11, //!< is the Molecule a point (i.e. do all its interfaces overlap with the COM)
-	 isImplicitLipid = 12, //!< Is it an implicit lipid.    
+    isImplicitLipid = 12, //!< Is it an implicit lipid.
 };
 
 /*! \enum RxnKeyword
@@ -75,24 +76,27 @@ enum class MolKeyword : int {
  * \brief Reaction block keywords. For use with class RxnBase and its derived classes.
  */
 enum class RxnKeyword : int {
-    onRate = 0, //!< on rate of the reaction
-    offRate = 1, //!< off rate of the reaction, if reversible
-    norm1 = 2, //!< norm of the first reactant, for use in the phi angle, if applicable
-    norm2 = 3, //!< norm of the second reactant, for use in the phi angle, if applicable
-    sigma = 4, //!< sigma vector (will eventually be changed to an integer)
-    assocAngles
-    = 5, //!< angles for association [$\theta_1$,$\theta_2$,$\phi_1$,$\phi_2$,$\omega$]. See \ref association and Angles
-    onMem = 6, //!< boolean for if the reaction occurs only on the membrane (eventually change to detecting a lipid in
-               //!< the reaction
-    rate = 7,
-    isCoupled = 8, //!< is the reaction coupled to another reaction?
-    isObserved = 9, //!< not used, but set by the parser
-    observeLabel = 10, //!< label for the observable which tracks the product of the reaction
-    bindRadSameCom = 11, //!< binding separaton to force association within same complex
-    irrevRingClosure = 12, //!< is ring closure irreversible, i.e. binding within complex has probability unity
-    creationRadius = 13, //!< the radius of the sphere around the parent molecule where a molecule is created
-    loopCoopFactor = 14, //!< the factor to multiple the loop closure rate, i.e. loopCoopFactor=exp(-dG/kT)
-    length3Dto2D = 15, //!< nm, length factor converts 3D to 2D rate
+    onRate3Dka = 0, //!< on rate of the reaction, micro
+    onRate3DMacro = 1, //!< on rate of the reaction, macro
+    offRatekb = 2, //!< off rate of the reaction, if reversible, micro
+    offRateMacro = 3, //!< off rate of the reaction, if reversible, macro
+    norm1 = 4, //!< norm of the first reactant, for use in the phi angle, if applicable
+    norm2 = 5, //!< norm of the second reactant, for use in the phi angle, if applicable
+    sigma = 6, //!< sigma vector (will eventually be changed to an integer)
+    assocAngles = 7, //!< angles for association [$\theta_1$,$\theta_2$,$\phi_1$,$\phi_2$,$\omega$]. See \ref association and Angles
+    onMem = 8, //!< boolean for if the reaction occurs only on the membrane (eventually change to detecting a lipid in
+    //!< the reaction
+    rate = 9,
+    isCoupled = 10, //!< is the reaction coupled to another reaction?
+    isObserved = 11, //!< not used, but set by the parser
+    observeLabel = 12, //!< label for the observable which tracks the product of the reaction
+    bindRadSameCom = 13, //!< binding separaton to force association within same complex
+    irrevRingClosure = 14, //!< is ring closure irreversible, i.e. binding within complex has probability unity
+    creationRadius = 15, //!< the radius of the sphere around the parent molecule where a molecule is created
+    loopCoopFactor = 16, //!< the factor to multiple the loop closure rate, i.e. loopCoopFactor=exp(-dG/kT)
+    length3Dto2D = 17, //!< nm, length factor converts 3D to 2D rate
+    rxnLabel = 18, //!< label of the reaction, used for coupled
+    coupledRxnLabel = 19, //!< lable of the coupled reaction
 };
 
 struct Parameters {
@@ -107,10 +111,10 @@ struct Parameters {
         bool printSystemInfo { false };
         int verbosity { 0 };
     };
-    
-  // parameter values
-  int rank;
-  int numMolTypes { 0 }; //!< number of MolTemplates. used to be Nprotypes
+
+    // parameter values
+    int rank;
+    int numMolTypes { 0 }; //!< number of MolTemplates. used to be Nprotypes
     //   int numIfaces { 0 }; //!< total number of interfaces on all MolTemplates. used to be nifaces
     int numTotalSpecies { 0 }; //!< total number of interfaces and states (including products!) possible in the system.
     unsigned nItr { 0 }; //!< number of timesteps requested by user. used to be int Nit.
@@ -122,8 +126,11 @@ struct Parameters {
     int maxUniqueSpecies { 1000 }; //!< maximum number of allowed unique species
 
     int numLipids { 0 }; //!< total number of lipids in the system
-    
+
     double overlapSepLimit { 1.5 }; //!< in nm. COM-COM distance less than this is cancelled, for checkOverlap molecules
+    bool implicitLipid { false };
+    bool hasUniMolStateChange { false };
+    bool hasCreationDestruction { false };
 
     std::string name {}; //!< name of the simulation
     Debug debugParams;
@@ -145,6 +152,7 @@ struct Parameters {
     int trajWrite { 10 }; //!< timestep interval to write coordinates file. used to be configwrite
     int restartWrite { 10 }; //!< timestep interval to write a restart file
     int pdbWrite { -1 }; //!< interval to write pdb
+    int checkPoint { -1 }; //!< interval to write checkpoint
 
     void display();
     void parse_paramFile(std::ifstream& paramFile);

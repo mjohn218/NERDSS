@@ -39,7 +39,7 @@ bool areInVicinity(const Molecule& mol1, const Molecule& mol2, const std::vector
  */
 void generate_coordinates(const Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
-			  const std::vector<ForwardRxn>& forwardRxns, const Membrane &membraneObject);
+    const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject);
 
 /*!
  * \ingroup SystemSetup
@@ -51,15 +51,33 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
  * Used to create the dimensions for the box cells.
  */
 void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTemplateList,
-                   const std::vector<ForwardRxn>& forwardRxns);
-
-
+    const std::vector<ForwardRxn>& forwardRxns, int numDoubleBeforeAdd, int numMolTemplateBeforeAdd);
 
 //void create(const MolTemplate& oneTemp, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
 //	    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList);
-Molecule initialize_molecule(int comIndex, const Parameters& params, const MolTemplate& molTemplate, const Membrane &membraneObject);
+Molecule initialize_molecule(int comIndex, const Parameters& params, const MolTemplate& molTemplate, const Membrane& membraneObject);
 Complex initialize_complex(const Molecule& mol, const MolTemplate& molTemp);
 
 // set up some important parameters for implicit-lipid model;
-void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const Parameters& params, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList, 
-                                             std::vector<MolTemplate>& molTemplateList, std::vector<Complex>& complexList, Membrane& membraneObject);
+void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const Parameters& params, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<Complex>& complexList, Membrane& membraneObject);
+
+//functions to generate new added molecules and complexes fo a restart simulation
+void generate_coordinates_for_restart(Parameters& params, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, std::vector<int>& emptyMolList,
+    std::vector<int>& emptyComList, const std::vector<MolTemplate>& molTemplateList,
+    const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject, int numMolTemplateBeforeAdd, int numForwardRxnBdeforeAdd);
+
+void create_molecule_and_complex_for_restart(const MolTemplate& createdMolTemp, Parameters& params, std::vector<int>& emptyMolLis,
+    std::vector<int>& emptyComLis, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject);
+
+Molecule initialize_molecule_for_restart(
+    int index, Parameters& params, const MolTemplate& molTemplate, const Membrane& membraneObject);
+
+bool moleculeOverlapsForRestart(const Parameters& params, Molecule& createdMol,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+
+// function to determine molecule's isPoint and isRod
+void determine_shape_molecule(std::vector<MolTemplate>& molTemplateList);

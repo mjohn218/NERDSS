@@ -1,0 +1,58 @@
+# Input file
+
+start parameters
+    nItr = 30000000 #number of steps to take
+    timeStep = 0.1 #in us
+
+    timeWrite = 1000 #print instantaneous properties
+    trajWrite = 100000 #print coordinates
+    restartWrite = 100000 #print restart file
+end parameters
+
+start boundaries
+     WaterBox = [470,470,5000]
+     xBCtype = reflect
+     yBCtype = reflect
+     zBCtype = reflect
+end boundaries
+
+start molecules
+    A : 665
+    B : 665
+    M : 3755
+end molecules
+
+start reactions
+    ### A+B
+    A(a) + B(b) <-> A(a!1).B(b!1)
+    onRate3Dka = 0.08303  #ka in nm3/us: ~5E4M-1s-1 kon
+    offRatekb = 1  #kb in /s
+    sigma = 1  #nm
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 1.5707963, nan, nan, 0]
+
+    ### A+M
+    A(m) + M(m) <-> A(m!1).M(m!1)
+    onRate3Dka = 3.3386  #ka in nm3/us: ~2E6M-1s-1 kon
+    offRatekb = 1.00526  #kb in /s
+    sigma = 1  #nm
+    #lipids are normal to membrane plane, so M has theta value
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    #lipids are normal to membrane plane, so M has theta value,
+    assocAngles = [1.5707963, 1.5707963, nan, nan, M_PI]
+
+
+    ### B+M
+    B(m) + M(m) <-> B(m!1).M(m!1)
+    onRate3Dka = 3.3386  #ka in nm3/us: ~2E6M-1s-1 kon
+    offRatekb = 1.00526  #kb in /s
+    sigma = 1  #nm
+    #lipids are normal to membrane plane, so M has theta value
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    #lipids are normal to membrane plane, so M has theta value,
+    assocAngles = [1.5707963, 1.5707963, nan, nan, M_PI]
+
+end reactions

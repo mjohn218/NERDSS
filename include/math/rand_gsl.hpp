@@ -2,6 +2,7 @@
 
 #include "gsl/gsl_rng.h"
 
+extern gsl_rng* r;
 extern long long randNum;
 
 /*!
@@ -29,6 +30,13 @@ void read_rng_state();
  * Writes the current state of the RNG to a binary file.
  */
 void write_rng_state();
+
+/*!
+ * \brief Wrapper for the internal GSL RNG state write function.
+ *
+ * Writes the current state of the RNG to a binary file for check point.
+ */
+void write_rng_state_simItr(int simItr);
 
 /*!
  * \brief Uses Box-Mueller method to greate Gaussian-distributed random numbers from a uniform random number generator.

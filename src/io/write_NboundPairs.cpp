@@ -3,8 +3,26 @@
 
 using namespace std;
 
-void write_NboundPairs(copyCounters& counterArrays, ofstream& outfile, int it, const Parameters& params)
+void write_NboundPairs(copyCounters& counterArrays, ofstream& outfile, int it, const Parameters& params, std::vector<Molecule>& moleculeList)
 {
+    // if (params.implicitLipid == true) {
+    //     //update NboundPairs with Implicit Lipid
+    //     for (int typeIndex = 0; typeIndex < params.numMolTypes; typeIndex++) {
+    //         counterArrays.nBoundPairs[params.numMolTypes * params.numMolTypes + typeIndex] = 0;
+    //     }
+    //     for (auto& molTemp : moleculeList) {
+    //         if (molTemp.isImplicitLipid == true)
+    //             continue;
+    //         int bounder1 { molTemp.index };
+
+    //         if (molTemp.linksToSurface > 0) {
+    //             int p1 { moleculeList[bounder1].molTypeIndex };
+    //             int index { params.numMolTypes * params.numMolTypes + p1 };
+    //             counterArrays.nBoundPairs[index]++;
+    //         }
+    //     }
+    // }
+
     int i, j;
 
     int index;

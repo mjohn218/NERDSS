@@ -1,0 +1,23 @@
+##
+# A molecule information file
+##
+
+Name    = A
+
+
+# translational diffusion constants
+D       = [20.0,20.0,20.0]
+
+# rotational diffusion constants
+Dr      = [0,0,0]
+
+# Coordinates, with states below, or
+COM     0.0000    0.0000    0.0000
+ser       0.0000    0.0000    0.0000
+
+#bonds for visualization
+bonds = 1
+COM ser
+
+#State definitions
+state = ser~U~P

@@ -37,7 +37,7 @@ bool isReactant(const Molecule& currMol, const Complex& currCom, const CreateDes
  * \brief Determines if the associating Molecules have the ancillary interfaces required by this reaction.
  */
 bool hasIntangibles(int reactIndex1, int reactIndex2, const Molecule& reactMol1, const Molecule& reactMol2,
-                    const RxnBase::RateState& currRxnState);
+    const RxnBase::RateState& currRxnState);
 
 /*!
  * \brief Determines if the Molecule in a unimolecular reaction has he ancillary interaces required
@@ -50,8 +50,8 @@ bool hasIntangibles(int reactantIndex, const Molecule& reactMol, const RxnBase::
  * \brief Determines which RxnState to use for the association/dissociation reaction.
  */
 int find_reaction_rate_state(int simItr, int relIfaceIndex1, int relIfaceIndex2, const Molecule& reactMol1,
-                             const Molecule& reactMol2, const BackRxn& backRxn,
-                             const std::vector<MolTemplate>& molTemplateList);
+    const Molecule& reactMol2, const BackRxn& backRxn,
+    const std::vector<MolTemplate>& molTemplateList);
 
 size_t find_reaction_rate_state(const Molecule& reactMol1, const Molecule& reactMol2, const ForwardRxn& forwardRxn,
     const std::vector<MolTemplate>& molTemplateList);
@@ -63,9 +63,9 @@ size_t find_reaction_rate_state(const Molecule& reactMol1, const Molecule& react
  * \param[out] std::array<size_t, 2> array of two indices, [index of ForwardRxn, index of RxnBase::RateState]
  */
 void find_which_reaction(int ifaceIndex1, int ifaceIndex2, int& rxnIndex, int& rateIndex, bool& isStateChangeBackRxn,
-                         const Interface::State& currState, const Molecule& reactMol1, const Molecule& reactMol2,
-                         const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
-                         const std::vector<MolTemplate>& molTemplateList);
+    const Interface::State& currState, const Molecule& reactMol1, const Molecule& reactMol2,
+    const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
+    const std::vector<MolTemplate>& molTemplateList);
 
 /*!
  * \brief Determines which state change reaction to use based on the identity of the current Interface::State of the
@@ -74,8 +74,8 @@ void find_which_reaction(int ifaceIndex1, int ifaceIndex2, int& rxnIndex, int& r
  * \params[out] std::array<int, 3> [rxnIndex, rateIndex, rxnType], where rxnType = 0 if forward, 1 if back
  */
 void find_which_state_change_reaction(int ifaceIndex, int& rxnIndex, int& rateIndex, bool& isStateChangeBackRxn,
-                                      const Molecule& reactMol, const Interface::State& currState,
-                                      const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+    const Molecule& reactMol, const Interface::State& currState,
+    const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 std::array<int, 2> find_which_reaction(int ifaceIndex, const Molecule& reactMol, const Interface::State& currState,
     const std::vector<BackRxn>& forwardRxns);
@@ -106,10 +106,10 @@ extern int evalBindNum;
  * If 2D, also calculates/looks up values for 2D reaction tables (normMatrix, survMatrix, and pirMatrix)
  */
 void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, double* tableIDs, unsigned& DDTableIndex,
-                                 const Parameters& params, std::vector<gsl_matrix*>& normMatrices, std::vector<gsl_matrix*>& survMatrices,
-                                 std::vector<gsl_matrix*>& pirMatrices, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                                 const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
-                                 const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane &membraneObject);
+    const Parameters& params, std::vector<gsl_matrix*>& normMatrices, std::vector<gsl_matrix*>& survMatrices,
+    std::vector<gsl_matrix*>& pirMatrices, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject);
 
 /*!
  * \brief Determines if binding of two molecules within the same complex can occur.
@@ -118,18 +118,17 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
  */
 
 void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Index, int iface2Index, int rxnIndex,
-                                     int rateIndex, bool isBiMolStateChange, const Parameters& params,
-                                     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                                     const std::vector<MolTemplate>& molTemplateList, const ForwardRxn& oneRxn,
-                                     const std::vector<BackRxn>& backRxns, copyCounters& counterArrays);
+    int rateIndex, bool isBiMolStateChange, const Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const ForwardRxn& oneRxn,
+    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays);
 
 bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const double maxRandInt, Molecule& mol,
-                                  std::vector<Molecule>& moleculeList, const std::vector<ForwardRxn>& forwardRxns);
+    std::vector<Molecule>& moleculeList, const std::vector<ForwardRxn>& forwardRxns);
 
 void update_Nboundpairs(int ptype1, int ptype2, int chg, const Parameters& params, copyCounters& counterArrays);
 
-void check_implicit_reactions(int pro1Index, int pro2Index, int simItr, double* tableIDs, unsigned& DDTableIndex,
-                              const Parameters& params, std::vector<gsl_matrix*>& normMatrices, std::vector<gsl_matrix*>& survMatrices,
-                              std::vector<gsl_matrix*>& pirMatrices, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                              const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
-                              const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane &membraneObject, std::vector<double> &IL2DbindingVec, std::vector<double> &IL2DUnbindingVec, std::vector<double> &ILTableIDs);
+void check_implicit_reactions(int pro1Index, int pro2Index, int simItr,
+    const Parameters& params, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs);

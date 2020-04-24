@@ -14,18 +14,25 @@
  * A 2D vector will always be an x and y coordinate
  */
 struct Vector : public Coord {
-    double magnitude{ 0.0 };
+    double magnitude { 0.0 };
 
     // operators
     Vector operator*(const double val) { return { x * val, y * val, z * val }; }
     Vector operator-(const double val) { return { x - val, y - val, z - val }; };
     Vector operator-(const Vector& vec) { return { this->x - vec.x, this->y - vec.y, this->z - vec.z }; }
-    Vector operator-() {return {-x, -y, -z};}
+    Vector operator-() { return { -x, -y, -z }; }
     Vector operator/=(double val) { return { x / val, y / val, z / val }; }
     Vector operator/(double val) { return { x / val, y / val, z / val }; }
-    Vector operator+(const Coord& crd) {return { this->x + crd.x, this->y + crd.y, this->z + crd.z }; }
+    Vector operator+(const Coord& crd) { return { this->x + crd.x, this->y + crd.y, this->z + crd.z }; }
     friend std::ostream& operator<<(std::ostream& os, Vector& vec);
     friend Coord operator+(const Vector& vec, const Coord& crd);
+
+    //void operator=(const Vector v)
+    //{
+    //    this->x = v.x;
+    //    this->y = v.y;
+    //    this->z = v.z;
+    //}
 
     /*!
      * \brief Calculates the magnitude of the Vector. Note that this is no longer done when the Vector is constructed.

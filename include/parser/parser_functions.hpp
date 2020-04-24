@@ -72,11 +72,11 @@
 
 #pragma once
 
+#include "classes/class_Membrane.hpp"
 #include "classes/class_Observable.hpp"
 #include "classes/class_Quat.hpp"
 #include "classes/class_Rxns.hpp"
 #include "classes/class_bngl_parser.hpp"
-#include "classes/class_Membrane.hpp"
 #include <algorithm>
 
 /* MAIN */
@@ -86,8 +86,13 @@
  * Delegates to parse_reactionFile(), parse_paramFile(), and parse_molFile().
  */
 void parse_input(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
-                 std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-                 std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane &membraneObject);
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);
+
+//parse input for restart with add.inp
+void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd);
 /*************************/
 
 /* INDEX DETERMINATION FUNCTIONS */
@@ -123,8 +128,8 @@ void check_for_state_change(ParsedMol::IfaceInfo& targetIface, ParsedMol& target
  * @param[in] targMol target molecule for which we want to find the iface indices
  */
 void determine_iface_indices(int specieIndex, int& totSpecies, ParsedMol& targMol, ParsedRxn& parsedRxn,
-                             const std::vector<ForwardRxn>& forwardRxns,
-                             const std::vector<MolTemplate>& molTemplateList);
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList);
 
 /*!\ingroup Parser
  * \brief Takes the string Interface names of two bound Interfaces and determines their Interface ifaceIndex
@@ -142,8 +147,8 @@ void determine_iface_indices(int specieIndex, int& totSpecies, ParsedMol& targMo
  *    - the former is probably easier. Is there a situation in which it wouldn't work?
  */
 void determine_bound_iface_index(int& totSpecies, ParsedMol::IfaceInfo& targIface,
-                                 ParsedRxn& parsedRxn, const std::vector<ForwardRxn>& forwardRxns,
-                                 const std::vector<MolTemplate>& molTemplateList);
+    ParsedRxn& parsedRxn, const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList);
 
 bool areCorrespondingMolecules(std::pair<std::string, ParsedMol::IfaceInfo>& prodMolIface,
     std::pair<std::string, ParsedMol::IfaceInfo>& reactMolIface);
@@ -183,9 +188,9 @@ ParsedMol parse_molecule_bngl(int& totSpecies, bool isProductSide, std::pair<std
  * @param[in] createDestructRxns vector of CreateDestructRxns
  */
 void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvidedRxns,
-                    std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
-                    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
-                    std::map<std::string, int>& observablesList);
+    std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
+    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::map<std::string, int>& observablesList, Membrane& membraneObject);
 
 bool read_boolean(std::string fileLine);
 
@@ -246,9 +251,12 @@ void create_conjugate_reaction_itrs(std::vector<ForwardRxn>& forwardRxns, std::v
  * \brief This function populates the vectors of the Interface's pertinent reactions for each State
  */
 void populate_reaction_lists(const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
-                             const std::vector<CreateDestructRxn>& createDestructRxns,
-                             std::vector<MolTemplate>& molTemplateList);
+    const std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList);
 /*******************/
+void populate_reaction_lists_for_add(const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
+    const std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList, int addForwardRxnNum, int addBackRxnNum, int addCreateDestructRxnNum);
 
 /* DISPLAY */
 std::string write_mol_iface(std::string mol, std::string iface);

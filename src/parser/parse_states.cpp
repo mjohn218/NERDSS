@@ -26,6 +26,6 @@ void parse_states(std::string& line, MolTemplate& molTemplate)
     } else {
         // TODO: replace the placeholder integer
         for (auto& oneState : states)
-            ifaceNameItr->stateList.emplace_back(oneState[0], -1);
+            ifaceNameItr->stateList.emplace_back(static_cast<char>(std::toupper(oneState[0])), -1);
     }
 }

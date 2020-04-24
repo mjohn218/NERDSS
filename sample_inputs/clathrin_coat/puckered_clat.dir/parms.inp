@@ -18,7 +18,7 @@ start boundaries
 end boundaries
 
 start molecules
-    clat
+    clat : 100
 end molecules
 
 # start observables
@@ -28,8 +28,8 @@ end molecules
 start reactions
     ### CLAT - CLAT ###
     clat(cd1) + clat(cd2) <-> clat(cd1!1).clat(cd2!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -38,8 +38,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1) + clat(cd3) <-> clat(cd1!1).clat(cd3!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -48,8 +48,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd2) + clat(cd3) <-> clat(cd2!1).clat(cd3!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -58,8 +58,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd1) + clat(cd1) <-> clat(cd1!1).clat(cd1!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -68,8 +68,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd2) + clat(cd2) <-> clat(cd2!1).clat(cd2!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0
@@ -78,8 +78,8 @@ start reactions
     bindRadSameCom = 5.0
 
     clat(cd3) + clat(cd3) <-> clat(cd3!1).clat(cd3!1)
-    onRate = 100
-    offRate = 10
+    onRate3Dka = 100
+    offRatekb = 10
     norm1 = [0,0,1]
     norm2 = [0,0,1]
     sigma = 1.0

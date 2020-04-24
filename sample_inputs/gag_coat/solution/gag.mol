@@ -1,0 +1,29 @@
+##
+# gag information file
+##
+
+name = gag
+checkOverlap = true
+
+#translational diffusion
+D = [10.0,10.0,10.0]
+
+#rotational diffusion
+Dr = [0.05,0.05,0.05]
+
+
+#coordinates
+COM     0.0000    0.0000    0.0000
+homo    0.0000    0.5000    0.0000
+mem     0.0000    2.0000    0.0000
+rna     0.0000   -4.0000    0.0000
+het1   -2.0000    0.0000    0.0000
+het2    2.0000    0.0000    0.0000
+
+#bonds for visualization
+bonds = 5
+COM homo
+homo mem
+COM rna
+COM het1
+COM het2

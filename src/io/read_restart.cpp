@@ -3,16 +3,16 @@
 #include <ctime>
 
 void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& params, SimulVolume& simulVolume,
-                  std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                  std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
-                  std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
-                  std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
-                  std::vector<int>& emptyComList, Membrane &membraneObject)
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
+    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
+    std::vector<int>& emptyComList, Membrane& membraneObject, copyCounters& counterArrays)
 {
     try {
-      // Read parameters
-      std::cout<<"READ IN PARMATERS from restart file"<<std::endl;
-      restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        // Read parameters
+        std::cout << "READ IN PARMATERS from restart file" << std::endl;
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         {
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.nItr;
@@ -57,11 +57,18 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             membraneObject.waterBox.volume = membraneObject.waterBox.x * membraneObject.waterBox.y * membraneObject.waterBox.z;
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
-	    restartFile >> membraneObject.implicitlipidIndex  >> membraneObject.RS3D >>membraneObject.RD2D >> membraneObject.nSites>>membraneObject.No_free_lipids>>membraneObject.No_protein>>membraneObject.totalSA;
-	    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
-	    restartFile  >> membraneObject.implicitLipid >> membraneObject.TwoD>>membraneObject.isBox>>membraneObject.isSphere>>membraneObject.sphereRadius;
-	    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
-	    
+            restartFile >> membraneObject.implicitlipidIndex >> membraneObject.nSites >> membraneObject.nStates >> membraneObject.No_free_lipids >> membraneObject.No_protein >> membraneObject.totalSA;
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            for (int i = 0; i < membraneObject.nStates; i++) {
+                membraneObject.numberOfFreeLipidsEachState.emplace_back(0);
+                restartFile >> membraneObject.numberOfFreeLipidsEachState[i];
+            }
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> membraneObject.implicitLipid >> membraneObject.TwoD >> membraneObject.isBox >> membraneObject.isSphere >> membraneObject.sphereRadius;
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.overlapSepLimit;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -84,9 +91,13 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.pdbWrite;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.checkPoint;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
-	std::cout <<"restart write, pdbWrite: "<<params.restartWrite<<' '<<params.pdbWrite<<std::endl;
-	/*	std::cout<<"READ IN SUB volume PARTITIONING from restart file"<<std::endl;
+        std::cout << "restart write, pdbWrite: " << params.restartWrite << ' ' << params.pdbWrite << std::endl;
+        /*	std::cout<<"READ IN SUB volume PARTITIONING from restart file"<<std::endl;
         // Read Simulation Volume
         {
             restartFile >> simulVolume.numSubCells.x >> simulVolume.numSubCells.y >> simulVolume.numSubCells.z
@@ -123,8 +134,8 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             }
         }
 	*/
-	std::cout<<"READ IN MOL TEMPLATE from restart file"<<std::endl;
-	restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "READ IN MOL TEMPLATE from restart file" << std::endl;
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // Read MolTemplates
         {
             restartFile >> MolTemplate::numMolTypes;
@@ -134,7 +145,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 MolTemplate::numEachMolType.push_back(num);
             }
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	    std::cout <<" Num moltypes: "<<MolTemplate::numMolTypes<<'\n';
+            std::cout << " Num moltypes: " << MolTemplate::numMolTypes << '\n';
             unsigned absToRelIfaceSize { 0 };
             restartFile >> absToRelIfaceSize;
             for (unsigned itr { 0 }; itr < absToRelIfaceSize; ++itr) {
@@ -149,7 +160,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             for (unsigned itr { 0 }; itr < MolTemplate::numMolTypes; ++itr) {
                 MolTemplate oneTemp {};
                 restartFile >> oneTemp.molTypeIndex >> oneTemp.molName;
-		std::cout<<" protein index, name: "<<oneTemp.molTypeIndex <<' '<< oneTemp.molName<<'\n';
+                std::cout << " protein index, name: " << oneTemp.molTypeIndex << ' ' << oneTemp.molName << '\n';
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> oneTemp.copies >> oneTemp.mass >> oneTemp.radius;
@@ -198,11 +209,11 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 unsigned oneTempIfaceSize { 0 };
                 restartFile >> oneTempIfaceSize;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		
+
                 for (unsigned ifaceItr { 0 }; ifaceItr < oneTempIfaceSize; ++ifaceItr) {
                     Interface tmpIface {};
                     restartFile >> tmpIface.index >> tmpIface.name;
-		    std::cout<<" iface index, name: "<<tmpIface.index<<' '<<tmpIface.name<<'\n';
+                    std::cout << " iface index, name: " << tmpIface.index << ' ' << tmpIface.name << '\n';
                     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     restartFile >> tmpIface.iCoord.x >> tmpIface.iCoord.y >> tmpIface.iCoord.z;
                     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -260,13 +271,24 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                     // done reading interface, add to interface list
                     oneTemp.interfaceList.emplace_back(tmpIface);
                 }
+
+                // read ifaceWithStates
+                unsigned ifacesWithStatesSize { 0 };
+                restartFile >> ifacesWithStatesSize;
+                for (unsigned rxnItr { 0 }; rxnItr < ifacesWithStatesSize; ++rxnItr) {
+                    unsigned elem { 0 };
+                    restartFile >> elem;
+                    oneTemp.ifacesWithStates.push_back(elem);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
                 // done reading template, add to template list
                 molTemplateList.emplace_back(oneTemp);
             }
         }
-	std::cout<<"READ IN REACTIONs from restart file"<<std::endl;
-	restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	// write Reactions
+        std::cout << "READ IN REACTIONs from restart file" << std::endl;
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        // write Reactions
         {
             unsigned forwardRxnsSize { 0 };
             unsigned backRxnsSize { 0 };
@@ -274,16 +296,16 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             restartFile >> RxnBase::numberOfRxns >> forwardRxnsSize >> backRxnsSize >> createDestructRxnsSize
                 >> RxnBase::totRxnSpecies;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	    std::cout<<" Num rxns: "<<RxnBase::numberOfRxns<<" forwardRxns: "<<forwardRxnsSize<<'\n';
+            std::cout << " Num rxns: " << RxnBase::numberOfRxns << " forwardRxns: " << forwardRxnsSize << '\n';
             // forward reactions
             for (unsigned rxnItr { 0 }; rxnItr < forwardRxnsSize; ++rxnItr) {
                 ForwardRxn tmpRxn;
-                restartFile >> tmpRxn.absRxnIndex >> tmpRxn.relRxnIndex;
+                restartFile >> tmpRxn.absRxnIndex >> tmpRxn.relRxnIndex >> tmpRxn.rxnLabel;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		std::cout<<" itr: "<<rxnItr<<" abs index, relindex: "<<tmpRxn.absRxnIndex<<' '<<tmpRxn.relRxnIndex<<'\n';
+                std::cout << " itr: " << rxnItr << " abs index, relindex: " << tmpRxn.absRxnIndex << ' ' << tmpRxn.relRxnIndex << '\n';
                 int rxnType { -1 };
                 restartFile >> rxnType >> tmpRxn.isSymmetric >> tmpRxn.isOnMem >> tmpRxn.hasStateChange;
-		std::cout <<"Rxntype: "<<rxnType<<'\n';
+                std::cout << "Rxntype: " << rxnType << '\n';
                 if (rxnType != -1) {
                     tmpRxn.rxnType = static_cast<ReactionType>(rxnType); // turn the int rxnType into ReactionType
                 } else {
@@ -296,44 +318,49 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 if (tmpRxn.isObserved)
                     restartFile >> tmpRxn.observeLabel;
                 restartFile >> tmpRxn.productName;
-		std::cout <<"Product name: "<<tmpRxn.productName<<std::endl;
+                std::cout << "Product name: " << tmpRxn.productName << std::endl;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                restartFile >> tmpRxn.isReversible >> tmpRxn.conjBackRxnIndex >> tmpRxn.irrevRingClosure>>tmpRxn.bindRadSameCom>>tmpRxn.loopCoopFactor>>tmpRxn.length3Dto2D;
+                restartFile >> tmpRxn.isReversible >> tmpRxn.conjBackRxnIndex >> tmpRxn.irrevRingClosure >> tmpRxn.bindRadSameCom >> tmpRxn.loopCoopFactor >> tmpRxn.length3Dto2D;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpRxn.bindRadius;
-		std::string th1, th2, ph1, ph2, omega;
-		restartFile >>th1>>th2>>ph1>>ph2>>omega;
-		
-		tmpRxn.assocAngles.theta1=std::stod(th1);
-		tmpRxn.assocAngles.theta2=std::stod(th2);
-		tmpRxn.assocAngles.phi1=std::stod(ph1);
-		tmpRxn.assocAngles.phi2=std::stod(ph2);
-		tmpRxn.assocAngles.omega=std::stod(omega);
-		if(th1=="nan")tmpRxn.assocAngles.theta1=std::numeric_limits<double>::quiet_NaN();
-		if(th2=="nan")tmpRxn.assocAngles.theta2=std::numeric_limits<double>::quiet_NaN();
-		if(ph1=="nan")tmpRxn.assocAngles.phi1=std::numeric_limits<double>::quiet_NaN();
-		if(ph2=="nan")tmpRxn.assocAngles.phi2=std::numeric_limits<double>::quiet_NaN();
-		if(omega=="nan")tmpRxn.assocAngles.omega=std::numeric_limits<double>::quiet_NaN();
-		//>> tmpRxn.assocAngles.theta1 >> tmpRxn.assocAngles.theta2
-		//>> tmpRxn.assocAngles.phi1 >> tmpRxn.assocAngles.phi2 >> tmpRxn.assocAngles.omega;
-		std::cout <<"RXN angles "<< tmpRxn.bindRadius <<' '<< tmpRxn.assocAngles.theta1 <<' '<< tmpRxn.assocAngles.theta2
-			  <<' '<< tmpRxn.assocAngles.phi1 <<' '<< tmpRxn.assocAngles.phi2 <<' '<< tmpRxn.assocAngles.omega<<'\n';
+                std::string th1, th2, ph1, ph2, omega;
+                restartFile >> th1 >> th2 >> ph1 >> ph2 >> omega;
+
+                tmpRxn.assocAngles.theta1 = std::stod(th1);
+                tmpRxn.assocAngles.theta2 = std::stod(th2);
+                tmpRxn.assocAngles.phi1 = std::stod(ph1);
+                tmpRxn.assocAngles.phi2 = std::stod(ph2);
+                tmpRxn.assocAngles.omega = std::stod(omega);
+                if (th1 == "nan")
+                    tmpRxn.assocAngles.theta1 = std::numeric_limits<double>::quiet_NaN();
+                if (th2 == "nan")
+                    tmpRxn.assocAngles.theta2 = std::numeric_limits<double>::quiet_NaN();
+                if (ph1 == "nan")
+                    tmpRxn.assocAngles.phi1 = std::numeric_limits<double>::quiet_NaN();
+                if (ph2 == "nan")
+                    tmpRxn.assocAngles.phi2 = std::numeric_limits<double>::quiet_NaN();
+                if (omega == "nan")
+                    tmpRxn.assocAngles.omega = std::numeric_limits<double>::quiet_NaN();
+                //>> tmpRxn.assocAngles.theta1 >> tmpRxn.assocAngles.theta2
+                //>> tmpRxn.assocAngles.phi1 >> tmpRxn.assocAngles.phi2 >> tmpRxn.assocAngles.omega;
+                std::cout << "RXN angles " << tmpRxn.bindRadius << ' ' << tmpRxn.assocAngles.theta1 << ' ' << tmpRxn.assocAngles.theta2
+                          << ' ' << tmpRxn.assocAngles.phi1 << ' ' << tmpRxn.assocAngles.phi2 << ' ' << tmpRxn.assocAngles.omega << '\n';
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> tmpRxn.norm1.x >> tmpRxn.norm1.y >> tmpRxn.norm1.z;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> tmpRxn.norm2.x >> tmpRxn.norm2.y >> tmpRxn.norm2.z;
-		std::cout<<" norm 2: "<<tmpRxn.norm2.x <<' '<< tmpRxn.norm2.y <<' '<< tmpRxn.norm2.z<<'\n';
+                std::cout << " norm 2: " << tmpRxn.norm2.x << ' ' << tmpRxn.norm2.y << ' ' << tmpRxn.norm2.z << '\n';
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpRxn.isCoupled;
-		std::cout<<" reaction is coupled? "<<tmpRxn.isCoupled<<std::endl;
+                std::cout << " reaction is coupled? " << tmpRxn.isCoupled << std::endl;
                 if (tmpRxn.isCoupled) {
                     rxnType = -1;
-		    std::cout <<"did not enter iscoupled loop "<<'\n';
-                    restartFile >> tmpRxn.coupledRxn.absRxnIndex >> tmpRxn.coupledRxn.relRxnIndex >> rxnType;
+                    std::cout << "did not enter iscoupled loop " << '\n';
+                    restartFile >> tmpRxn.coupledRxn.absRxnIndex >> tmpRxn.coupledRxn.relRxnIndex >> rxnType >> tmpRxn.coupledRxn.label;
                     if (rxnType != -1) {
-                        tmpRxn.rxnType = static_cast<ReactionType>(rxnType);
+                        tmpRxn.coupledRxn.rxnType = static_cast<ReactionType>(rxnType);
                     } else {
                         std::cerr << "ERROR: Cannot parse reaction type for reaction coupled to reaction "
                                   << tmpRxn.absRxnIndex << ". Exiting.\n";
@@ -345,12 +372,12 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 // integer reactants
                 unsigned intReactantListSize { 0 };
                 restartFile >> intReactantListSize;
-		std::cout<<"Nreactant first round "<<intReactantListSize<<'\n';
+                std::cout << "Nreactant first round " << intReactantListSize << '\n';
                 for (unsigned itr { 0 }; itr < intReactantListSize; ++itr) {
                     int reactant { -1 };
                     restartFile >> reactant;
                     tmpRxn.intReactantList.push_back(reactant);
-		    std::cout<<" reactant: "<<reactant<<'\n';
+                    std::cout << " reactant: " << reactant << '\n';
                 }
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -367,20 +394,19 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 // reactant list
                 unsigned reactantListNewSize { 0 };
                 restartFile >> reactantListNewSize;
-		std::cout<<"N reactants: "<<reactantListNewSize<<'\n';
+                std::cout << "N reactants: " << reactantListNewSize << '\n';
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 for (unsigned itr { 0 }; itr < reactantListNewSize; ++itr) {
                     RxnIface oneReact {};
                     restartFile >> oneReact.molTypeIndex;
-		    std::cout<<" molTypeIndex: "<<oneReact.molTypeIndex<<'\n';
-		    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << " molTypeIndex: " << oneReact.molTypeIndex << '\n';
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     restartFile >> oneReact.ifaceName >> oneReact.absIfaceIndex >> oneReact.relIfaceIndex;
                     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     restartFile >> oneReact.requiresState >> oneReact.requiresInteraction;
                     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     tmpRxn.reactantListNew.emplace_back(oneReact);
-		    std::cout<<" requiresState, requiresInteraction: "<<oneReact.requiresState<<' '<<oneReact.requiresInteraction<<'\n';
-		    
+                    std::cout << " requiresState, requiresInteraction: " << oneReact.requiresState << ' ' << oneReact.requiresInteraction << '\n';
                 }
 
                 // product list
@@ -401,13 +427,13 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 // rate list
                 unsigned rateListSize { 0 };
                 restartFile >> rateListSize;
-		std::cout<<"Nrates: "<<rateListSize<<'\n';
+                std::cout << "Nrates: " << rateListSize << '\n';
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 for (unsigned itr { 0 }; itr < rateListSize; ++itr) {
                     RxnBase::RateState oneRate {};
                     restartFile >> oneRate.rate;
-		    std::cout<<" rate: "<<oneRate.rate<<'\n';
-		    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << " rate: " << oneRate.rate << '\n';
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                     unsigned otherIfaceListsSize { 0 };
                     unsigned ifaceItr { 0 };
@@ -417,7 +443,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                         unsigned oneListSize { 0 };
                         std::vector<RxnIface> tmpIfaceVec {};
                         restartFile >> oneListSize;
-			std::cout<<"onelistsize: "<<oneListSize<<'\n';
+                        std::cout << "onelistsize: " << oneListSize << '\n';
                         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         for (unsigned anccIfaceItr { 0 }; anccIfaceItr < oneListSize; ++anccIfaceItr) {
                             RxnIface otherIface {};
@@ -431,10 +457,10 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                     }
                     tmpRxn.rateList.emplace_back(oneRate);
                 }
-		tmpRxn.display();
-		forwardRxns.emplace_back(tmpRxn);
+                tmpRxn.display();
+                forwardRxns.emplace_back(tmpRxn);
             }
-	    std::cout <<" Done with forward reactions " <<'\n';
+            std::cout << " Done with forward reactions " << '\n';
             // backRxns
             for (unsigned rxnItr { 0 }; rxnItr < backRxnsSize; ++rxnItr) {
                 BackRxn tmpRxn;
@@ -535,9 +561,9 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 }
                 backRxns.emplace_back(tmpRxn);
             }
-	    std::cout <<"Done with back reactions "<<'\n';
+            std::cout << "Done with back reactions " << '\n';
             // creation and destruction reactions
-	    std::cout <<"Now creation and destruction "<<'\n';
+            std::cout << "Now creation and destruction " << '\n';
             for (unsigned rxnItr { 0 }; rxnItr < createDestructRxnsSize; ++rxnItr) {
                 CreateDestructRxn tmpRxn {};
                 restartFile >> tmpRxn.absRxnIndex >> tmpRxn.relRxnIndex;
@@ -546,9 +572,9 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 int rxnType { -1 };
                 restartFile >> rxnType >> tmpRxn.isOnMem;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                restartFile >> tmpRxn.isObserved;//>>tmpRxn.observeLabel;
-		if (tmpRxn.isObserved)
-		  restartFile >> tmpRxn.observeLabel;
+                restartFile >> tmpRxn.isObserved; //>>tmpRxn.observeLabel;
+                if (tmpRxn.isObserved)
+                    restartFile >> tmpRxn.observeLabel;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 tmpRxn.rxnType = static_cast<ReactionType>(rxnType);
                 restartFile >> tmpRxn.creationRadius;
@@ -582,8 +608,8 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                     CreateDestructRxn::CreateDestructMol oneMol {};
                     unsigned interfaceListSize { 0 };
                     restartFile >> oneMol.molTypeIndex >> oneMol.molName >> interfaceListSize;
-		    std::cout <<" Destroy molecule: "<<oneMol.molName<<std::endl;
-		    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << " Destroy molecule: " << oneMol.molName << std::endl;
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     for (unsigned ifaceItr { 0 }; ifaceItr < interfaceListSize; ++ifaceItr) {
                         RxnIface tmpIface {};
                         restartFile >> tmpIface.molTypeIndex;
@@ -605,7 +631,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                     CreateDestructRxn::CreateDestructMol oneMol {};
                     unsigned interfaceListSize { 0 };
                     restartFile >> oneMol.molTypeIndex >> oneMol.molName >> interfaceListSize;
-		    std::cout<<" CREATION OF MOL: "<<oneMol.molName<<std::endl;
+                    std::cout << " CREATION OF MOL: " << oneMol.molName << std::endl;
                     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     for (unsigned ifaceItr { 0 }; ifaceItr < interfaceListSize; ++ifaceItr) {
                         RxnIface tmpIface {};
@@ -639,13 +665,13 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                     //     tmpRate.otherIfaceLists.emplace_back(std::vector<RxnIface> { tmpIface });
                     // }
 
-		    // restartFile >> otherIfaceListsSize;
+                    // restartFile >> otherIfaceListsSize;
                     // restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     for (unsigned listItr { 0 }; listItr < otherIfaceListsSize; ++listItr) {
                         unsigned oneListSize { 0 };
                         std::vector<RxnIface> tmpIfaceVec {};
                         restartFile >> oneListSize;
-			std::cout<<"onelistsize: "<<oneListSize<<'\n';
+                        std::cout << "onelistsize: " << oneListSize << '\n';
                         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         for (unsigned anccIfaceItr { 0 }; anccIfaceItr < oneListSize; ++anccIfaceItr) {
                             RxnIface otherIface {};
@@ -657,26 +683,26 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                         }
                         tmpRate.otherIfaceLists.push_back(tmpIfaceVec);
                     }
-                    //copied new version up to here. 
+                    //copied new version up to here.
                     tmpRxn.rateList.emplace_back(tmpRate);
                 }
                 createDestructRxns.emplace_back(tmpRxn);
             }
         }
-	std::cout <<"Now read in coordinates "<<std::endl;
-	restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Now read in coordinates " << std::endl;
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // write Molecules
         {
             int molListSize { 0 };
-	    
+
             restartFile >> molListSize >> Molecule::numberOfMolecules;
-	    std::cout <<"Mol list size and molecule.numberofMolecules: "<<molListSize<<' '<<Molecule::numberOfMolecules<<std::endl;
-	    for (unsigned molItr { 0 }; molItr < molListSize; ++molItr) {
+            std::cout << "Mol list size and molecule.numberofMolecules: " << molListSize << ' ' << Molecule::numberOfMolecules << std::endl;
+            for (unsigned molItr { 0 }; molItr < molListSize; ++molItr) {
                 Molecule tmpMol {};
                 restartFile >> tmpMol.index >> tmpMol.isEmpty >> tmpMol.myComIndex >> tmpMol.molTypeIndex
                     >> tmpMol.mySubVolIndex;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                restartFile >> tmpMol.mass >> tmpMol.isLipid >> tmpMol.isImplicitLipid >>tmpMol.linksToSurface>> tmpMol.isEmpty;
+                restartFile >> tmpMol.mass >> tmpMol.isLipid >> tmpMol.isImplicitLipid >> tmpMol.linksToSurface >> tmpMol.isEmpty;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 // center of mass
@@ -783,26 +809,26 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 moleculeList.emplace_back(tmpMol);
-		//std::cout <<"read in : "<<tmpMol.index<<" first interface z crd: "<<tmpMol.comCoord.z<<std::endl;
+                //std::cout <<"read in : "<<tmpMol.index<<" first interface z crd: "<<tmpMol.comCoord.z<<std::endl;
             }
-	    
+
             unsigned long emptyMolListSize { 0 };
             restartFile >> emptyMolListSize;
             for (unsigned itr { 0 }; itr < emptyMolListSize; ++itr) {
                 int index { 0 };
                 restartFile >> index;
-                emptyMolList.push_back(index);
+                Molecule::emptyMolList.push_back(index);
             }
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	    std::cout <<"N empty molecules: "<<emptyMolListSize<<std::endl;
+            std::cout << "N empty molecules: " << emptyMolListSize << std::endl;
         }
-	std::cout <<"Now read in complexes from RESTART "<<'\n';
-	restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Now read in complexes from RESTART " << '\n';
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // read Complexes
         {
             int comListSize { 0 };
             restartFile >> comListSize >> Complex::numberOfComplexes;
-	    std::cout <<" Ncomplexes including empties: "<<comListSize<<" N actual complexes: "<<Complex::numberOfComplexes<<std::endl;
+            std::cout << " Ncomplexes including empties: " << comListSize << " N actual complexes: " << Complex::numberOfComplexes << std::endl;
             for (unsigned comItr { 0 }; comItr < comListSize; ++comItr) {
                 Complex tmpCom {};
                 restartFile >> tmpCom.index >> tmpCom.isEmpty >> tmpCom.radius >> tmpCom.mass;
@@ -839,19 +865,19 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
 
             unsigned long emptyComListSize { 0 };
             restartFile >> emptyComListSize;
-	    std::cout <<"N empty complexes "<<emptyComListSize<<'\t';
+            std::cout << "N empty complexes " << emptyComListSize << '\t';
             for (unsigned itr { 0 }; itr < emptyComListSize; ++itr) {
                 int index { 0 };
                 restartFile >> index;
-                emptyComList.push_back(index);
+                Complex::emptyComList.push_back(index);
             }
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        }//done reading complexes
-	restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } //done reading complexes
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // read observables
         int numObs { 0 };
         restartFile >> numObs;
-	std::cout <<"N observables "<<numObs<<'\t';
+        std::cout << "N observables " << numObs << '\t';
         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         for (unsigned itr { 0 }; itr < numObs; ++itr) {
             std::string obsName;
@@ -860,6 +886,9 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             observablesList.emplace(obsName, obsCount);
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
+        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        // read counterArrays
+        restartFile >> counterArrays.nLoops;
     } catch (const std::string& msg) {
         std::cerr << msg << '\n';
         exit(1);

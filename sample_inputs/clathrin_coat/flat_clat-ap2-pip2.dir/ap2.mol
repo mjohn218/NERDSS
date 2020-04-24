@@ -3,9 +3,6 @@
 ##
 
 Name    = ap2
-copies  = 300
-isRod   = true
-mass    = 1
 
 # translational diffusion constants
 D       = [12.0,12.0,12.0]
