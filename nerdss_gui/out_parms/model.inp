@@ -1,0 +1,35 @@
+ # Input file
+
+start parameters
+	nItr = 10
+	timeStep = 10
+
+	timeWrite = 10
+	trajWrite = 10
+	restartWrite = 10
+	fromRestart = false
+end parameters
+
+start boundaries
+	WaterBox = [20,20,20]
+	isLipid = false
+	isImplicitLipid = false
+	xBCtype = periodic
+	yBCtype = periodic
+	zBCtype = periodic
+end boundaries
+
+start molecules
+	MolecX
+end molecules
+
+start reactions
+	MolecX(Site1) + MolecX(Site1) -> MolecX(Site1!1).MolecX(Site1!1)
+	onRate = 0.0
+	offRate = 0.0
+	sigma = 6
+	norm1 = [0.9164475, -0.09631176, -0.3883915]
+	norm2 = [0.9384982, -0.1873407, -0.29004234]
+	assocAngles = [1.9736443,1.2199154,0.08726689,0.03490449,2.9294894]
+
+end reactions
