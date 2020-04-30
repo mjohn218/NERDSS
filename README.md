@@ -1,4 +1,4 @@
-# nerdss_development
+# NERDSS release
 Software for structure-resolved RD
 
 1. To compile the code, see INSTALL
