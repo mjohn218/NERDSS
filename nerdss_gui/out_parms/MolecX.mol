@@ -1,0 +1,24 @@
+##
+# MolecXmolecule information file
+##
+
+Name	= MolecX
+copies	= 100
+isLipid = false
+checkOverlap =
+
+Dx	Dy	Dz
+0.0000	0.0000	0.0000
+____________________________
+Drx	Dry	Drz
+0.0000	0.0000	0.0000
+____________________________
+#interfaces	#unique interface id
+1	0
+____________________________
+#interface	name	#extra states	states
+0	Site1	0	-
+____________________________
+#Coords	x	y	z
+Cm	0.0000	0.0000	0.0000
+Site1	3.0000	4.0000	5.0000

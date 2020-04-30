@@ -9,3 +9,5 @@ sample_inputs
 ./nerdss -f parms.inp
 
 should initiate the simulations. 
+
+3. Detailed documentation in NERDSS_USER_GUIDE_GIT.pdf

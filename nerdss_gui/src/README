@@ -1,0 +1,22 @@
+FPR GUI
+
+This GUI allows for a user to add molecules with any number of binding interfaces and specify parameters for a reaction.
+A 3D viewport allows a user to define the angles phi, theta, and omega for any pair of binding interfaces. The current code
+is based on a simpler GUI that was provided.
+
+Major features I have added include:
+
+    - allowing rotation of both molecules relative to the interface between them instead of only one
+    - switch from rotation defined by euclidean angles to rotation defined by torsion angle phi, theta and omega
+    - allow for multiple interfaces per molecule.
+    - update the openGL version
+    - fixed bugs - including the screen failing to update under some circumstances
+    - fully switch to quaternion based rotations to avoid rotation matrix issues like gimbal lock
+
+Remaining problems
+    - there is sometimes an issue when going back and forth between the molecule and reaction screens multiple times that
+      causes the program to become unresponsive.
+    - there is an issue where over time rotations become less and less accurate. I believe that this is due to floating
+      point inaccuracies, and I have been trying to solve the problem for over a week now, but so far can't figure it out.
+
+

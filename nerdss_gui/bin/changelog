@@ -1,0 +1,235 @@
+204a205
+> 	private JButton parminput; //this is what nomo added
+1354c1355
+< 		JLabel lblWriteOutputFrequency = new JLabel("<html> Statistics Output <br>Frequency (every us)</html>");
+---
+> 		JLabel lblWriteOutputFrequency = new JLabel("<html> Freq to print <br>Statistics (in timesteps)</html>");
+1360a1362,1365
+> 		/* Nomo's attempts to add another button follows*/
+> 		parminput = new JButton("Create model input file");
+> 
+> 
+1376a1382
+> 										.addComponent(parminput)
+1405c1411
+< 												.addGap(18)
+---
+> 												.addGap(10)
+1409c1415
+< 												.addGap(18)
+---
+> 												.addGap(10)
+1423c1429
+< 												.addGap(18)
+---
+> 												.addGap(10)
+1431,1432c1437,1440
+< 												.addGap(18)
+< 												.addComponent(chckbxRestart)))
+---
+> 												.addGap(10)
+> 												.addComponent(chckbxRestart)
+> 												.addGap(10)
+> 												.addComponent(parminput)))
+1461c1469
+< 		contentPane.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{molecpanel, scrollPaneMolecule, tableMolecule, btnAddMolecule, btnUpdateMolecule, btnDeleteMolecule, lblMoleculeNameEmptyError, lblMoleculeName, tabbedPane, chckbxAnchoredToMembrane, textFieldRotDifCoeff, lblTranslationalDiffusionCoefficient_1, textFieldTransDifCoeff, lblTranslationalDiffusionCoefficient, textFieldMoleculeName, textFieldMoleculeCount, lblMoleculeCount, panelEditInterfaces, textFieldInterfaceName, lblInterfaceName, lblInterfaceCoordinatesRelative, textFieldInterfaceX, textFieldInterfaceY, lblZ, textFieldInterfaceZ, btnAddInterface, btnUpdateInterface, btnDeleteInterface, scrollPaneInterfaceList, tableInterface, separator_1, reacpanel, panelReactionDesigner, separator, lblNumberOfReactants, spinnerNumReactant, lblNumberOfProducts, spinnerNumProduct, scrollPaneProduct1, treeProduct1, scrollPaneReactant1, treeReactant1, lblBackwardRate, textFieldBackwardRate, lblForwardRate, textFieldForwardRate, scrollPaneProduct2, treeProduct2, scrollPaneReactant2, treeReactant2, chckbxReversibleReaction, panelInteractionDesigner, lblSigmanm, lblOmega, lblPhi, lblTheta, SpinnerOmega, SpinnerPhi, SpinnerTheta, textFieldSigmaX, panelDrawInterface, scrollPaneReactions, tableReaction, btnAddReaction, btnUpdateReaction, btnDeleteReaction, parmpanel, lblBoxLengths, lblX, textFieldBoxX, textFieldNUMiterations, lblNUMiterations, lblTimeStep, textFieldTimeStep, label, textFieldBoxY, label_1, textFieldBoxZ, chckbxRestart, lblWriteConfigurationEvery, lblWriteOutputFrequency, textFieldStatOutFreq, textFieldConfOutFreq}));
+---
+> 		contentPane.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{molecpanel, scrollPaneMolecule, tableMolecule, btnAddMolecule, btnUpdateMolecule, btnDeleteMolecule, lblMoleculeNameEmptyError, lblMoleculeName, tabbedPane, chckbxAnchoredToMembrane, textFieldRotDifCoeff, lblTranslationalDiffusionCoefficient_1, textFieldTransDifCoeff, lblTranslationalDiffusionCoefficient, textFieldMoleculeName, textFieldMoleculeCount, lblMoleculeCount, panelEditInterfaces, textFieldInterfaceName, lblInterfaceName, lblInterfaceCoordinatesRelative, textFieldInterfaceX, textFieldInterfaceY, lblZ, textFieldInterfaceZ, btnAddInterface, btnUpdateInterface, btnDeleteInterface, scrollPaneInterfaceList, tableInterface, separator_1, reacpanel, panelReactionDesigner, separator, lblNumberOfReactants, spinnerNumReactant, lblNumberOfProducts, spinnerNumProduct, scrollPaneProduct1, treeProduct1, scrollPaneReactant1, treeReactant1, lblBackwardRate, textFieldBackwardRate, lblForwardRate, textFieldForwardRate, scrollPaneProduct2, treeProduct2, scrollPaneReactant2, treeReactant2, chckbxReversibleReaction, panelInteractionDesigner, lblSigmanm, lblOmega, lblPhi, lblTheta, SpinnerOmega, SpinnerPhi, SpinnerTheta, textFieldSigmaX, panelDrawInterface, scrollPaneReactions, tableReaction, btnAddReaction, btnUpdateReaction, btnDeleteReaction, parmpanel, lblBoxLengths, lblX, textFieldBoxX, textFieldNUMiterations, lblNUMiterations, lblTimeStep, textFieldTimeStep, label, textFieldBoxY, label_1, textFieldBoxZ, chckbxRestart, parminput, lblWriteConfigurationEvery, lblWriteOutputFrequency, textFieldStatOutFreq, textFieldConfOutFreq}));
+1650,1651d1657
+< 		Vector3f zed = new Vector3f(0,0,1);
+< 
+1653d1658
+< 		float rotAngle = 0;
+1662a1668
+> 			Vector3f zed = new Vector3f(0, 0, 1);
+1664d1669
+< 			rotAngle = (float) (-57.2958 * (Math.atan((Math.sqrt((norm[0] * norm[0]) + (norm[1] * norm[1])) / norm[2]))));
+1667,1668c1672
+< 			Vector3f phinorm = sys.getOrigNormal();
+< 			phinorm.get(norm);
+---
+> 			sys.getOrigNormal().get(norm);
+1670,1671c1674
+< 			rotAxis.cross(sys.getNormal(), sys.phiRotationAxis());
+< 			rotAxis.get(normRot);
+---
+> 			rotAxis.cross(sys.getOrigNormal(), sys.phiRotationAxis());
+1674,1677d1676
+< 
+< 			Vector3f zproj = projectToPlane(zed, sys.curVec);
+< 			rotAngle = -1*zproj.angle(zed);
+< 			if(1==rotAngle){System.out.println("woopes");}
+1679a1679,1680
+> 		float rotAngle = (float) (57.2958 * (Math.atan((Math.sqrt((norm[0] * norm[0]) + (norm[1] * norm[1])) / norm[2]))));
+> 
+1687a1689
+> 		gl.glRotatef(rotAngle, normRot[0], normRot[1], normRot[2]);
+1689d1690
+< 		gl.glRotatef((float) Math.toDegrees(rotAngle), normRot[0], normRot[1], normRot[2]);
+1760d1760
+< 			axes(gl);
+1769,1784d1768
+< 	/**
+< 	 * project a vector onto plane defined by normal
+< 	 * @param vector1 the vector to project.
+< 	 * @param normal vector orthogonal to the plane to project on
+< 	 * @return the projection vector
+< 	 */
+< 	private Vector3f projectToPlane(Vector3f vector1, Vector3f normal) {
+< 		Vector3f vec = new Vector3f(vector1);
+< 		Vector3f norm = new Vector3f(normal);
+< 		float dot = vec.dot(norm);
+< 		dot = dot/norm.lengthSquared();
+< 		norm.scale(-1*dot);
+< 		vec.add(norm);
+< 		return vec;
+< 	}
+< 
+2633c2617
+< 
+---
+> // the following is the save button
+2636c2620
+< 		mntmExport.addActionListener(new ActionListener()
+---
+> 		parminput.addActionListener(new ActionListener()
+2741c2725
+< 							FileWriter stream2 = new FileWriter(yourFolder + "/parms.inp");
+---
+> 							FileWriter stream2 = new FileWriter(yourFolder + "/model.inp");
+2753,2754c2737,2738
+< 
+< 												out.write(String.valueOf(MolCla.size()) + " #NProtein Types: Number of Proteins");
+---
+> 												//Nomo edit file code here.
+> 												out.write("# Input file");
+2756d2739
+< 												out.write(String.valueOf(textFieldNUMiterations.getText()) + " #Nit");
+2758c2741
+< 												out.write(String.valueOf(textFieldTimeStep.getText()) + " #time step (us)");
+---
+> 												out.write("start parameters");
+2760c2743
+< 												out.write(String.valueOf(0) + " #Nrxn");
+---
+> 												out.write("	nItr = " + String.valueOf(textFieldNUMiterations.getText()));
+2762c2745
+< 												out.write(String.valueOf(0) + " #Nspecies");
+---
+> 												out.write("	timeStep = " + String.valueOf(textFieldTimeStep.getText()));
+2764c2747
+< 												out.write(String.valueOf(textFieldBoxX.getText()) + " # xsidelentgh in nm");
+---
+> 												out.write("	WaterBox = [" + String.valueOf(textFieldBoxX.getText()) + "," + String.valueOf(textFieldBoxY.getText()) + "," + String.valueOf(textFieldBoxZ.getText()) + "]");
+2766d2748
+< 												out.write(String.valueOf(textFieldBoxY.getText()) + " # ysidelentgh in nm");
+2768c2750
+< 												out.write(String.valueOf(textFieldBoxZ.getText()) + " # zsidelentgh in nm");
+---
+> 												out.write("	timeWrite = " );
+2770c2752
+< 												out.write(String.valueOf(textFieldStatOutFreq.getText()) + " #statwrite: printout statistics");
+---
+> 												out.write("	trajWrite = ");
+2772c2754
+< 												out.write(String.valueOf(textFieldConfOutFreq.getText()) + " #config write your coords");
+---
+> 												out.write("	restartWrite = ");
+2773a2756
+> 												out.write("	fromRestart = ");
+2776c2759
+< 													out.write("1 # restart");
+---
+> 													out.write( "true");
+2778c2761
+< 													out.write("0 # restart");
+---
+> 													out.write("false");
+2781c2764
+< 												out.write("____MOLECULE INFO FILES____");
+---
+> 												out.write("end parameters");
+2783,2784c2766,2769
+< 												for(j=0;j<MolCla.size();j++)
+< 												{
+---
+> 												out.newLine();
+> 												out.write("start molecules");
+> 												out.newLine();
+> 												for(j=0;j<MolCla.size();j++) {
+2786c2771
+< 													out.write(filename+ ".info");
+---
+> 													out.write("	" + filename);
+2787a2773
+> 
+2788a2775,2823
+> 												out.write("end molecules");
+> 												out.newLine();
+> 												out.newLine();
+> 												out.write("start reactions");
+> 												out.newLine();
+> 												DefaultTableModel model = (DefaultTableModel) tableReaction.getModel();
+> 												if(Reax.size()>0)
+> 												{
+> 													for(j=0;j<Reax.size();j++)
+> 													{
+> 														out.write("	### " + String.valueOf(textFieldMoleculeName.getText()) + "###");
+> 														out.newLine();
+> //														model.getValueAt(j, 0); //rxn,
+> //														model.getValueAt(j, 1); //sigma,
+> //														model.getValueAt(j, 2); //onrate,
+> //														model.getValueAt(j, 3); //onrateunit,
+> //														model.getValueAt(j, 4); //offrate,
+> //														model.getValueAt(j, 5); //offrateunit,
+> //														model.getValueAt(j, 6); //Angle1,
+> //														model.getValueAt(j, 7); //Angle2,
+> //														model.getValueAt(j, 8); //Angle3,
+> 
+> //														out.write("	" + model.getValueAt(j, 0) + " " + model.getValueAt(j, 2) + "," + model.getValueAt(j, 4) + "," + model.getValueAt(j, 1)+ "," + model.getValueAt(j, 6)+ "," + model.getValueAt(j, 7)+ "," + model.getValueAt(j, 8));
+> //														out.newLine();
+> //														out.write("#On-rate unit: " + model.getValueAt(j, 3) + ", Off-rate unit: " + model.getValueAt(j, 5) + ", Sigma unit: nm, Reaction on the membrane?:" + Reax.get(j).getmolOnMembrane());
+> //														out.newLine();
+> 
+> 														out.write(model.getValueAt(j, 0).toString());
+> 														out.newLine();
+> 														out.write("	onRate = " + model.getValueAt(j, 2));
+> 														out.newLine();
+> 														out.write("	offRate = " + model.getValueAt(j, 4));
+> 														out.newLine();
+> 														out.write("	norm1 = [" + sphereNormalArray[1] + "," + sphereNormalArray[2] + "," + sphereNormalArray[3] + "]");
+> 														out.newLine();
+> 														out.write("	norm2 = ");
+> 														out.newLine();
+> 														out.write("	sigma = " + model.getValueAt(j,1));
+> 														out.newLine();
+> 														out.write("	assocAngles = [" + model.getValueAt(j,6) + "," + model.getValueAt(j,6) + "," + model.getValueAt(j,7) + "," + model.getValueAt(j,7) + "," + model.getValueAt(j,8) + "]");
+> 														out.newLine();
+> 														out.newLine();
+> 
+> 													}
+> 													out.write("end reactions");
+> 												}else{
+> 													JOptionPane.showMessageDialog(null, "FPR reactions file were not successfully exported. No reactions present.");
+> 												}
+> 
+2791c2826
+< 												JOptionPane.showMessageDialog(null, "FPR parm file was not successfully exported. Please check Parameters>Box size");
+---
+> 												JOptionPane.showMessageDialog(null, "FPR model file was not successfully exported. Please check Parameters>Box size");
+2794c2829
+< 											JOptionPane.showMessageDialog(null, "FPR parm file was not successfully exported. Please check Parameters>Configuration output frequency.");
+---
+> 											JOptionPane.showMessageDialog(null, "FPR model file was not successfully exported. Please check Parameters>Configuration output frequency.");
+2797c2832
+< 										JOptionPane.showMessageDialog(null, "FPR parm file was not successfully exported. Please check Parameters>Statistics output frequency.");
+---
+> 										JOptionPane.showMessageDialog(null, "FPR model file was not successfully exported. Please check Parameters>Freq to print statistics.");
+2800c2835
+< 									JOptionPane.showMessageDialog(null, "FPR parm file was not successfully exported. Please check Parameters>Number of iterations.");
+---
+> 									JOptionPane.showMessageDialog(null, "FPR model file was not successfully exported. Please check Parameters>Number of iterations.");
+2803c2838
+< 								JOptionPane.showMessageDialog(null, "FPR parm file was not successfully exported. Please check Parameters>Time step.");
+---
+> 								JOptionPane.showMessageDialog(null, "FPR model file was not successfully exported. Please check Parameters>Time step.");
