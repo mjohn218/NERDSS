@@ -19,12 +19,13 @@ cd3  -10.0000    0.0000    0.0000
 td1    2.5000    4.3301   -4.0000
 td2    2.5000   -4.3301   -4.0000
 td3   -5.0000    0.0000   -4.0000
+ref    0.0000    0.0000    0.0000
 
-# bonds
+# bonds: for visualization only.
 bonds = 6
+com cd1
+com cd2
+com cd3
 com td1
 com td2
 com td3
-cd1 td1
-cd2 td2
-cd3 td3

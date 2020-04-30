@@ -6,7 +6,7 @@
 function[at,pt]=reversible_unimolecular(A0, P0, kf, kb)
 
 t=logspace(-7, 2,200); %10^-7:10^2, 200 points.
-at=(A0+P0)/(kb+kf)*kb*(1-exp(-tvec*(kb+kf)))+A0*exp(-(kb+kf)*tvec);
-pt=(A0+P0)/(kb+kf)*kf*(1-exp(-tvec*(kb+kf)))+P0*exp(-(kb+kf)*tvec);
+at=(A0+P0)/(kb+kf)*kb*(1-exp(-t*(kb+kf)))+A0*exp(-(kb+kf)*t);
+pt=(A0+P0)/(kb+kf)*kf*(1-exp(-t*(kb+kf)))+P0*exp(-(kb+kf)*t);
 %steady-state value.
 Aeq=kb*(A0+P0)/(kf+kb);

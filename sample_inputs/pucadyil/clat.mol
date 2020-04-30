@@ -11,17 +11,17 @@ D = [10.0, 10.0, 10.0]
 # rotational diffusion constants
 Dr = [0.02, 0.02, 0.02]
 
-# Coordinates
+# Coordinates, flat legLenth=8nm
 COM    0.0000    0.0000    0.0000
-cd1    5.0000    8.6602    0.0000
-cd2    5.0000   -8.6602    0.0000
-cd3  -10.0000    0.0000    0.0000
+cd1    4.0000    6.9282    0.0000
+cd2    4.0000   -6.9282    0.0000
+cd3   -8.0000    0.0000    0.0000
 td1    2.5000    4.3301   -4.0000
 td2    2.5000   -4.3301   -4.0000
 td3   -5.0000    0.0000   -4.0000
 ref    0.0000	 0.0000	   0.0000
 
-# bonds
+# bonds for visualization only.
 bonds = 6
 com cd1
 com cd2

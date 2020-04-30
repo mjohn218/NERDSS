@@ -1,16 +1,17 @@
 ##
-# Clathrin molecule information file
+# Clathrin molecule information file, for leg=10nm, flat
 ##
 
 Name = clat
+checkOverlap = true
 
 # translational diffusion constants
-D = [3.0, 3.0, 3.0]
+D = [13.0, 13.0, 13.0]
 
 # rotational diffusion constants
-Dr = [0.05, 0.05, 0.05]
+Dr = [0.03, 0.03, 0.03]
 
-# Coordinates
+# Coordinates, flat leglength=10nm
 COM    0.0000    0.0000    0.0000
 cd1    5.0000    8.6602    0.0000
 cd2    5.0000   -8.6602    0.0000

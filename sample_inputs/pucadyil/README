@@ -1,0 +1,19 @@
+
+updated clathrin parameters, self uses ka3D values.
+distinct labeled self interactions multiplied by 2.
+
+Clathrin is a flat trimer, it has a clathrin leg length of 8nm, so two bound clathrin have COM separated by 17nm (including 1nm binding radius).
+
+
+In this model, the Clath+ AP2_on_mem/IL is 50uM. koff=0.1s-1
+Clath+Clath is 120uM. koff=10s-1.
+
+Increase Clath+Clath if either molecule is bound to an AP2_on_mem/IL, by a factor of 15.
+
+Use loopCoopFactor=0.001.
+
+Add reflecting site at clathrin COM to prevent passing through each other.
+
+
+
+length3Dto2D is 30nm for all binding reactions.

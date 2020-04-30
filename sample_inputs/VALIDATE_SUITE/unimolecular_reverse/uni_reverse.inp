@@ -19,14 +19,13 @@ start molecules
 end molecules
 
 start reactions
-    # Rxn Nums: 0,1. BIMOLECULAR #
 
-    #Rxn Num: 4, autoPhosphorylation
+    #Rxn, autoPhosphorylation
     A(ser~U) -> A(ser~P)
     rate = 20.12   # s-1
 
-    #Rxn Num: 5, auto-DEphosphorylation
+    #Rxn auto-DEphosphorylation
     A(ser~P) -> A(ser~U)
-    rate = 10.   # s-1. This never happens spontaneously
+    rate = 10.   # s-1. 
 
 end reactions
