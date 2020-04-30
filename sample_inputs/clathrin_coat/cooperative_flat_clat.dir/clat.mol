@@ -6,38 +6,19 @@ Name = clat
 checkOverlap = true
 
 # translational diffusion constants
-D = [3.0, 3.0, 3.0]
+D = [13.0, 13.0, 13.0]
 
 # rotational diffusion constants
-Dr = [0.05, 0.05, 0.05]
+Dr = [0.03, 0.03, 0.03]
 
-# Coordinates
+# Coordinates, leglenth=10, flat
 COM    0.0000    0.0000    0.0000
 cd1    5.0000    8.6602    0.0000
 cd2    5.0000   -8.6602    0.0000
 cd3  -10.0000    0.0000    0.0000
-# td1    2.5000    4.3301   -4.0000
-# td2    2.5000   -4.3301   -4.0000
-# td3   -5.0000    0.0000   -4.0000
-# COM   0.0000000e+00   0.0000000e+00   0.0000000e+00
-# cd1  -6.3965140e+00  -3.6930291e+00  -1.3023613e+00
-# cd2   6.3965140e+00  -3.6930291e+00  -1.3023613e+00
-# cd3   4.7428175e-15   7.3860581e+00  -1.3023613e+00
-# td1  -1.1635757e+01  -2.1490024e+01  -7.5785420e+00
-# td2   2.4428785e+01   6.6815071e-01  -7.5785420e+00
-# td3  -1.2793028e+01   2.0821873e+01  -7.5785420e+00
 
-# bonds
-bonds = 6
-# com cd1
-# com cd2
-# com cd3
-# cd1 td1
-# cd2 td2
-# cd3 td3
-# com td1
-# com td2
-# com td3
-cd1 td1
-cd2 td2
-cd3 td3
+# bonds for visualization
+bonds = 3
+com cd1
+com cd2
+com cd3

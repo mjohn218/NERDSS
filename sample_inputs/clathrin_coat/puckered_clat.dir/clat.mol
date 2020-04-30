@@ -1,15 +1,15 @@
 ##
-# Clathrin molecule information file
+# Clathrin molecule information file. puckered clathrin
 ##
 
 Name = clat
 checkOverlap = true
 
 # translational diffusion constants
-D = [3.0, 3.0, 3.0]
+D = [13.0, 13.0, 13.0]
 
 # rotational diffusion constants
-Dr = [0.05, 0.05, 0.05]
+Dr = [0.03, 0.03, 0.03]
 
 # Coordinates
 COM   0.0000000e+00   0.0000000e+00   0.0000000e+00
