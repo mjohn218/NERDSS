@@ -1,0 +1,55 @@
+# Input file
+
+start parameters
+    nItr = 100000000
+    timeStep = 0.2
+   #    pdbWrite = 1000
+    timeWrite = 500
+    trajWrite = 100000
+    restartWrite = 100000
+    checkPoint = 10000000
+end parameters
+
+start boundaries
+    waterBox = [144.22,144.22,144.22] #in nm
+end boundaries
+
+start molecules
+    A : 103 (ser~U), 5 (ser~P)
+    Phos : 9
+end molecules
+
+start reactions
+    # Rxn Nums: 0,1. MICHAELIS MENTEN#
+    A(ser~P) + A(ser~U) <-> A(ser~P!1).A(ser~U!1)
+    onRate3Dka = 1.67   # nm3/us
+    offRatekb =0.0 #s-1
+    kcat = 20. #s-1
+    sigma = 1
+    coupledRxnLabel = autoP #FORCE RXN NUM LISTED (rate=INF)
+    norm1=[0,0,1]
+    norm2=[0,0,1]
+    assocAngles=[nan, nan, nan, nan, nan]
+
+    #Rxn Num: 2,3, MICHAELIS MENTEN
+    A(ser~P) + Phos(de) <-> A(ser~P!1).Phos(de!1)
+    onRate3Dka = 282.0  # nm3/us
+    offRatekb = 0.0  #s-1
+    kcat = 53.9 #s-1
+    sigma = 1
+    coupledRxnLabel = autoDP #FORCE RXN NUM LISTED (rate=INF)    
+    norm1=[0,0,1]
+    norm2=[0,0,1]
+    assocAngles=[nan, nan, nan, nan, nan]
+
+    #Rxn Num: 4, autoPhosphorylation
+    A(ser~U) -> A(ser~P)
+    rate = 2.12   # s-1
+    rxnLabel = autoP
+
+    #Rxn Num: 5, auto-DEphosphorylation
+    A(ser~P) -> A(ser~U)
+    rate = 0   # s-1. This never happens spontaneously
+    rxnLabel = autoDP
+
+end reactions

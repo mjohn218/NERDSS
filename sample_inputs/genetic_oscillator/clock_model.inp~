@@ -6,8 +6,8 @@ start parameters
 
     pdbWrite = 1000
     timeWrite = 1000
-    trajWrite = 100000
-    restartWrite = 100000
+    trajWrite = 1000
+    restartWrite = 1000
 end parameters
 
 start boundaries
@@ -28,8 +28,7 @@ start reactions
     # A + R -> C (1204 uM-1s-1) 
     A(a) + R(r) <-> A(a!1).R(r!1)
     onRate3Dka = 356262.9   #nm^3/us 
-    offRatekb =0.0 #1/s rate to perform dissociation with no coupled reaction.
-    kcat = 1.0 #1/s rate to perform dissociation coupled to degA
+    offRatekb =1.0 #1/s
     sigma = 8 #nm
     coupledRxnLabel = degA #FORCE RXN NUM LISTED (rate=INF)
     norm1=[0,0,1]

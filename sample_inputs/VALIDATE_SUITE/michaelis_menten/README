@@ -1,0 +1,10 @@
+
+NERDSS simulation is a single trajectory. 
+kf is 0.167nm3/us = 0.1005 uM-1s-1
+kb= 1 s-1
+kcat= 3 s-1
+
+S0=59.8uM
+E0=4.98uM
+P0=0
+E.S0=0 #encounter complex.
