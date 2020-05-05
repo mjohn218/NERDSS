@@ -7,14 +7,14 @@ Name    =  IL
 isImplicitLipid   = true
 
 # translational diffusion constants
-D       = [1,1,0]
+D       = [1.0,1.0,0.0]
 
 # rotational diffusion constants
-Dr      = [0,0,0]
+Dr      = [0.05,0.05,0]
 
 # Coordinates, with states below, or
 COM     0.0000    0.0000    0.0000
-m       0.0000    0.0000    0.0001
+m       0.0000    0.0000    0.5000
 
 #bonds for visualizing output
 bonds = 1

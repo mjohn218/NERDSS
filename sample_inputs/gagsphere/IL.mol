@@ -1,0 +1,21 @@
+##
+# IL molecule information file
+# Must specify isImplicitLipid, otherwise exit. 
+##
+
+Name    =  IL
+isImplicitLipid   = true
+
+# translational diffusion constants
+D       = [0.5,0.5,0.0]
+
+# rotational diffusion constants
+Dr      = [0,0,0]
+
+# Coordinates, with states below, or
+COM     0.0000    0.0000    0.0000
+m       0.5000    0.0000    0.0000
+
+#bonds for visualizing output
+bonds = 1
+com m 

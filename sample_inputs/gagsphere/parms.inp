@@ -1,0 +1,68 @@
+# Input file
+
+start parameters
+    nItr = 1000000
+    timestep = 0.1
+    timeWrite = 5000
+    trajWrite = 100
+    pdbWrite = -1
+    restartWrite = 50000
+    overlapSepLimit = 0.7
+end parameters
+
+
+start boundaries
+    implicitLipid = true
+    isSphere = true
+    sphereR = 70
+end boundaries
+
+start molecules
+    IL : 500
+    gag : 200
+end molecules
+
+start reactions
+    ### gag+IL
+    gag(mem) + IL(m) <-> gag(mem!1).IL(m!1)
+    onRate3Dka  = 173.59  #ka in nm3/us: ~2E6M-1s-1 kon
+    offRatekb = 1e-2 #kb in /s
+    sigma   = 1  #nm
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    #lipids are normal to membrane plane, so M has theta value,
+    assocAngles = [M_PI, M_PI, nan, nan, nan]
+
+    #gag-gag homodimerization
+    gag(homo) + gag(homo) <-> gag(homo!1).gag(homo!1)
+    onRate3Dka      = 10
+    offRatekb     = 1.0
+    sigma       = 1.0  #nm
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    assocAngles = [1.56349699, 1.56349699, 0.0, 0.0, 0.0] 
+
+    #gag-gag heterodimerization
+    gag(het2) + gag(het1) <-> gag(het2!1).gag(het1!1)
+    onRate3Dka      = 0.5
+    offRatekb     = 10
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    assocAngles = [2.61799387799, 2.61799387799, -3.075896854, 3.075896854, 0.0] 
+
+    #gag-gag prevent overlap
+    gag(rna) + gag(rna) <-> gag(rna!1).gag(rna!1)
+    onRate3Dka      = 0
+    offRatekb     = 0
+    sigma       = 1.0
+    norm1       = [0,0,1]
+    norm2       = [0,0,1]
+    bindRadSameCom = 1.5 #scales sigma to define distance	
+    loopCoopFactor = 0.001
+    assocAngles = [nan, nan, nan, nan, nan]
+end reactions
