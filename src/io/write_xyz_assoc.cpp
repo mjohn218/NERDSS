@@ -1,4 +1,5 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -6,6 +7,7 @@
 void write_xyz_assoc(
     std::string filename, const Complex& reactCom1, const Complex& reactCom2, const std::vector<Molecule>& moleculeList)
 {
+    TRACE();
     std::ofstream out(filename);
 
     int totAtoms { int(reactCom1.memberList.size() + reactCom2.memberList.size()) };

@@ -203,7 +203,7 @@ void ForwardRxn::display() const
         std::cout << "length3Dto2D " << length3Dto2D << std::endl;
         std::cout << "isCoupled? " << isCoupled << std::endl;
         if (isCoupled)
-            std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << std::endl;
+            std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << " prob to perform coupled: "<<coupledRxn.probCoupled<<std::endl;
     }
 }
 

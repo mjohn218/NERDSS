@@ -31,8 +31,9 @@ void translate_complex_tmpCoords(const Vector& transVec, Complex& targCom, std::
  *
  * Only occurs if the molecule has not dissociated or associated during the timestep
  */
-void create_complex_propagation_vectors(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, 
-               std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
+void create_complex_propagation_vectors(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+Coord create_complex_propagation_vectors_on_sphere(const Parameters& params, Complex& targCom);
 
 bool complexSpansBox(Vector& transVec, const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList);
 
@@ -59,9 +60,17 @@ void clear_reweight_vecs(Molecule& oneMol);
  * Membrane version of sweep_separation_complex_rot
  */
 void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Parameters& params,
-                                          std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                                          const std::vector<ForwardRxn>& forwardRxns,
-                                          const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, const Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, const Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
 
 /*!
  * \brief Checks for overlap of proteins in solution.
@@ -69,8 +78,14 @@ void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Param
  * 3D version of sweep_separation_complex_rot_memtest
  */
 void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& params,
-                                  std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                                  const std::vector<ForwardRxn>& forwardRxns,
-                                  const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject);
-
-
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_box(int simItr, int pro1Index, const Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_sphere(int simItr, int pro1Index, const Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);

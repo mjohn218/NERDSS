@@ -1,10 +1,12 @@
 #include "math/rand_gsl.hpp"
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 #include <numeric>
 
 Molecule initialize_molecule_after_zeroth_reaction(
-						   int index, Parameters& params, const MolTemplate& molTemplate, const CreateDestructRxn& currRxn, const Membrane &membraneObject)
+    int index, Parameters& params, const MolTemplate& molTemplate, const CreateDestructRxn& currRxn, const Membrane& membraneObject)
 {
+    TRACE();
     /*!
      * \brief Creates a molecule according to a creation from concentration reaction (CreateDestructRxn), assigns
      * coords.
@@ -57,8 +59,9 @@ Molecule initialize_molecule_after_zeroth_reaction(
 }
 
 Molecule initialize_molecule_after_uni_reaction(int index, const Molecule& parentMol, Parameters& params,
-                                                const MolTemplate& molTemplate, const CreateDestructRxn& currRxn)
+    const MolTemplate& molTemplate, const CreateDestructRxn& currRxn)
 {
+    TRACE();
     Molecule tmp {};
     // TODO: Need to finish this, state should be set to reaction's product's state
     tmp.molTypeIndex = molTemplate.molTypeIndex;

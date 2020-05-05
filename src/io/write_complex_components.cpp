@@ -1,4 +1,5 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 
@@ -6,6 +7,7 @@ void write_complex_components(int simItr, std::ofstream& complexFile, const Para
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     complexFile << "iter: " << simItr << " Ncomplexes: " << Complex::numberOfComplexes << '\n';
     int totMols { 0 };
     for (auto& complex : complexList) {

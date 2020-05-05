@@ -1,10 +1,12 @@
 #include "math/rand_gsl.hpp"
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 
 bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const double maxRandInt, Molecule& mol,
     std::vector<Molecule>& moleculeList, const std::vector<ForwardRxn>& forwardRxns)
 {
+    TRACE();
     bool willReact { false };
     for (unsigned crossMolItr { 0 }; crossMolItr < mol.crossbase.size(); ++crossMolItr) {
         double rand { 1.0 * rand_gsl() };

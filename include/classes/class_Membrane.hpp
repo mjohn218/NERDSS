@@ -19,7 +19,8 @@ enum class BoundaryKeyword : int {
     xBCtype = 2, //!< reflecting or periodic?
     yBCtype = 3, //!< reflecting or periodic?
     zBCtype = 4, //!< reflecting or periodic?
-    sphere = 5, //!< use a sphere, specify R.
+    isSphere = 5, //!< use a sphere boundary, if provide sphereR, this will be set to true.
+    sphereR = 6, //!< sphere radius
 };
 
 struct Membrane {
@@ -44,6 +45,8 @@ struct Membrane {
         }
     };
     WaterBox waterBox; //!< water box x, y, z. used to be xboxl, yboxl, zboxl
+    double sphereR = 0; //!< for sphere, value of radius in nm.
+    double sphereVol = 0;
     int nSites;
     int nStates { 0 }; // number of the states of implict lipid
     int No_free_lipids;
@@ -66,7 +69,6 @@ struct Membrane {
     bool TwoD = false;
     bool isBox = false;
     bool isSphere = false;
-    double sphereRadius = 0;
     std::string xBCtype; //allow reflect, or pbc
     std::string yBCtype;
     std::string zBCtype;
@@ -81,4 +83,8 @@ struct Membrane {
     /*In here, we could also store coordinate vector                                                                                                       
       for a single representative lipid                                                                                                                    
     */
+
+    void display(); // display the information for the boundary, define in the src/parse/parse_input.cpp
+
+    void create_water_box(); // create box for sphere boundary, define in the src/parse/parse_input.cpp
 };

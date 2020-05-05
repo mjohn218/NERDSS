@@ -1,8 +1,10 @@
 #include "classes/class_Parameters.hpp"
 #include "classes/class_copyCounters.hpp"
+#include "tracing.hpp"
 
 void update_Nboundpairs(int ptype1, int ptype2, int chg, const Parameters& params, copyCounters& counterArrays)
 {
+    TRACE();
     /*After a reaction occurs, change the count of protein-protein pair bonds */
     /*To avoid storing the same pair in two bins, ptype1 must be <=ptype2*/
 

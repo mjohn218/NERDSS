@@ -4,6 +4,7 @@
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::vector<int>& emptyMolList,
     std::vector<int>& emptyComList, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
@@ -11,6 +12,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
     const std::vector<CreateDestructRxn>& createDestructRxns, const std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
 {
+    TRACE();
     // Note: cannot use a for-range or vector iterator loop here, since we are changing the moleculeList vector
     // while iterating over it
     for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
@@ -162,6 +164,8 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
 
                                             --counterArrays.copyNumSpecies[stateItr->index];
                                             ++counterArrays.copyNumSpecies[newState.absIfaceIndex];
+
+                                            /*State change happens here.*/
                                             moleculeList[molItr].interfaceList[relIndex].change_state(
                                                 relStateIndex, newState.absIfaceIndex, newState.requiresState);
 

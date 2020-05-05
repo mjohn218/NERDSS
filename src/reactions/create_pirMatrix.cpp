@@ -1,8 +1,10 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
 void create_pirMatrix(gsl_matrix*& pirMatrix, double bindRadius, double Dtot, double kr, double comRMax,
     double RStepSize, const Parameters& params)
 {
+    TRACE();
     int itr1 { 0 };
     int itr2 { 0 };
     double result;

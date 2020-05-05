@@ -1,10 +1,12 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
-double calc_pirr(gsl_matrix *pirMatrix, gsl_matrix *survMatrix, double RStepSize, double r, double r0, double a)
+double calc_pirr(gsl_matrix* pirMatrix, gsl_matrix* survMatrix, double RStepSize, double r, double r0, double a)
 {
+    TRACE();
     // This is a 2D lookup table, decide the value of an arbitrary point (r,r0) using 2D linear interpolation
-    int indexr0{ static_cast<int>(floor((r0 - a) / RStepSize)) };
-    int indexr{ static_cast<int>(floor((r - a) / RStepSize)) };
+    int indexr0 { static_cast<int>(floor((r0 - a) / RStepSize)) };
+    int indexr { static_cast<int>(floor((r - a) / RStepSize)) };
     double prob;
 
     if (indexr < 0)

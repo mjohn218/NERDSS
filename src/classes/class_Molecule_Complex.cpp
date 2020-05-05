@@ -17,6 +17,7 @@
 #include "math/matrix.hpp"
 #include "math/rand_gsl.hpp"
 #include "parser/parser_functions.hpp"
+#include "reactions/association/functions_for_spherical_system.hpp"
 
 #include <cmath>
 #include <iomanip>
@@ -263,64 +264,149 @@ void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membra
      * \brief Create random coordinates for a Molecule
      * rotation. Saves time, but could be changed easily.
      */
+    if (membraneObject.isSphere) {
+        double R = membraneObject.sphereR;
 
-    comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
-    comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
+        comCoord.x = (membraneObject.sphereR * 2 * rand_gsl() - (membraneObject.sphereR));
+        comCoord.y = (membraneObject.sphereR * 2 * rand_gsl() - (membraneObject.sphereR));
+        comCoord.z = (membraneObject.sphereR * 2 * rand_gsl() - (membraneObject.sphereR));
 
-    bool outOfBox { false }; // TODO: commented out for testing purposes only
-    // if the molecule is a lipid, place it along the bottom of the box and don't give it a rotation
-    if (molTemplate.isLipid) {
-        comCoord.z = -membraneObject.waterBox.z / 2.0;
-        for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
-            interfaceList[ifaceItr].coord = Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord };
+        bool outOfBox { false }; // TODO: commented out for testing purposes only
+        // if the molecule is a lipid, place it along the bottom of the box and don't give it a rotation
 
-            /* TODO: commented out for testing only */
-            if (interfaceList[ifaceItr].coord.isOutOfBox(membraneObject)) {
-                outOfBox = true;
-                break;
+        double molMag = sqrt(comCoord.x * comCoord.x + comCoord.y * comCoord.y + comCoord.z * comCoord.z);
+
+        if (molMag > R) {
+            outOfBox = true;
+        }
+
+        if (molTemplate.isLipid) {
+            double x = comCoord.x;
+            double y = comCoord.y;
+            double z = comCoord.z;
+
+            comCoord.x = (R / sqrt(x * x + y * y + z * z)) * x;
+            comCoord.y = (R / sqrt(x * x + y * y + z * z)) * y;
+            comCoord.z = (R / sqrt(x * x + y * y + z * z)) * z;
+            for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
+
+                interfaceList[ifaceItr].coord = Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord };
+                Coord iCoord = molTemplate.interfaceList[ifaceItr].iCoord;
+                double iLen = sqrt(iCoord.x * iCoord.x + iCoord.y * iCoord.y + iCoord.z * iCoord.z);
+
+                interfaceList[ifaceItr].coord.x = (R - iLen) * (comCoord.x) / R;
+                interfaceList[ifaceItr].coord.y = (R - iLen) * (comCoord.y) / R;
+                interfaceList[ifaceItr].coord.z = (R - iLen) * (comCoord.z) / R;
+                /*
+              //random position for check
+              Coord a = find_spherical_coords(comCoord);
+              double dangle = M_PI/20.0;
+              interfaceList[ifaceItr].coord.x = a.z * sin(a.x) * cos(a.y + dangle);
+              interfaceList[ifaceItr].coord.y = a.z * sin(a.x) * sin(a.y + dangle);
+              interfaceList[ifaceItr].coord.z = a.z * cos(a.x);
+              */
+                // initialize the Interface::State to the default state (first listed)
+                /*For each physical molecule, initialize the interfaces using
+                the interfaces defined for the molTemplate, which were defined in parse_molFile.cpp
+               at lines 1038.  Since each interface can exist in multiple states, the
+               default choice here is to use the first state, usually an unbound state.
+              */
+                interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
+                interfaceList[ifaceItr].relIndex = ifaceItr;
+                interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
+                interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
+                interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
             }
+        } else {
 
-            // initialize the Interface::State to the default state (first listed)
-            /*For each physical molecule, initialize the interfaces using
+            // set interface coordinates, with a random rotation on the entire molecule
+            // TODO: Commented this out for testing against old version
+            Quat rotQuat { rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1 };
+            rotQuat = rotQuat.unit();
+            for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
+                Vector ifaceVec { Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord } - comCoord };
+                rotQuat.rotate(ifaceVec);
+                interfaceList[ifaceItr].coord = Coord { comCoord + ifaceVec };
+
+                // TODO: Commented out for testing
+                Coord iCoord = interfaceList[ifaceItr].coord;
+                double iMag = sqrt(iCoord.x * iCoord.x + iCoord.y * iCoord.y + iCoord.z * iCoord.z);
+                if (iMag > R) {
+                    outOfBox = true;
+                    break;
+                }
+
+                interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
+                interfaceList[ifaceItr].relIndex = ifaceItr;
+                interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
+                interfaceList[ifaceItr].stateIndex = 0;
+                interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
+            }
+        }
+
+        // TODO: Commented out for testing
+        if (outOfBox)
+            this->create_random_coords(molTemplate, membraneObject);
+
+    } else {
+        comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
+        comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
+
+        bool outOfBox { false }; // TODO: commented out for testing purposes only
+        // if the molecule is a lipid, place it along the bottom of the box and don't give it a rotation
+        if (molTemplate.isLipid) {
+            comCoord.z = -membraneObject.waterBox.z / 2.0;
+            for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
+                interfaceList[ifaceItr].coord = Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord };
+
+                /* TODO: commented out for testing only */
+                if (interfaceList[ifaceItr].coord.isOutOfBox(membraneObject)) {
+                    outOfBox = true;
+                    break;
+                }
+
+                // initialize the Interface::State to the default state (first listed)
+                /*For each physical molecule, initialize the interfaces using
               the interfaces defined for the molTemplate, which were defined in parse_molFile.cpp
              at lines 1038.  Since each interface can exist in multiple states, the
              default choice here is to use the first state, usually an unbound state.
             */
-            interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
-            interfaceList[ifaceItr].relIndex = ifaceItr;
-            interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
-            interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
-            interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
-        }
-    } else {
-        comCoord.z = (membraneObject.waterBox.z * rand_gsl()) - (membraneObject.waterBox.z / 2.0);
-
-        // set interface coordinates, with a random rotation on the entire molecule
-        // TODO: Commented this out for testing against old version
-        Quat rotQuat { rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1 };
-        rotQuat = rotQuat.unit();
-        for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
-            Vector ifaceVec { Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord } - comCoord };
-            rotQuat.rotate(ifaceVec);
-            interfaceList[ifaceItr].coord = Coord { comCoord + ifaceVec };
-
-            // TODO: Commented out for testing
-            if (interfaceList[ifaceItr].coord.isOutOfBox(membraneObject)) {
-                outOfBox = true;
-                break;
+                interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
+                interfaceList[ifaceItr].relIndex = ifaceItr;
+                interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
+                interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
+                interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
             }
+        } else {
+            comCoord.z = (membraneObject.waterBox.z * rand_gsl()) - (membraneObject.waterBox.z / 2.0);
 
-            interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
-            interfaceList[ifaceItr].relIndex = ifaceItr;
-            interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
-            interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
-            interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
+            // set interface coordinates, with a random rotation on the entire molecule
+            // TODO: Commented this out for testing against old version
+            Quat rotQuat { rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1, rand_gsl() * 2 - 1 };
+            rotQuat = rotQuat.unit();
+            for (unsigned int ifaceItr { 0 }; ifaceItr < molTemplate.interfaceList.size(); ++ifaceItr) {
+                Vector ifaceVec { Coord { comCoord + molTemplate.interfaceList[ifaceItr].iCoord } - comCoord };
+                rotQuat.rotate(ifaceVec);
+                interfaceList[ifaceItr].coord = Coord { comCoord + ifaceVec };
+
+                // TODO: Commented out for testing
+                if (interfaceList[ifaceItr].coord.isOutOfBox(membraneObject)) {
+                    outOfBox = true;
+                    break;
+                }
+
+                interfaceList[ifaceItr].index = molTemplate.interfaceList[ifaceItr].stateList[0].index;
+                interfaceList[ifaceItr].relIndex = ifaceItr;
+                interfaceList[ifaceItr].stateIden = molTemplate.interfaceList[ifaceItr].stateList[0].iden;
+                interfaceList[ifaceItr].stateIndex = 0; // because by default we picked the first state
+                interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
+            }
         }
-    }
 
-    // TODO: Commented out for testing
-    if (outOfBox)
-        this->create_random_coords(molTemplate, membraneObject);
+        // TODO: Commented out for testing
+        if (outOfBox)
+            this->create_random_coords(molTemplate, membraneObject);
+    }
 }
 
 bool Molecule::operator==(const Molecule& rhs) const
@@ -655,51 +741,145 @@ void Complex::put_back_into_SimulVolume(
     }
 }
 
-void Complex::propagate(std::vector<Molecule>& moleculeList)
+// void Complex::propagate(std::vector<Molecule>& moleculeList)
+// {
+//     ++propCalled;
+//     // Create the quaternion
+//     double cosZ { cos(trajRot.z * 0.5) };
+//     double sinZ { sin(trajRot.z * 0.5) };
+//     double cosY { cos(trajRot.y * 0.5) };
+//     double sinY { sin(trajRot.y * 0.5) };
+//     double cosX { cos(trajRot.x * 0.5) };
+//     double sinX { sin(trajRot.x * 0.5) };
+
+//     Quat rotQuat {};
+//     rotQuat.x = (sinX * cosY * cosZ) - (cosX * sinY * sinZ);
+//     rotQuat.y = (cosX * sinY * cosZ) + (sinX * cosY * sinZ);
+//     rotQuat.z = (cosX * cosY * sinZ) - (sinX * sinY * cosZ);
+//     rotQuat.w = (cosX * cosY * cosZ) + (sinX * sinY * sinZ);
+//     rotQuat.unit();
+
+//     // update the member proteins
+//     for (auto mol : memberList) {
+//         //        if (moleculeList[mol].comCoord != this->comCoord) {
+//         Vector comVec { moleculeList[mol].comCoord - this->comCoord };
+//         rotQuat.rotate(comVec);
+//         moleculeList[mol].comCoord = Coord { comVec.x, comVec.y, comVec.z } + this->comCoord + trajTrans;
+//         //        } else {
+//         //            moleculeList[mol].comCoord += trajTrans;
+//         //        }
+
+//         // now rotate each member molecule of the complex
+//         for (auto& iface : moleculeList[mol].interfaceList) {
+//             // get the vector from the interface to the target interface
+//             Vector ifaceVec { iface.coord - comCoord };
+//             // rotate
+//             rotQuat.rotate(ifaceVec);
+//             iface.coord = Coord { ifaceVec.x, ifaceVec.y, ifaceVec.z } + comCoord + trajTrans;
+//         }
+//         moleculeList[mol].trajStatus = TrajStatus::propagated;
+//     }
+
+//     // propagate the complex's center of mass
+//     comCoord += trajTrans;
+
+//     // zero the propagation values
+//     trajTrans.zero_crds();
+//     trajRot.zero_crds();
+// }
+
+void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject)
 {
     ++propCalled;
-    // Create the quaternion
-    double cosZ { cos(trajRot.z * 0.5) };
-    double sinZ { sin(trajRot.z * 0.5) };
-    double cosY { cos(trajRot.y * 0.5) };
-    double sinY { sin(trajRot.y * 0.5) };
-    double cosX { cos(trajRot.x * 0.5) };
-    double sinX { sin(trajRot.x * 0.5) };
-
-    Quat rotQuat {};
-    rotQuat.x = (sinX * cosY * cosZ) - (cosX * sinY * sinZ);
-    rotQuat.y = (cosX * sinY * cosZ) + (sinX * cosY * sinZ);
-    rotQuat.z = (cosX * cosY * sinZ) - (sinX * sinY * cosZ);
-    rotQuat.w = (cosX * cosY * cosZ) + (sinX * sinY * sinZ);
-    rotQuat.unit();
-
-    // update the member proteins
-    for (auto mol : memberList) {
-        //        if (moleculeList[mol].comCoord != this->comCoord) {
-        Vector comVec { moleculeList[mol].comCoord - this->comCoord };
-        rotQuat.rotate(comVec);
-        moleculeList[mol].comCoord = Coord { comVec.x, comVec.y, comVec.z } + this->comCoord + trajTrans;
-        //        } else {
-        //            moleculeList[mol].comCoord += trajTrans;
-        //        }
-
-        // now rotate each member molecule of the complex
-        for (auto& iface : moleculeList[mol].interfaceList) {
-            // get the vector from the interface to the target interface
-            Vector ifaceVec { iface.coord - comCoord };
-            // rotate
-            rotQuat.rotate(ifaceVec);
-            iface.coord = Coord { ifaceVec.x, ifaceVec.y, ifaceVec.z } + comCoord + trajTrans;
+    // for the complex on the sphere surface, propagation is special
+    if (membraneObject.isSphere && this->D.z < 1E-14) {
+        Coord COM = comCoord;
+        Coord COMnew = comCoord + trajTrans;
+        std::array<double, 9> Crdset = inner_coord_set(COM, COMnew);
+        std::array<double, 9> Crdsetnew = inner_coord_set_new(COM, COMnew);
+        // propagate the com of the complex
+        comCoord += trajTrans;
+        // get the rotation angle: dangle
+        double Rotangle = trajRot.x; // we select the rotation angle x as the angle that the complex rotate on the sphere
+        // update the member proteins
+        for (auto mol : memberList) {
+            Coord targmol = moleculeList[mol].comCoord;
+            targmol = translate_on_sphere(targmol, COM, COMnew, Crdset, Crdsetnew);
+            moleculeList[mol].comCoord = rotate_on_sphere(targmol, COMnew, Crdsetnew, Rotangle);
+            moleculeList[mol].trajStatus = TrajStatus::propagated;
+            // now update each interface of the molecule
+            for (auto& iface : moleculeList[mol].interfaceList) {
+                Coord targiface = iface.coord;
+                targiface = translate_on_sphere(targiface, COM, COMnew, Crdset, Crdsetnew);
+                iface.coord = rotate_on_sphere(targiface, COMnew, Crdsetnew, Rotangle);
+            }
         }
-        moleculeList[mol].trajStatus = TrajStatus::propagated;
+    } else { // for the complex in solution or on box surface
+        // Create the quaternion
+        double cosZ { cos(trajRot.z * 0.5) };
+        double sinZ { sin(trajRot.z * 0.5) };
+        double cosY { cos(trajRot.y * 0.5) };
+        double sinY { sin(trajRot.y * 0.5) };
+        double cosX { cos(trajRot.x * 0.5) };
+        double sinX { sin(trajRot.x * 0.5) };
+
+        Quat rotQuat {};
+        rotQuat.x = (sinX * cosY * cosZ) - (cosX * sinY * sinZ);
+        rotQuat.y = (cosX * sinY * cosZ) + (sinX * cosY * sinZ);
+        rotQuat.z = (cosX * cosY * sinZ) - (sinX * sinY * cosZ);
+        rotQuat.w = (cosX * cosY * cosZ) + (sinX * sinY * sinZ);
+        rotQuat.unit();
+
+        // update the member proteins
+        for (auto mol : memberList) {
+            Vector comVec { moleculeList[mol].comCoord - this->comCoord };
+            rotQuat.rotate(comVec);
+            moleculeList[mol].comCoord = Coord { comVec.x, comVec.y, comVec.z } + this->comCoord + trajTrans;
+
+            // now rotate each member molecule of the complex
+            for (auto& iface : moleculeList[mol].interfaceList) {
+                // get the vector from the interface to the target interface
+                Vector ifaceVec { iface.coord - comCoord };
+                // rotate
+                rotQuat.rotate(ifaceVec);
+                iface.coord = Coord { ifaceVec.x, ifaceVec.y, ifaceVec.z } + comCoord + trajTrans;
+            }
+            moleculeList[mol].trajStatus = TrajStatus::propagated;
+        }
+
+        // propagate the complex's center of mass
+        comCoord += trajTrans;
     }
-
-    // propagate the complex's center of mass
-    comCoord += trajTrans;
-
     // zero the propagation values
     trajTrans.zero_crds();
     trajRot.zero_crds();
+}
+
+//only used for the temporary movement on sphere
+// all the input coords are cardesian coords
+void Complex::update_association_coords_sphere(std::vector<Molecule>& moleculeList, Coord iface, Coord ifacenew)
+{
+    Coord COM = iface;
+    Coord COMnew = ifacenew;
+    std::array<double, 9> Crdset = inner_coord_set(COM, COMnew);
+    std::array<double, 9> Crdsetnew = inner_coord_set_new(COM, COMnew);
+
+    // update the member proteins
+    for (auto mol : memberList) {
+        Coord targ = moleculeList[mol].comCoord;
+        moleculeList[mol].tmpComCoord = translate_on_sphere(targ, COM, COMnew, Crdset, Crdsetnew);
+        // now update each interface of the molecule
+        for (int i = 0; i < moleculeList[mol].interfaceList.size(); i++) {
+            auto ifacetmp = moleculeList[mol].interfaceList[i];
+            targ = ifacetmp.coord;
+            Coord ifacecrds = translate_on_sphere(targ, COM, COMnew, Crdset, Crdsetnew);
+            if (moleculeList[mol].tmpICoords.empty()) {
+                moleculeList[mol].tmpICoords.push_back(ifacecrds);
+            } else {
+                moleculeList[mol].tmpICoords[i] = ifacecrds;
+            }
+        }
+    }
 }
 
 void Complex::translate(Vector transVec, std::vector<Molecule>& moleculeList)
@@ -708,5 +888,32 @@ void Complex::translate(Vector transVec, std::vector<Molecule>& moleculeList)
         moleculeList[memMol].comCoord += transVec;
         for (auto& iface : moleculeList[memMol].interfaceList)
             iface.coord += transVec;
+    }
+}
+
+void Molecule::create_position_implicit_lipid(Molecule& reactMol1, int ifaceIndex2, double bindRadius, const Membrane& membraneObject)
+{
+    if (membraneObject.isSphere) {
+        Coord displace = interfaceList[ifaceIndex2].coord - comCoord;
+        double mag = displace.get_magnitude();
+        /*
+    double lambda = (membraneObject.sphereR - mag)/(reactMol1.comCoord.get_magnitude());
+    interfaceList[ifaceIndex2].coord = lambda*reactMol1.comCoord;
+    double lambda2 = (membraneObject.sphereR)/(reactMol1.comCoord.get_magnitude());
+    comCoord = lambda2*reactMol1.comCoord;
+    */
+        // the implicit lipid is set out of sphere, then the protein will bind onto the sphere. and the boundary condition is easy to carry out.
+        double lambda1 = (membraneObject.sphereR + mag + bindRadius) / (reactMol1.comCoord.get_magnitude());
+        comCoord = lambda1 * reactMol1.comCoord;
+        double lambda2 = (membraneObject.sphereR + bindRadius) / (reactMol1.comCoord.get_magnitude());
+        interfaceList[ifaceIndex2].coord = lambda2 * reactMol1.comCoord;
+    } else {
+        Coord displace = interfaceList[ifaceIndex2].coord - comCoord;
+        double shift = 0.1; //do not put right underneath, so that sigma starts at non-zero.
+        comCoord.x = reactMol1.comCoord.x + shift;
+        comCoord.y = reactMol1.comCoord.y - shift;
+        comCoord.z = -membraneObject.waterBox.z / 2.0 - displace.get_magnitude() - 1.0; // + membraneObject.RS3D;
+        Coord direction { 0.0, 0.0, 1.0 };
+        interfaceList[ifaceIndex2].coord = comCoord + displace.get_magnitude() * direction;
     }
 }

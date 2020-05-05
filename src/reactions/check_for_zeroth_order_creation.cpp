@@ -2,6 +2,7 @@
 #include "math/math_functions.hpp"
 #include "math/rand_gsl.hpp"
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::vector<int>& emptyMolList,
     std::vector<int>& emptyComList, SimulVolume& simulVolume, const std::vector<ForwardRxn>& forwardRxns,
@@ -9,6 +10,7 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::v
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, Membrane& membraneObject)
 {
+    TRACE();
     for (auto& oneRxn : createDestructRxns) {
         if (oneRxn.rxnType == ReactionType::zerothOrderCreation) {
             const MolTemplate& oneTemp = molTemplateList[oneRxn.productMolList.at(0).molTypeIndex];
@@ -17,8 +19,16 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::v
                 // Calculate the probability
                 // Poisson process, p(zero events) = exp(-k * V * deltaT), where k = rate (M/s), V = volume (L), deltaT=
                 // timestep (s)
-                long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * membraneObject.waterBox.volume
-                    * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
+                // long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * membraneObject.waterBox.volume
+                //     * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
+                double Volume = 0.0;
+                // Change Volume depending upon box or sphere simulation
+                if (membraneObject.isSphere) {
+                    Volume = membraneObject.sphereVol;
+                } else {
+                    Volume = membraneObject.waterBox.volume;
+                }
+                long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * Volume * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
                 long double prob { exp(-lambda) };
                 unsigned numEvents { 0 };
                 double rNum { 1.0 * rand_gsl() };

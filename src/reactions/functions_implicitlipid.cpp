@@ -19,6 +19,9 @@ double dissociate2D(paramsIL& parameters2D)
     int Na = parameters2D.Na;
     int Nlipid = parameters2D.Nlipid;
     double A = parameters2D.area;
+    if (kb < 1E-25) {
+        return 0.0;
+    }
 
     double KD = kb / ka;
     double maxNaNlipid = 0;
@@ -118,6 +121,10 @@ void block_distance(paramsIL& parameters2D)
 // binding probability, but must time the lipid density
 double pimplicitlipid_2D(paramsIL& parameters2D)
 {
+    double ka = parameters2D.ka;
+    if (ka < 1E-25) {
+        return 0.0;
+    }
     block_distance(parameters2D);
     //std::cout<<parameters2D.R2D<<std::endl;
 
@@ -145,7 +152,6 @@ double pimplicitlipid_2D(paramsIL& parameters2D)
     gsl_integration_workspace_free(w);
     gsl_set_error_handler(NULL);
 
-    double ka = parameters2D.ka;
     return result * 4 * ka;
 }
 
@@ -159,6 +165,9 @@ double dissociate3D(double h, double D, double sigma, double ka, double kbsecond
     //double ka = parameters3D.ka;
     //double kb = parameters3D.kb;
     double kb = kbsecond / 1.0e6; // change the unit S into us.
+    if (kb < 1E-25) {
+        return 0.0;
+    }
     double KD = 2.0 * kb / ka;
     double kon = 0.5 / (1.0 / ka + 1.0 / (4.0 * M_PI * D * sigma));
     double koff = kon * KD;
@@ -173,6 +182,9 @@ double pimplicitlipid_3D(double z, paramsIL& parameters3D)
     double D = parameters3D.Dtot;
     double sigma = parameters3D.sigma;
     double ka = parameters3D.ka;
+    if (ka < 1E-25) {
+        return 0.0;
+    }
 
     double out;
     if (z > sigma) {

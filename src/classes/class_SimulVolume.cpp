@@ -238,7 +238,7 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
         for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
             Molecule& mol = moleculeList[molItr]; // just for legibility
 
-            if (mol.isEmpty)
+            if (mol.isEmpty || mol.isImplicitLipid)
                 continue;
 
             // get which box the Molecule belongs to

@@ -178,6 +178,16 @@ bool skipLine(std::string line);
 ParsedMol parse_molecule_bngl(int& totSpecies, bool isProductSide, std::pair<std::string, int> oneMol);
 
 /*!\ingroup Parser
+ * \brief Takes starting copy numbers of states from a input line
+ *
+ * @param[in] oneLine the line to be parsed
+ * @param[out] ParsedMolNumState struct containing the parsed information
+ *
+ * - Format of input line  will be 100 (interface~state1), 100 (interface~state2)
+ */
+ParsedMolNumState parse_number_bngl(std::string oneLine);
+
+/*!\ingroup Parser
  * \brief This function determines the reaction type and reversibility, and parses the reaction file accordingly
  *
  * @param[in] reactionFile user provided reaction file

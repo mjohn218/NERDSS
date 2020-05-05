@@ -36,7 +36,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
      * @param value value of the parameter as a string
      * @param keywords the keyword parsed from the input file to match to the enumeration Keywords
      */
-
+  double nit, checkit;
     try {
         auto key = static_cast<std::underlying_type<ParamKeyword>::type>(keywords);
         switch (key) {
@@ -47,7 +47,8 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             this->numTotalSpecies = std::stoi(value);
             break;
         case 2:
-            this->nItr = std::stoi(value);
+	   nit=std::stod(value);
+	  this->nItr = (long long)(nit);//std::stoi(value);
             break;
         case 3:
             this->fromRestart = read_boolean(value);
@@ -85,7 +86,8 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             this->name = value;
             break;
         case 14:
-            this->checkPoint = std::stoi(value);
+	    checkit=std::stod(value);
+	  this->checkPoint = (long long)(checkit);//std::stoi(value);
             break;
         default:
             throw std::invalid_argument("Not a valid keyword.");

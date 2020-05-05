@@ -1,12 +1,14 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns, std::vector<gsl_matrix*>& normMatrices,
+    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
     std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices)
 {
+    TRACE();
     double Dr1 {};
     {
         double cf { cos(sqrt(2.0 * complexList[biMolData.com1Index].Dr.x * params.timeStep)) };
@@ -25,7 +27,7 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     double sep {};
     double R1 {};
     bool withinRmax { get_distance(biMolData.pro1Index, biMolData.pro2Index, biMolData.relIface1, biMolData.relIface2,
-        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, RMax, complexList, forwardRxns[rxnIndex], moleculeList) };
+        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, RMax, complexList, forwardRxns[rxnIndex], moleculeList, membraneObject) };
     if (withinRmax) {
         // in case they dissociated
         moleculeList[biMolData.pro1Index].probvec.push_back(0);

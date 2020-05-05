@@ -35,7 +35,7 @@ void populate_reaction_lists(const std::vector<ForwardRxn>& forwardRxns, const s
                         if (reactIface2.stateList[stateIndex].index == forwardRxn.reactantListNew[1].absIfaceIndex) {
                             reactIface2.stateList[stateIndex].myForwardRxns.push_back(forwardRxn.relRxnIndex);
                             reactIface2.stateList[stateIndex].rxnPartners.push_back(
-                                reactIface1.stateList[stateIndex].index);
+                                reactIface1.stateList[stateIndex1].index);
                             reactIface1.stateList[stateIndex1].rxnPartners.push_back(
                                 reactIface2.stateList[stateIndex].index);
                             break;
@@ -157,7 +157,7 @@ void populate_reaction_lists_for_add(const std::vector<ForwardRxn>& forwardRxns,
                         if (reactIface2.stateList[stateIndex].index == forwardRxn.reactantListNew[1].absIfaceIndex) {
                             reactIface2.stateList[stateIndex].myForwardRxns.push_back(forwardRxn.relRxnIndex);
                             reactIface2.stateList[stateIndex].rxnPartners.push_back(
-                                reactIface1.stateList[stateIndex].index);
+                                reactIface1.stateList[stateIndex1].index);
                             reactIface1.stateList[stateIndex1].rxnPartners.push_back(
                                 reactIface2.stateList[stateIndex].index);
                             break;

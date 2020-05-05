@@ -149,3 +149,8 @@ bool Coord::isOutOfBox(const Membrane& membraneObject)
 
     return false;
 }
+
+double Coord::get_magnitude()
+{
+    return sqrt(x * x + y * y + z * z);
+}

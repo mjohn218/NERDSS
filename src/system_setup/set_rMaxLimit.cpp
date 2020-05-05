@@ -1,7 +1,9 @@
 #include "system_setup/system_setup.hpp"
+#include "tracing.hpp"
 
 void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, int numDoubleBeforeAdd, int numMolTemplateBeforeAdd)
 {
+    TRACE();
     /*For each reaction, need distance from the interface to the COM for both partners, plus the
      * bindrad+sqrt(6*Dtot*deltat)
      */

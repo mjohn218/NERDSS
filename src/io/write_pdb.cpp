@@ -1,16 +1,18 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 #include <iomanip>
 
 void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
-	       const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject)
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    unsigned totFrames { params.nItr / params.trajWrite };
+    TRACE();
+    long long int totFrames { params.nItr / params.trajWrite };
     //    std::ofstream pdbFile { "pdb/" + std::to_string(frameNum) + ".pdb" };
     // if (!pdbFile) {
-    std::ofstream  pdbFile { std::to_string(frameNum) + ".pdb" };
-	//}
+    std::ofstream pdbFile { std::to_string(frameNum) + ".pdb" };
+    //}
     auto printTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     pdbFile << std::left << std::setw(6) << "TITLE" << ' ' << std::left << std::setw(70) << "PDB TIMESTEP " << simItr
             << " CREATED " << std::ctime(&printTime);
@@ -23,7 +25,7 @@ void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, con
         // this is just so visualization software reads species in at the same color whether or not they're in the
         // system
         if (oneTemp.isImplicitLipid)
-    	      continue;
+            continue;
         pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' ' << std::setw(4) << " COM" << ' ' << std::setw(3)
                 << molTemplateList[i].molName.substr(0, 3) << ' ' << std::right << std::setw(4) << i << "     "
                 << std::setw(8) << membraneObject.waterBox.x << std::setw(8) << membraneObject.waterBox.y << std::setw(8)
@@ -33,9 +35,9 @@ void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, con
     }
     int molCounter { 0 };
     for (const auto& mol : moleculeList) {
-    	  if (mol.isImplicitLipid)
-    	      continue;
-    	      
+        if (mol.isImplicitLipid)
+            continue;
+
         if (!mol.isEmpty) {
             const MolTemplate& oneTemp = molTemplateList[mol.molTypeIndex];
             pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' ' << std::setw(4) << " COM" << ' '

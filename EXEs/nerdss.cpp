@@ -22,6 +22,7 @@
 #include "reactions/shared_reaction_functions.hpp"
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
 #include "system_setup/system_setup.hpp"
+#include "tracing.hpp"
 #include "trajectory_functions/trajectory_functions.hpp"
 
 #include <chrono>
@@ -42,6 +43,7 @@ unsigned long totMatches = 0;
 
 int main(int argc, char* argv[])
 {
+    TRACE(); // this can trace the function calling
     /* SIMULATION SETUP */
     // Get seed for random number generation
     // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
@@ -245,6 +247,12 @@ int main(int argc, char* argv[])
         moleculeList.reserve(reservation);
         complexList.reserve(reservation);
 
+        //create water box for sphere boundary
+        if (membraneObject.isSphere) {
+            membraneObject.create_water_box();
+            membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
+        }
+
         // generate the system coordinates, write out coordinate and topology files
         generate_coordinates(params, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
         write_psf(params, moleculeList, molTemplateList);
@@ -253,6 +261,10 @@ int main(int argc, char* argv[])
         initialize_paramters_for_implicitlipid_model(implicitlipidIndex, params, forwardRxns, backRxns,
             moleculeList, molTemplateList, complexList, membraneObject);
         membraneObject.No_free_lipids = membraneObject.nSites;
+
+        // initialize the starting copy number for each state
+        initialize_states(moleculeList, molTemplateList, membraneObject);
+
         /* CREATE SIMULATION BOX CELLS */
         std::cout << llinebreak << bon << "Partitioning simulation box into sub-boxes...\n"
                   << boff;
@@ -368,6 +380,12 @@ int main(int argc, char* argv[])
                 }
             }
 
+            //create water box for sphere boundary
+            if (membraneObject.isSphere) {
+                membraneObject.create_water_box();
+                membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
+            }
+
             // generate the coordinates, write out coordinate and topology files for added molecules
             generate_coordinates_for_restart(params, moleculeList, complexList, emptyMolList, emptyComList, molTemplateList, forwardRxns, membraneObject, numMolTemplateBeforeAdd, numForwardRxnBdeforeAdd);
             for (auto& tmpComplex : complexList) {
@@ -389,6 +407,9 @@ int main(int argc, char* argv[])
         // set up some important parameters for implicit-lipid model;
         initialize_paramters_for_implicitlipid_model(implicitlipidIndex, params, forwardRxns, backRxns,
             moleculeList, molTemplateList, complexList, membraneObject);
+
+        // initialize the starting copy number for each state
+        initialize_states(moleculeList, molTemplateList, membraneObject);
 
         /* CREATE SIMULATION BOX CELLS */
         std::cout << llinebreak << bon << "Partitioning simulation box into sub-boxes...\n"
@@ -466,7 +487,7 @@ int main(int argc, char* argv[])
 
     /*Print out parameters*/
     params.display();
-    std::cout << " BOX DIMENSIONS, X,Y,Z: " << membraneObject.waterBox.x << ' ' << membraneObject.waterBox.y << ' ' << membraneObject.waterBox.z << '\n';
+    membraneObject.display();
 
     /*Determine whether the surface has adsorption properties:
       Do any molecules bind directly to surface using our continuum model?
@@ -686,20 +707,24 @@ int main(int argc, char* argv[])
                             //complexList[comIndex1].display();
                             std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
                             std::cout << "Implicit lipid, my Com Index: " << moleculeList[molItr2].myComIndex << " size of memberlist: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << std::endl;
-                            if (moleculeList[molItr].interfaceList[ifaceIndex1].index
-                                == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
+                            // if (moleculeList[molItr].interfaceList[ifaceIndex1].index
+                            //     == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
 
-                                associate_binding_to_surface(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
-                                    complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
-                            } else {
-                                //IL is listed first as the reactant.
-                                associate_binding_to_surface(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
-                                    complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
-                            }
+                            //     associate_binding_to_surface(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
+                            //         complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
+                            //         moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                            //         counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                            // } else {
+                            //     //IL is listed first as the reactant.
+                            //     associate_binding_to_surface(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
+                            //         complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
+                            //         moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                            //         counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                            // }
+                            associate_implicitlipid(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
+                                complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
+                                moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                                counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                         }
                         if (moleculeList[molItr2].isImplicitLipid == false) {
                             std::cout << "Performing association between molecules " << molItr << " and " << molItr2 << " ["
@@ -834,6 +859,7 @@ int main(int argc, char* argv[])
             complexList[mol.myComIndex].propagate(moleculeList);
         }
         */
+
         // Now we have to check for overlap!!!
         for (auto& mol : moleculeList) {
             //Now track each complex (ncrosscom), and test for overlap of all proteins in that complex before
@@ -867,19 +893,25 @@ int main(int argc, char* argv[])
                         sweep_separation_complex_rot(
                             simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
                     }
+                    reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
                 }
             } else {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
                     //For proteins with ncross=0, they either moved independently, or their displacements
                     //were selected based on the complex they were part of, and they may not yet been moved.
 
-                    std::array<double, 9> M = create_euler_rotation_matrix(complexList[mol.myComIndex].trajRot);
-                    reflect_traj_complex_rad_rot(params, moleculeList, complexList[mol.myComIndex], M, membraneObject, RS3Dinput);
-                    complexList[mol.myComIndex].propagate(moleculeList);
+                    create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
+                        complexList, molTemplateList, membraneObject);
+                    complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
+                    reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
                 }
             }
         }
-
+        /*std::cout <<" DISPLAY AFTER SWEEP iter: "<<simItr<<" molecule 21 "<<std::endl;
+ 	moleculeList[21].display(molTemplateList[moleculeList[21].molTypeIndex]);
+ 	std::cout <<" DISPLAY AFTER SWEEP iter "<<simItr<<" molecule 27 "<<std::endl;
+ 	moleculeList[27].display(molTemplateList[moleculeList[27].molTypeIndex]);
+	*/
         if (simItr % params.trajWrite == 0) {
             std::cout << "Writing trajectory..." << '\n';
             std::ofstream trajFile { trajFileName, std::ios::app }; // for append

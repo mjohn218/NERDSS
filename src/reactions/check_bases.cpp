@@ -1,4 +1,5 @@
 #include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 #include <iomanip>
 
@@ -7,6 +8,7 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
     const Complex& reactCom2, const ForwardRxn& currRxn, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     Vector sigma { reactIface1 - reactIface2 };
     Vector v1 { reactIface1 - reactMol1.tmpComCoord };
     Vector v2 { reactIface2 - reactMol2.tmpComCoord };

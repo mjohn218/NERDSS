@@ -1,16 +1,16 @@
 #include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 #include <cmath>
 
 Quat orient_crds_to_template(const MolTemplate& oneTemplate, Molecule& targMol)
 {
-
+    TRACE();
     Quat firstRot {};
     Quat secondRot {};
     { // first rotation
         // determine the interface-center of mass vector (v0, v1), the rotation vector (u), and the angle to rotate
         // (angle)
-
         // arbitrarily the center of mass to first interface of the MolTemplate
         Vector vec1 { oneTemplate.interfaceList[0].iCoord - oneTemplate.comCoord };
         // the center of mass to first interface of the target Molecule
@@ -21,22 +21,21 @@ Quat orient_crds_to_template(const MolTemplate& oneTemplate, Molecule& targMol)
         Vector rotAxis { vec1.cross(vec2) };
         double angle { vec1.dot_theta(vec2) };
         // TODO: the above vectors are correct
-
         // determine if we need to flip the sign
-//        if (requiresSignFlip(rotAxis, vec1, vec2))
-//            angle = -angle;
-        double sa = sin(angle/2);
+        //        if (requiresSignFlip(rotAxis, vec1, vec2))
+        //            angle = -angle;
+        double sa = sin(angle / 2);
         firstRot = Quat { cos(angle / 2), sa * rotAxis.x, sa * rotAxis.y,
             sa * rotAxis.z };
         firstRot = firstRot.unit();
         {
             Vector tmpVec { targMol.tmpICoords[0] - targMol.tmpComCoord };
             firstRot.rotate(tmpVec);
-            if(std::abs(tmpVec.x - oneTemplate.interfaceList[0].iCoord.x) > 1E-8 || std::abs(tmpVec.y - oneTemplate.interfaceList[0].iCoord.y) > 1E-8 || std::abs(tmpVec.z - oneTemplate.interfaceList[0].iCoord.z) > 1E-8) {
+            if (std::abs(tmpVec.x - oneTemplate.interfaceList[0].iCoord.x) > 1E-8 || std::abs(tmpVec.y - oneTemplate.interfaceList[0].iCoord.y) > 1E-8 || std::abs(tmpVec.z - oneTemplate.interfaceList[0].iCoord.z) > 1E-8) {
                 angle = -angle;
-                sa = sin(angle/2);
+                sa = sin(angle / 2);
                 firstRot = Quat { cos(angle / 2), sa * rotAxis.x, sa * rotAxis.y,
-                                  sa * rotAxis.z };
+                    sa * rotAxis.z };
                 firstRot = firstRot.unit();
             }
         }
@@ -95,17 +94,17 @@ Quat orient_crds_to_template(const MolTemplate& oneTemplate, Molecule& targMol)
         secondRot = Quat(cos(angle / 2), sin(angle / 2) * rotAxis.x, sin(angle / 2) * rotAxis.y, sin(angle / 2) * rotAxis.z);
         secondRot = secondRot.unit();
 
-//        {
-//            Vector tmpVec { targMol.tmpICoords[ifaceIndex] - targMol.tmpComCoord };
-//            firstRot.rotate(tmpVec);
-//            if(std::abs(tmpVec.x - oneTemplate.interfaceList[ifaceIndex].iCoord.x) > 1E-8 || std::abs(tmpVec.y - oneTemplate.interfaceList[ifaceIndex].iCoord.y) > 1E-8 || std::abs(tmpVec.z - oneTemplate.interfaceList[ifaceIndex].iCoord.z) > 1E-8) {
-//                angle = -angle;
-//                sa = sin(angle/2);
-//                secondRot = Quat { cos(angle / 2), sa * rotAxis.x, sa * rotAxis.y,
-//                                  sa * rotAxis.z };
-//                secondRot = secondRot.unit();
-//            }
-//        }
+        //        {
+        //            Vector tmpVec { targMol.tmpICoords[ifaceIndex] - targMol.tmpComCoord };
+        //            firstRot.rotate(tmpVec);
+        //            if(std::abs(tmpVec.x - oneTemplate.interfaceList[ifaceIndex].iCoord.x) > 1E-8 || std::abs(tmpVec.y - oneTemplate.interfaceList[ifaceIndex].iCoord.y) > 1E-8 || std::abs(tmpVec.z - oneTemplate.interfaceList[ifaceIndex].iCoord.z) > 1E-8) {
+        //                angle = -angle;
+        //                sa = sin(angle/2);
+        //                secondRot = Quat { cos(angle / 2), sa * rotAxis.x, sa * rotAxis.y,
+        //                                  sa * rotAxis.z };
+        //                secondRot = secondRot.unit();
+        //            }
+        //        }
 
         // might not need this, but good for a check after
         // to make sure it worked

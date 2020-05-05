@@ -1,12 +1,14 @@
 #include "classes/class_Molecule_Complex.hpp"
 #include "classes/class_Rxns.hpp"
 #include "classes/class_copyCounters.hpp"
+#include "tracing.hpp"
 
 using namespace std;
 
 // write the header for file tracking all species
 int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns)
 {
+    TRACE();
     int nSpecies = 0;
     speciesFile << "Itr";
     for (const auto& oneTemp : molTemplateList) {

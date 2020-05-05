@@ -1,12 +1,14 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns, std::vector<gsl_matrix*>& normMatrices,
+    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
     std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices)
 {
+    TRACE();
     /*3D reaction*/
     double Dr1 {};
     if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10) {
@@ -35,7 +37,18 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     double sep {};
     double R1 {};
     bool withinRmax = get_distance(biMolData.pro1Index, biMolData.pro2Index, biMolData.relIface1, biMolData.relIface2,
-        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, Rmax, complexList, forwardRxns[rxnIndex], moleculeList);
+        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, Rmax, complexList, forwardRxns[rxnIndex], moleculeList, membraneObject);
+    //     if(biMolData.pro1Index == 64)
+    // 	std::cout <<"IN DETERMINE 3D, TRACKING 64 and 65! "<<biMolData.pro1Index<<" Rmax "<<Rmax<<" is within Rmax? "<<withinRmax<<" partner: "<<biMolData.pro2Index<<" sep "<<R1<<std::endl;
+
+    //     if(biMolData.pro2Index == 64)
+    // 	std::cout <<"IN DETERMINE 3D, TRACKING 64 and 65! "<<biMolData.pro1Index<<" Rmax "<<Rmax<<" is within Rmax? "<<withinRmax<<" partner: "<<biMolData.pro2Index<<" sep "<<R1<<std::endl;
+    //     if(biMolData.pro1Index == 65)
+    // 	std::cout <<"IN DETERMINE 3D, TRACKING 64 and 65! "<<biMolData.pro1Index<<" Rmax "<<Rmax<<" is within Rmax? "<<withinRmax<<" partner: "<<biMolData.pro2Index<<" sep "<<R1<<std::endl;
+
+    //     if(biMolData.pro2Index == 65)
+    // 	std::cout <<"IN DETERMINE 3D, TRACKING 64 and 65! "<<biMolData.pro1Index<<" Rmax "<<Rmax<<" is within Rmax? "<<withinRmax<<" partner: "<<biMolData.pro2Index<<" sep "<<R1<<std::endl;
+
     if (withinRmax) {
         // in case the molecule dissociated
         moleculeList[biMolData.pro1Index].probvec.push_back(0);

@@ -97,6 +97,7 @@ enum class RxnKeyword : int {
     length3Dto2D = 17, //!< nm, length factor converts 3D to 2D rate
     rxnLabel = 18, //!< label of the reaction, used for coupled
     coupledRxnLabel = 19, //!< lable of the coupled reaction
+	kcat = 20, //!<rate for a Michaelis-Menten reaction.
 };
 
 struct Parameters {
@@ -117,7 +118,7 @@ struct Parameters {
     int numMolTypes { 0 }; //!< number of MolTemplates. used to be Nprotypes
     //   int numIfaces { 0 }; //!< total number of interfaces on all MolTemplates. used to be nifaces
     int numTotalSpecies { 0 }; //!< total number of interfaces and states (including products!) possible in the system.
-    unsigned nItr { 0 }; //!< number of timesteps requested by user. used to be int Nit.
+    long long int nItr { 0 }; //!< number of timesteps requested by user. used to be int Nit.
     int numTotalComplex { 0 }; //!< number of complexes in the system at start
     unsigned numTotalUnits { 0 }; //!< number of total molecules + interfaces in the system at start
     double timeStep { 0 }; //!< timestep, in microseconds.  used to be deltat
@@ -152,7 +153,7 @@ struct Parameters {
     int trajWrite { 10 }; //!< timestep interval to write coordinates file. used to be configwrite
     int restartWrite { 10 }; //!< timestep interval to write a restart file
     int pdbWrite { -1 }; //!< interval to write pdb
-    int checkPoint { -1 }; //!< interval to write checkpoint
+    long long int checkPoint { -1 }; //!< interval to write checkpoint
 
     void display();
     void parse_paramFile(std::ifstream& paramFile);

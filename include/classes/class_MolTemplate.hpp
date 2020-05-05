@@ -91,6 +91,19 @@ struct Interface {
     Interface(std::string name, std::vector<State> states, Coord iCoord);
 };
 
+struct ParsedMolNumState {
+    /*! \struct ParsedMolNumState
+     * \ingroup Parser
+     * \brief Holds MolTemplate information temporarily during input file parsing for the starting copy numbers each state
+     */
+
+    int totalCopyNumbers { 0 }; //!< total copy numbers for one molTemplate
+    std::vector<int> numberEachState {}; //!< copy numbers for each state
+    std::vector<std::string> nameEachState {}; //!< iface~state for each state
+
+    ParsedMolNumState() = default;
+};
+
 struct MolTemplate {
     /*! \struct MolTemplate
      * \ingroup Templates
@@ -116,6 +129,7 @@ struct MolTemplate {
     std::vector<int> rxnPartners {}; //!< list of MolTemplate indices that this molecule can react with
     std::vector<std::array<int, 2>> bondList {}; //!< bonds between interfaces/COM, optionally given by the user
     std::vector<int> ifacesWithStates {}; //!< list of interface indicies that have states
+    ParsedMolNumState startingNumState {}; //!< record the starting numbers of each state
 
     // Molecule types, for checking to perform certain actions
     bool isRod { false }; //!< is the molecule a rod (is it strictly one dimensional)

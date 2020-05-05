@@ -1,10 +1,12 @@
 #include "io/io.hpp"
 #include "system_setup/system_setup.hpp"
+#include "tracing.hpp"
 
 void generate_coordinates(const Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
     const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
+    TRACE();
     // First create all the molecules and their corresponding complexes, with random center of mass coordinates
     for (const auto& oneTemp : molTemplateList) {
         if (oneTemp.isImplicitLipid == false) {

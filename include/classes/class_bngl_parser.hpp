@@ -137,6 +137,7 @@ struct ParsedRxn : public ForwardRxn {
     double onRate3DMacro { std::numeric_limits<double>::quiet_NaN() }; //!< the forward rate of the reaction, macro
     double offRatekb { std::numeric_limits<double>::quiet_NaN() }; //!< the rate of a reversible reaction's back reaction, micro
     double offRateMacro { std::numeric_limits<double>::quiet_NaN() }; //!< the rate of a reversible reaction's back reaction, macro
+    double kcat {std::numeric_limits<double>::quiet_NaN() }; //!< the rate for a Michaelis-Menten reaction catalysis.
     std::vector<std::vector<RxnIface>> otherIfaceLists; //!< ancillary interfaces which must be present
     std::pair<RxnIface, RxnIface> stateChangeIface; //!< interfaces which don't change interaction but change state
 

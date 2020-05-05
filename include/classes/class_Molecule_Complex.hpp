@@ -219,6 +219,7 @@ struct Molecule {
     void update_association_coords(const Vector& vec);
     void set_tmp_association_coords();
     void clear_tmp_association_coords();
+    void create_position_implicit_lipid(Molecule& reactMol1, int ifaceIndex2, double bindRadius, const Membrane& membraneObject);
 
     // other reaction member functions
     void create_random_coords(const MolTemplate& molTemplate, const Membrane& membraneObject);
@@ -256,6 +257,7 @@ public:
     Coord Dr { 0, 0, 0 }; //!< Complex's rotational diffusion constants
     bool isEmpty { false }; //!< true if the complex has been destroyed and is a void
     bool OnSurface { false }; // to check whether on the implicit-lipid membrane.
+    bool tmpOnSurface { false }; //
 
     // static variables
     static int numberOfComplexes; //!< total number of complexes in the system. starts out equal to numberOfMolecules
@@ -287,7 +289,9 @@ public:
     void put_back_into_SimulVolume(
         int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList);
     void translate(Vector transVec, std::vector<Molecule>& moleculeList);
-    void propagate(std::vector<Molecule>& moleculeList);
+    // void propagate(std::vector<Molecule>& moleculeList);
+    void propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject);
+    void update_association_coords_sphere(std::vector<Molecule>& moleculeList, Coord iface, Coord ifacenew);
 
     Complex() = default;
     //    Complex(Molecule mol, Coord D, Coord Dr);

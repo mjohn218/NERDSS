@@ -1,7 +1,9 @@
 #include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 Vector determine_normal(Vector normal, const MolTemplate& molTemplate, Molecule oneMol)
 {
+    TRACE();
     if (oneMol.interfaceList.empty()) {
         std::cout << "Molecule is a point, has no normal." << std::endl;
         return { 0, 0, 0 };
@@ -21,24 +23,24 @@ Vector determine_normal(Vector normal, const MolTemplate& molTemplate, Molecule 
             ++numUnmatched;
 	    }*/
     //    if (numUnmatched != 0) {
-        Quat totalRotQuat { orient_crds_to_template(molTemplate, oneMol) };
+    Quat totalRotQuat { orient_crds_to_template(molTemplate, oneMol) };
 
-        totalRotQuat = totalRotQuat.unit();
-        totalRotQuat = totalRotQuat.inverse();
-        totalRotQuat.rotate(normal);
+    totalRotQuat = totalRotQuat.unit();
+    totalRotQuat = totalRotQuat.inverse();
+    totalRotQuat.rotate(normal);
 
-        { // check to make sure the rotations were successful
-            for (unsigned ifaceIndex { 0 }; ifaceIndex < oneMol.tmpICoords.size(); ifaceIndex++) {
-                Vector tmpVec { oneMol.tmpICoords[ifaceIndex] - oneMol.tmpComCoord };
-                totalRotQuat.rotate(tmpVec);
-                oneMol.tmpICoords[ifaceIndex] = Coord(tmpVec.x, tmpVec.y, tmpVec.z);
-                if (oneMol.tmpICoords[ifaceIndex] != tmpMol.tmpICoords[ifaceIndex]) {
-                    std::cout << "Backwards rotation unsuccessful on interface " << ifaceIndex << std::endl;
-                    return { 0, 0, 0 };
-                }
+    { // check to make sure the rotations were successful
+        for (unsigned ifaceIndex { 0 }; ifaceIndex < oneMol.tmpICoords.size(); ifaceIndex++) {
+            Vector tmpVec { oneMol.tmpICoords[ifaceIndex] - oneMol.tmpComCoord };
+            totalRotQuat.rotate(tmpVec);
+            oneMol.tmpICoords[ifaceIndex] = Coord(tmpVec.x, tmpVec.y, tmpVec.z);
+            if (oneMol.tmpICoords[ifaceIndex] != tmpMol.tmpICoords[ifaceIndex]) {
+                std::cout << "Backwards rotation unsuccessful on interface " << ifaceIndex << std::endl;
+                return { 0, 0, 0 };
             }
         }
-	//    }
+    }
+    //    }
 
     normal.normalize(); // just in case
     return normal;

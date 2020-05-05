@@ -1,8 +1,10 @@
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 bool determine_parent_complex_IL(int pro1Index, int pro2Index, int newComIndex, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, int ILindexMol)
 {
+    TRACE();
     // TODO: clean this up
     int c1 { moleculeList[pro1Index].myComIndex };
     std::vector<int> origlist = complexList[c1].memberList;

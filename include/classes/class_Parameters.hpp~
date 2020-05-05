@@ -95,6 +95,8 @@ enum class RxnKeyword : int {
     creationRadius = 15, //!< the radius of the sphere around the parent molecule where a molecule is created
     loopCoopFactor = 16, //!< the factor to multiple the loop closure rate, i.e. loopCoopFactor=exp(-dG/kT)
     length3Dto2D = 17, //!< nm, length factor converts 3D to 2D rate
+    rxnLabel = 18, //!< label of the reaction, used for coupled
+    coupledRxnLabel = 19, //!< lable of the coupled reaction
 };
 
 struct Parameters {
@@ -127,6 +129,8 @@ struct Parameters {
 
     double overlapSepLimit { 1.5 }; //!< in nm. COM-COM distance less than this is cancelled, for checkOverlap molecules
     bool implicitLipid { false };
+    bool hasUniMolStateChange { false };
+    bool hasCreationDestruction { false };
 
     std::string name {}; //!< name of the simulation
     Debug debugParams;

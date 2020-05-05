@@ -1,9 +1,11 @@
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 
 void find_which_state_change_reaction(int ifaceIndex, int& rxnIndex, int& rateIndex, bool& isStateChangeBackRxn,
     const Molecule& reactMol, const Interface::State& currState, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns)
 {
+    TRACE();
     for (auto rxnItr : currState.stateChangeRxns) {
         const ForwardRxn& oneRxn = forwardRxns[rxnItr.first]; // rxnItr.first is the reaction's index in forwardRxns
         if (oneRxn.rxnType == ReactionType::uniMolStateChange) {

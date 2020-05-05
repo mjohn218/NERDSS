@@ -55,8 +55,11 @@ void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    membraneObject.totalSA = membraneObject.waterBox.x * membraneObject.waterBox.y;
-    // here, we assume that the membrane surface is on the Z-axis bottom of the cubic box.
+    if (membraneObject.isSphere) {
+        membraneObject.totalSA = 4.0 * M_PI * pow(membraneObject.sphereR, 2.0);
+    } else {
+        membraneObject.totalSA = membraneObject.waterBox.x * membraneObject.waterBox.y;
+    }
 
     // inititalize RS3Dvect with -1
     for (int i = 0; i < 500; i++) {

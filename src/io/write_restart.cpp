@@ -1,4 +1,5 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -10,6 +11,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
     const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
     const std::vector<int>& emptyComList, const Membrane& membraneObject, const copyCounters& counterArrays)
 {
+    TRACE();
     // Write parameters
     {
         restartFile << "#Parameters--update these for restart \n";
@@ -33,7 +35,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             }
         }
         restartFile << '\n';
-        restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereRadius << '\n';
+        restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereR << '\n';
         restartFile << "ifaceOverlapSepLimit = " << params.overlapSepLimit << '\n';
         restartFile << "rMaxLimit = " << std::fixed << params.rMaxLimit << '\n';
         restartFile << "timeWrite = " << params.timeWrite << '\n';
@@ -161,7 +163,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << oneRxn.norm2.x << ' ' << oneRxn.norm2.y << ' ' << oneRxn.norm2.z << '\n';
             restartFile << oneRxn.isCoupled;
             if (oneRxn.isCoupled)
-                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label;
+                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label << ' ' << oneRxn.coupledRxn.probCoupled;
             restartFile << '\n';
 
             // integer reactants

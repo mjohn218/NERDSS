@@ -59,6 +59,8 @@ public:
     void zero_crds();
     bool isOutOfBox(const Membrane& membraneObject);
 
+    double get_magnitude();
+
     Coord() = default;
     Coord(double x, double y, double z);
 

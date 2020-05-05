@@ -113,7 +113,7 @@ ParsedMol parse_molecule_bngl(int& totSpecies, bool isProductSide,
                 break;
             }
             default: {
-//                gen_read_err(__func__, __LINE__);
+                //                gen_read_err(__func__, __LINE__);
                 std::cerr << "ERROR: Character " << *molIterator << " is not valid in reactions. Exiting...\n.";
                 exit(1);
             }
@@ -121,4 +121,58 @@ ParsedMol parse_molecule_bngl(int& totSpecies, bool isProductSide,
         }
     }
     return tmpMol;
+}
+
+ParsedMolNumState parse_number_bngl(std::string oneLine)
+{
+    std::string buffer;
+    ParsedMolNumState tmpMolNum;
+    for (auto molIterator = oneLine.begin(); molIterator != oneLine.end(); std::advance(molIterator, 1)) {
+        if (isalnum(*molIterator))
+            // if the character is alphanumeric, just append it to the buffer
+            buffer += *molIterator;
+        else {
+            switch (*molIterator) {
+            case '~': {
+                // if the character is '~' it indicates a state. add an iface to the vector with
+                // iface~state as the ifaceName and state as the state
+                std::string iface { buffer };
+                ++molIterator;
+                buffer += "~";
+                buffer += static_cast<char>(std::toupper(*molIterator));
+                break;
+            }
+            case '(': {
+                /* -if the character is '(', it indicates the beginning of an iface list
+                 * set the copy number to the buffer before the parenthesis
+                 */
+                tmpMolNum.totalCopyNumbers += std::stoi(buffer);
+                tmpMolNum.numberEachState.emplace_back(std::stoi(buffer));
+                buffer.clear();
+                break;
+            }
+            case ',': {
+                if (!buffer.empty())
+                    buffer += *molIterator;
+                break;
+            }
+            case ')': {
+                // a ')' indicates the end of an iface list
+                if (!buffer.empty()) { // if the buffer is empty, there's nothing to do
+                    tmpMolNum.nameEachState.emplace_back(buffer);
+                    buffer.clear();
+                }
+                break;
+            }
+            default: {
+                std::cerr << "ERROR: Character " << *molIterator << " is not valid in starting copy numbers for each state. Exiting...\n.";
+                exit(1);
+            }
+            }
+        }
+    }
+    if (!buffer.empty()) {
+        tmpMolNum.totalCopyNumbers += std::stoi(buffer);
+    }
+    return tmpMolNum;
 }

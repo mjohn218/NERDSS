@@ -1,4 +1,5 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 
@@ -6,6 +7,7 @@ void write_timestep_information(int simItr, std::ofstream& outFile, std::ofstrea
     std::ofstream& textTimeStatFile, const Parameters& params, std::vector<std::vector<int>>& molecTypesList,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     Complex::currNumberComTypes = 0; // reset and then recount complex types
     int HEIGHT { Complex::numberOfComplexes };
     int WIDTH = 2 + 2 * molTemplateList.size(); // max number of different molecules in a complex is Nprotypes

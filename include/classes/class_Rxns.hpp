@@ -92,7 +92,7 @@ public:
         int relRxnIndex { -1 }; //!< relative index of the coupled reaction
         ReactionType rxnType { ReactionType::none }; //!< type of the coupled reaction
         std::string label { "none" }; //!< label of the coupled reaction
-
+        double probCoupled { 1 }; //!< perform coupled reaction with this prob.
         CoupledRxn() = default;
         CoupledRxn(int _absRxnIndex)
             : absRxnIndex(_absRxnIndex)
@@ -206,6 +206,7 @@ public:
 
     // arrays for association
     double bindRadius { 1.0 };
+    double bindRadius2D { 1.0 };
 
     Vector norm1 { 0, 0, 1 }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 1
     Vector norm2 { 0, 0, 1 }; //!< arbitrary 'normal' vector determined from an ancillary interface for reactant 2

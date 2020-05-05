@@ -6,12 +6,15 @@
  */
 
 #include "io/io.hpp"
+#include "tracing.hpp"
 
 void print_system_information(int simItr, std::ofstream& systemFile, const std::vector<Molecule>& moleculeList,
     const std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     systemFile << "Iteration: " << simItr << '\n';
-    systemFile << llinebreak << llinebreak << "\t\t\tMOLECULES\n" << llinebreak << llinebreak << linebreak;
+    systemFile << llinebreak << llinebreak << "\t\t\tMOLECULES\n"
+               << llinebreak << llinebreak << linebreak;
     for (const auto& mol : moleculeList) {
         systemFile << "Index: " << mol.index << '\n';
         systemFile << "Is empty: " << std::boolalpha << mol.isEmpty << '\n';
@@ -40,7 +43,8 @@ void print_system_information(int simItr, std::ofstream& systemFile, const std::
         systemFile << linebreak;
     }
 
-    systemFile << llinebreak << llinebreak << "\t\t\tCOMPLEXES\n" << llinebreak << llinebreak << linebreak;
+    systemFile << llinebreak << llinebreak << "\t\t\tCOMPLEXES\n"
+               << llinebreak << llinebreak << linebreak;
     for (const auto& complex : complexList) {
         systemFile << "Index: " << complex.index << '\n';
         systemFile << "Is empty: " << complex.isEmpty << '\n';

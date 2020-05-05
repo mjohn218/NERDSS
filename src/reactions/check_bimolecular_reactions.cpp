@@ -2,6 +2,7 @@
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 #include <algorithm>
 
 void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, double* tableIDs, unsigned& DDTableIndex,
@@ -10,8 +11,13 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject)
 {
+    TRACE();
     int pro1MolType = moleculeList[pro1Index].molTypeIndex;
-
+    /* if(pro1Index== 21)
+ 	std::cout <<"In check bimolecular Reaction for protein 21 ! to  "<<pro2Index<<std::endl;
+     if(pro1Index== 27)
+ 	std::cout <<"In check bimolecular Reaction for protein 27 ! to "<<pro2Index<<std::endl;
+    */
     bool canInteract { false };
     for (auto partner : molTemplateList[pro1MolType].rxnPartners) {
         if (partner == moleculeList[pro2Index].molTypeIndex) {
@@ -52,6 +58,11 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
 
     if (canInteract) {
         /* CALCULATE ASSOCIATION PROBABILITIES */
+        /*if(pro1Index== 21)
+ 	    std::cout <<" calculate Association prob to ! "<<pro2Index<<std::endl;
+ 	if(pro1Index== 27)
+ 	    std::cout <<" calculate Association prob to ! "<<pro2Index<<std::endl;
+	*/
         for (int relIface1Itr { 0 }; relIface1Itr < moleculeList[pro1Index].freelist.size(); ++relIface1Itr) {
             /*test all of i1's binding partners to see whether they are on protein pro2 */
             int relIface1 { moleculeList[pro1Index].freelist[relIface1Itr] };
@@ -60,11 +71,21 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
             const Interface::State& state {
                 molTemplateList[pro1MolType].interfaceList[relIface1].stateList[stateIndex1]
             };
+            //if(pro1Index == 21 || pro1Index ==27)
+            //std::cout <<"reliface, abs, stateindex, npartners: "<<relIface1<<' '<<absIface1<<' '<<stateIndex1<<' '<<state.rxnPartners.size()<<std::endl;
             for (auto statePartner : state.rxnPartners) {
+                //if(pro1Index == 21 || pro1Index ==27)
+                //  std::cout <<"statePertner: "<<statePartner<<std::endl;
                 for (int relIface2Idx = 0; relIface2Idx < moleculeList[pro2Index].freelist.size(); ++relIface2Idx) {
                     int relIface2 { moleculeList[pro2Index].freelist[relIface2Idx] };
                     int absIface2 { moleculeList[pro2Index].interfaceList[relIface2].index };
+
                     if (absIface2 == statePartner) { // both binding interfaces are available!
+                        /*if(pro1Index== 21)
+ 			    std::cout <<" Both Ifaces available! "<<pro2Index<<std::endl;
+ 			if(pro1Index== 27)
+ 			    std::cout <<" Both Ifaces available!! "<<pro2Index<<std::endl;
+			*/
                         /*Here now we evaluate the probability of binding*/
                         /*Different interfaces can have different diffusion constants if they
                         also rotate. <theta^2>=6Drparams.timeStep.
@@ -80,7 +101,11 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
 
                         find_which_reaction(relIface1, relIface2, rxnIndex, rateIndex, isStateChangeBackRxn, state,
                             moleculeList[pro1Index], moleculeList[pro2Index], forwardRxns, backRxns, molTemplateList);
-
+                        /*if(pro1Index== 21)
+ 			    std::cout <<" found which reaction! "<<rxnIndex<<" "<<rateIndex<<std::endl;
+ 			if(pro1Index== 27)
+ 			    std::cout <<" found which reaction! "<<rxnIndex<<" "<<rateIndex<<std::endl;
+			*/
                         if (rxnIndex != -1 && rateIndex != -1) {
                             //int com1Index { moleculeList[pro1Index].myComIndex };
                             //int com2Index { moleculeList[pro2Index].myComIndex };
@@ -89,7 +114,7 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
                                 evaluate_binding_within_complex(pro1Index, pro2Index, relIface1, relIface2, rxnIndex,
                                     rateIndex, isStateChangeBackRxn, params, moleculeList,
                                     complexList, molTemplateList,
-                                    forwardRxns[rxnIndex], backRxns, counterArrays);
+                                    forwardRxns[rxnIndex], backRxns, membraneObject, counterArrays);
                             } else {
                                 Vector ifaceVec { moleculeList[pro1Index].interfaceList[relIface1].coord
                                     - complexList[moleculeList[pro1Index].myComIndex].comCoord };
@@ -112,7 +137,7 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
 
                                     determine_2D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
                                         isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
-                                        complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
+                                        complexList, forwardRxns, backRxns, membraneObject, normMatrices, survMatrices, pirMatrices);
                                 } else {
                                     //3D reaction
                                     double Dtot = 1.0 / 3.0 * (complexList[moleculeList[pro1Index].myComIndex].D.x + complexList[moleculeList[pro2Index].myComIndex].D.x)
@@ -124,7 +149,7 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
 
                                     determine_3D_bimolecular_reaction_probability(simItr, rxnIndex, rateIndex,
                                         isStateChangeBackRxn, DDTableIndex, tableIDs, biMolData, params, moleculeList,
-                                        complexList, forwardRxns, backRxns, normMatrices, survMatrices, pirMatrices);
+                                        complexList, forwardRxns, backRxns, membraneObject, normMatrices, survMatrices, pirMatrices);
                                 } //end else 3D
                                 //read_rng_state();
                             }

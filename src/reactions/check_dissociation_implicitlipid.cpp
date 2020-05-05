@@ -5,6 +5,7 @@
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& params, SimulVolume& simulVolume,
     const std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, unsigned int molItr,
@@ -12,6 +13,7 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
     std::vector<Complex>& complexList, const std::vector<BackRxn>& backRxns, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
 {
+    TRACE();
     double Dtot;
     for (int relIface1Itr { 0 }; relIface1Itr < moleculeList[molItr].bndlist.size(); ++relIface1Itr) {
         int relIface1 { moleculeList[molItr].bndlist[relIface1Itr] };
@@ -213,12 +215,21 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
                     moleculeList[molItr].linksToSurface--;
                     // consider the reflecting-surface movement
                     Vector transVec1 {};
-                    if (complexList[moleculeList[molItr].myComIndex].linksToSurface == 0 && membraneObject.TwoD == false) {
-                        transVec1.x = 0;
-                        transVec1.y = 0;
-                        //transVec1.z = 0;
-                        transVec1.z = (-membraneObject.waterBox.z / 2.0 + RS3D) - moleculeList[molItr].interfaceList[relIface1].coord.z; //move this interface to the RS3D position in z.
-                        std::cout << " unbinding POSITION UPDATE IN Z: " << transVec1.z << std::endl;
+                    if (complexList[moleculeList[molItr].myComIndex].linksToSurface < 1 && membraneObject.TwoD == false) {
+                        if (membraneObject.isSphere) {
+                            Coord coord = moleculeList[molItr].interfaceList[relIface1].coord;
+                            double rtmp = membraneObject.sphereR - RS3D;
+                            Coord coordnew = rtmp / coord.get_magnitude() * coord;
+                            transVec1.x = coordnew.x - coord.x;
+                            transVec1.y = coordnew.y - coord.y;
+                            transVec1.z = coordnew.z - coord.z;
+                        } else {
+                            transVec1.x = 0;
+                            transVec1.y = 0;
+                            //transVec1.z = 0;
+                            transVec1.z = (-membraneObject.waterBox.z / 2.0 + RS3D) - moleculeList[molItr].interfaceList[relIface1].coord.z; //move this interface to the RS3D position in z.
+                            std::cout << " unbinding POSITION UPDATE IN Z: " << transVec1.z << std::endl;
+                        }
                         complexList[moleculeList[molItr].myComIndex].OnSurface = false; // the complex is not bound to the membrane anymore.
                     } else {
                         transVec1.x = 0;

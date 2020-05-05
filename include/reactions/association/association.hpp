@@ -39,12 +39,28 @@ extern unsigned numAssoc;
  *
  */
 void associate(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
-    Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
-    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, const Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+void associate_sphere(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
-void associate_binding_to_surface(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
-    Complex& reactCom2, const Parameters& params, const ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+void associate_implicitlipid(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
+void associate_implicitlipid_sphere(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+    Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
@@ -375,3 +391,5 @@ void com_of_two_tmp_complexes(Complex& reactCom1, Complex& reactCom2, Coord& vec
  */
 
 void update_complex_tmp_com_crds(Complex& reactCom, std::vector<Molecule>& moleculeList);
+
+double get_geodesic_distance(Coord intFace1, Coord intFace2);

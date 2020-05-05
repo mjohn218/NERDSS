@@ -7,7 +7,7 @@
 std::map<const std::string, BoundaryKeyword> bcKeywords = {
     { "implicitlipid", BoundaryKeyword::implicitLipid }, { "waterbox", BoundaryKeyword::waterBox },
     { "xbctype", BoundaryKeyword::xBCtype }, { "ybctype", BoundaryKeyword::yBCtype },
-    { "zbctype", BoundaryKeyword::zBCtype }, { "sphere", BoundaryKeyword::sphere }
+    { "zbctype", BoundaryKeyword::zBCtype }, { "issphere", BoundaryKeyword::isSphere }, { "spherer", BoundaryKeyword::sphereR }
 };
 
 void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
@@ -32,7 +32,10 @@ void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
             this->zBCtype = value;
             break;
         case 5:
-            this->sphereRadius = stod(value);
+            this->isSphere = read_boolean(value);
+            break;
+        case 6:
+            this->sphereR = std::stod(value);
             this->isSphere = true;
             break;
         default:
@@ -42,6 +45,24 @@ void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
         std::cout << e.what() << '\n';
         exit(1);
     }
+}
+
+void Membrane::display()
+{
+    std::cout << " isSphere? " << std::boolalpha << isSphere << std::endl;
+    std::cout << " sphere Radius " << sphereR << std::endl;
+    if (isBox == true) {
+        std::cout << " BOX geometry, dimensions: " << std::endl;
+        std::cout << waterBox.x << ' ' << waterBox.y << ' ' << waterBox.z << std::endl;
+    }
+    std::cout << " hasImplicitLipid? " << std::boolalpha << implicitLipid << std::endl;
+}
+
+void Membrane::create_water_box()
+{
+    waterBox.x = 2 * sphereR;
+    waterBox.y = 2 * sphereR;
+    waterBox.z = 2 * sphereR;
 }
 
 std::string create_tmp_line(const std::string& line)
@@ -127,6 +148,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
             std::vector<std::string> providedMols {};
             std::vector<std::string> providedMols_temp {};
             std::vector<MolTemplate> molTemplateList_temp {};
+            std::vector<ParsedMolNumState> providedNumState {};
             std::vector<int> providedNums {};
             while (getline(inputFile, line)) {
                 tmpLine = create_tmp_line(line);
@@ -146,7 +168,10 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                             providedMols.emplace_back(buffer);
                             line.erase(line.begin(), lineItr + 1); // + 1 removes the ':' sign. could make this erase(remove_if)
                             // find the value type from the keyword and then set that parameter
-                            providedNums.emplace_back(std::stoi(line));
+                            ParsedMolNumState tmpMolNumState {};
+                            tmpMolNumState = parse_number_bngl(line);
+                            providedNums.emplace_back(tmpMolNumState.totalCopyNumbers);
+                            providedNumState.emplace_back(tmpMolNumState);
                             gotValue = true;
                             break;
                         }
@@ -163,6 +188,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                 molTemplateList.emplace_back(parse_molFile(providedMols[providedMolIndex])); // do the actual parsing
                 molTemplateList.back().molTypeIndex = &providedMols[providedMolIndex] - &providedMols[0];
                 molTemplateList.back().copies = providedNums[providedMolIndex];
+                molTemplateList.back().startingNumState = providedNumState[providedMolIndex];
                 ++MolTemplate::numMolTypes;
                 if (molTemplateList.back().isImplicitLipid == false) {
                     params.numTotalComplex += molTemplateList.back().copies;
@@ -243,7 +269,6 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
     // TODO: TEMPORARY COUPLED RXN
     for (unsigned rxnItr { 0 }; rxnItr < forwardRxns.size(); ++rxnItr) {
         if (forwardRxns[rxnItr].isCoupled) {
-            // if the input is a asRxnIndex
             if (forwardRxns[rxnItr].coupledRxn.absRxnIndex != -1) {
                 // for the case destruction coupled to disscociation
                 for (const auto& createDestructRxn : createDestructRxns) {
@@ -419,6 +444,7 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
             std::vector<std::string> providedMols {};
             std::vector<std::string> providedMols_temp {};
             std::vector<MolTemplate> molTemplateList_temp {};
+            std::vector<ParsedMolNumState> providedNumState {};
             std::vector<int> providedNums {};
             while (getline(inputFile, line)) {
                 tmpLine = create_tmp_line(line);
@@ -438,7 +464,10 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
                             providedMols.emplace_back(buffer);
                             line.erase(line.begin(), lineItr + 1); // + 1 removes the ':' sign. could make this erase(remove_if)
                             // find the value type from the keyword and then set that parameter
-                            providedNums.emplace_back(std::stoi(line));
+                            ParsedMolNumState tmpMolNumState {};
+                            tmpMolNumState = parse_number_bngl(line);
+                            providedNums.emplace_back(tmpMolNumState.totalCopyNumbers);
+                            providedNumState.emplace_back(tmpMolNumState);
                             gotValue = true;
                             break;
                         }
@@ -455,6 +484,7 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
                 molTemplateList.emplace_back(parse_molFile(providedMols[providedMolIndex])); // do the actual parsing
                 molTemplateList.back().molTypeIndex = &providedMols[providedMolIndex] - &providedMols[0] + addMolTemplateListNum;
                 molTemplateList.back().copies = providedNums[providedMolIndex];
+                molTemplateList.back().startingNumState = providedNumState[providedMolIndex];
                 ++MolTemplate::numMolTypes;
                 if (molTemplateList.back().isImplicitLipid == false) {
                     params.numTotalComplex += molTemplateList.back().copies;

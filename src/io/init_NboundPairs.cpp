@@ -1,5 +1,6 @@
 #include "classes/class_Molecule_Complex.hpp"
 #include "classes/class_copyCounters.hpp"
+#include "tracing.hpp"
 
 using namespace std;
 
@@ -9,6 +10,7 @@ may also be bound to other proteins does not matter, so it counts all A-B bonds 
 void init_NboundPairs(
     copyCounters& counterArrays, ofstream& outfile, Parameters params, std::vector<MolTemplate>& molTemplateList, std::vector<Molecule>& moleculeList)
 {
+    TRACE();
     int i, j;
     bool bindSurface = false;
     int index;

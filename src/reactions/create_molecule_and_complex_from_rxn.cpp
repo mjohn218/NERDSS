@@ -1,10 +1,12 @@
 #include "reactions/shared_reaction_functions.hpp"
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
+#include "tracing.hpp"
 
 bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecule& createdMol,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-		      const std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject)
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
+    TRACE();
     // get which box the Molecule belongs to
     int xItr { int((createdMol.comCoord.x + membraneObject.waterBox.x / 2) / simulVolume.subCellSize.x) };
     int yItr { int((createdMol.comCoord.y + membraneObject.waterBox.y / 2) / simulVolume.subCellSize.y) };
@@ -99,10 +101,10 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
 }
 
 void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, int& newComIndex, bool createInVicinity,
-                                          const MolTemplate& createdMolTemp, Parameters& params, std::vector<int>& emptyMolLis,
-                                          std::vector<int>& emptyComLis, const CreateDestructRxn& currRxn, SimulVolume& simulVolume,
-                                          std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-                                          const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane &membraneObject)
+    const MolTemplate& createdMolTemp, Parameters& params, std::vector<int>& emptyMolLis,
+    std::vector<int>& emptyComLis, const CreateDestructRxn& currRxn, SimulVolume& simulVolume,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
     newMolIndex = 0;
     newComIndex = 0;
@@ -151,7 +153,7 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
             moleculeList[newMolIndex] = initialize_molecule_after_uni_reaction(
                 newMolIndex, moleculeList[parentMolIndex], params, createdMolTemp, currRxn);
             needsResampling = moleculeOverlaps(params, simulVolume, moleculeList[newMolIndex], moleculeList,
-					       complexList, forwardRxns, molTemplateList, membraneObject);
+                complexList, forwardRxns, molTemplateList, membraneObject);
         }
     } else {
         bool needsResampling { true };
@@ -159,7 +161,7 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
             moleculeList[newMolIndex]
                 = initialize_molecule_after_zeroth_reaction(newMolIndex, params, createdMolTemp, currRxn, membraneObject);
             needsResampling = moleculeOverlaps(params, simulVolume, moleculeList[newMolIndex], moleculeList,
-					       complexList, forwardRxns, molTemplateList, membraneObject);
+                complexList, forwardRxns, molTemplateList, membraneObject);
         }
     }
 

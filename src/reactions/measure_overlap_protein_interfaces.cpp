@@ -1,6 +1,7 @@
 #include "classes/class_Rxns.hpp"
 #include "reactions/association/association.hpp"
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 
 /*
   Loop over all interfaces of base1 and then base2.
@@ -10,6 +11,7 @@
  */
 void measure_overlap_protein_interfaces(Molecule base1, Molecule baseTmp, bool& flagCancel)
 {
+    TRACE();
     for (unsigned i { 0 }; i < base1.interfaceList.size(); i++) {
         // just check all interfaces.
         for (int m = 0; m < baseTmp.interfaceList.size(); m++) {

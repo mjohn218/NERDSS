@@ -1,10 +1,12 @@
-#include "reactions/association/association.hpp"
 #include "io/io.hpp"
+#include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
     Complex& reactCom1, Complex& reactCom2, const Vector& normal, const double& targPhi, const ForwardRxn& currRxn,
     std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     /*! \ingroup Associate
      * \brief Function to rotate a Molecule to some a target dihedral phi, relative to sigma (the
      (sigma)-(interface)-(normal) dihedral)
@@ -34,9 +36,9 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
      * not change iface1 or iface2, since they are references to different objects. Because of this, the creation of
      * the projected vectors in calculate_phi() will fail unless the index of iface2 is passed to it.
      */
- 
+
     // axis of rotation is com-iface vector
-//    Vector rotAxis = Vector { reactMol1.tmpComCoord-reactIface1 };
+    //    Vector rotAxis = Vector { reactMol1.tmpComCoord-reactIface1 };
     Vector rotAxis = Vector { reactIface1 - reactMol1.tmpComCoord };
     rotAxis.calc_magnitude();
     //    std::cout <<" in phi, rotAxis: "<<rotAxis.x<<' '<<rotAxis.y<<' '<<rotAxis.z<<std::endl;
@@ -52,7 +54,6 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
     else {
         rotAxis.normalize(); // rotation axis must be normalized
 
-        
         // Determine how much to rotate each complex by based on their respective contributions to the overall
         // rotational diffusion constant of the two molecules
         double posPhiRotAng {};
@@ -76,7 +77,7 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
         rotAxis.normalize();
         currPhi
             = calculate_phi(reactIface1, ifaceIndex2, reactMol1, reactMol2, normal, rotAxis, currRxn, molTemplateList);
-	
+
         //write_xyz_assoc("phi_forward2.xyz", reactCom1, reactCom2, moleculeList);
         if ((areSameAngle(targPhi, M_PI) || areSameAngle(targPhi, 0)) && areSameAngle(targPhi, currPhi)) {
             std::cout << "Phi After: " << currPhi << std::endl;
@@ -109,11 +110,10 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
             // rotate the two complexes
             rotate(reactIface1, rotQuatNeg, reactCom1, moleculeList);
             rotate(reactIface1, rotQuatPos, reactCom2, moleculeList);
-	    
-            
-	    rotAxis = Vector { reactIface1 - reactMol1.tmpComCoord };
-	    rotAxis.normalize();
-            
+
+            rotAxis = Vector { reactIface1 - reactMol1.tmpComCoord };
+            rotAxis.normalize();
+
             currPhi = calculate_phi(
                 reactIface1, ifaceIndex2, reactMol1, reactMol2, normal, rotAxis, currRxn, molTemplateList);
 
@@ -124,7 +124,7 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
             //write_xyz_assoc("phi_reversal2.xyz", reactCom1, reactCom2, moleculeList);
 
             // If the rotation still didn't give the desired angle
-            if (std::abs(currPhi - targPhi) > 1E-11) {
+            if (std::abs(currPhi - targPhi) > 1E-4) {
                 std::cerr << "Cannot resolve phi angle for protein " << reactMol1.index << " in complex "
                           << reactCom1.index << " relative to protein " << reactMol2.index << " in complex "
                           << reactCom2.index << ". Final angle: " << currPhi << ". Exiting..." << std::endl;

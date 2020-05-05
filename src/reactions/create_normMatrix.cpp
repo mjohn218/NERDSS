@@ -1,8 +1,10 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
 void create_normMatrix(gsl_matrix*& normMatrix, double bindRadius, double Dtot, double kr, double comRMax,
     double RStepSize, const Parameters& params)
 {
+    TRACE();
     //    double result, error;
     const double xLowB { bindRadius };
     int itr { 0 };
@@ -33,8 +35,8 @@ void create_normMatrix(gsl_matrix*& normMatrix, double bindRadius, double Dtot, 
         ++itr;
         RIndex += RStepSize;
     }
-//    std::cout << "ELEMENT 318: " << gsl_matrix_get(normMatrix, 0, 318) << ' ' << gsl_matrix_get(normMatrix, 1, 318)
-//              << '\n';
-//    std::cout << "ELEMENT 319: " << gsl_matrix_get(normMatrix, 0, 319) << ' ' << gsl_matrix_get(normMatrix, 1, 319)
-//              << '\n';
+    //    std::cout << "ELEMENT 318: " << gsl_matrix_get(normMatrix, 0, 318) << ' ' << gsl_matrix_get(normMatrix, 1, 318)
+    //              << '\n';
+    //    std::cout << "ELEMENT 319: " << gsl_matrix_get(normMatrix, 0, 319) << ' ' << gsl_matrix_get(normMatrix, 1, 319)
+    //              << '\n';
 }

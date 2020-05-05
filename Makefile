@@ -2,6 +2,7 @@
 CFLAGS = $(shell gsl-config --cflags) -std=c++0x
 ##CFLAGS += -ggdb -gdwarf-2 -Wall -I include -O
 CFLAGS +=-O3 -I include
+##CFLAGS += -D _DEBUG # comment this line if you don't need compile with debug; if you don't need tracing function, define TRACING_DISABLED
 MPCFLAG = -I /cm/shared/mpi/openmpi/2.1/intel/17.0/include
 LIBS   = $(shell gsl-config --libs)
 

@@ -1,9 +1,11 @@
 #include "math/Faddeeva.hpp"
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
 double pirr_pfree_ratio_psF(
     double rCurr, double r0, double tCurr, double Dtot, double bindrad, double alpha, double ps_prev, double rtol)
 {
+    TRACE();
 
     double fDt = 4.0 * Dtot * tCurr;
     double sq_fDt = sqrt(fDt);

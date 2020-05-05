@@ -1,8 +1,10 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
 void create_survMatrix(gsl_matrix*& survMatrix, double bindRadius, double Dtot, double kr, double comRMax,
     double RStepSize, const Parameters& params)
 {
+    TRACE();
     size_t ctr { 0 };
     //    double result; //, RstepSize = sqrt(Dtot * deltat) / 50;
     //	double Rmax = 3.0 * sqrt(4.0 * Dtot * deltat) + bindrad;

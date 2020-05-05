@@ -121,7 +121,7 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
     int rateIndex, bool isBiMolStateChange, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const ForwardRxn& oneRxn,
-    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays);
+    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, copyCounters& counterArrays);
 
 bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const double maxRandInt, Molecule& mol,
     std::vector<Molecule>& moleculeList, const std::vector<ForwardRxn>& forwardRxns);

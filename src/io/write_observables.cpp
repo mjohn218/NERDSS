@@ -1,10 +1,12 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 
 void write_observables(
     unsigned simItr, std::ofstream& observablesFile, const std::map<std::string, int>& observablesList)
 {
+    TRACE();
     if (observablesList.size() == 1)
         observablesFile << simItr << ',' << observablesList.begin()->second << '\n';
     else {

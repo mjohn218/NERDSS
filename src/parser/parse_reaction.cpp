@@ -15,7 +15,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         { "observelabel", RxnKeyword::observeLabel }, { "bindradsamecom", RxnKeyword::bindRadSameCom },
         { "irrevringclosure", RxnKeyword::irrevRingClosure },
         { "creationradius", RxnKeyword::creationRadius }, { "loopcoopfactor", RxnKeyword::loopCoopFactor },
-        { "length3dto2d", RxnKeyword::length3Dto2D }, { "rxnlabel", RxnKeyword::rxnLabel }, { "coupledrxnlabel", RxnKeyword::coupledRxnLabel } };
+							    { "length3dto2d", RxnKeyword::length3Dto2D }, { "rxnlabel", RxnKeyword::rxnLabel }, { "coupledrxnlabel", RxnKeyword::coupledRxnLabel }, {"kcat",RxnKeyword::kcat} };
 
     // Parse reaction
     ParsedRxn parsedRxn;
@@ -409,7 +409,20 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
             }
         }
     }
-
+    if(parsedRxn.isCoupled == true){
+	//create a probability for this reaction to be Michaelis Menten, if kcat exists and kb exists. Otherwise prob=1. 
+	if(std::isnan(parsedRxn.kcat)==false){
+	    
+	    double kcat=parsedRxn.kcat;// kcat is not used after this function in the code, only probCoupled is. 
+	    if(std::isnan(parsedRxn.offRatekb)==true) parsedRxn.offRatekb = 0;//set this to zero, so dissociation occurs with rate kcat, and coupled Rxn always occurs.
+	    parsedRxn.coupledRxn.probCoupled=kcat/(kcat+parsedRxn.offRatekb);
+	    parsedRxn.offRatekb +=kcat;// the rate that the bound complex undergoes reaction is due to both catalysis and unbinding. Will then choose which one to perform based on probCoupled.
+	    std::cout <<"Allow Michaelis-Menten for this reaction. Probability of catalysis: kcat/(kcat+offRatekb): "<<parsedRxn.coupledRxn.probCoupled<<" total rate: "<<parsedRxn.offRatekb<<std::endl;
+	}else{
+	    std::cout <<" No kcat rate specified, will NOT perform coupled reaction! Must specify rate using kcat " <<std::endl;
+	}
+	
+    }
     // Done parsing, set up the reaction(s) and place into their correct vectors
     if (parsedRxn.willBeMultipleRxns) {
         // if there is an interface that is missing a state (on purpose), we need to create a different forward
@@ -455,4 +468,5 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         reactTemp1.rxnPartners.push_back(reactTemp2.molTypeIndex);
         reactTemp2.rxnPartners.push_back(reactTemp1.molTypeIndex);
     }
+
 }

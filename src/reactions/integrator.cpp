@@ -1,12 +1,13 @@
-#include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "io/io.hpp"
+#include "reactions/bimolecular/2D_reaction_table_functions.hpp"
+#include "tracing.hpp"
 
 #include <iomanip>
 
 double integrator(gsl_function F, IntegrandParams params, gsl_integration_workspace* w, double r0, double bindrad,
     double Dtot, double kr, double deltat, char* funcID, double (*f)(double, void*))
 {
-
+    TRACE();
     double result {};
     double error {};
     const double xlow { 0 };

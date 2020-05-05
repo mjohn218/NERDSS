@@ -81,3 +81,6 @@ bool moleculeOverlapsForRestart(const Parameters& params, Molecule& createdMol,
 
 // function to determine molecule's isPoint and isRod
 void determine_shape_molecule(std::vector<MolTemplate>& molTemplateList);
+
+// function to initialize starting copy number for each state
+void initialize_states(std::vector<Molecule>& moleculeList, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);

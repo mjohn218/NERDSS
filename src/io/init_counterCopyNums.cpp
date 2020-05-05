@@ -1,6 +1,7 @@
 #include "classes/class_Molecule_Complex.hpp"
 #include "classes/class_Rxns.hpp"
 #include "classes/class_copyCounters.hpp"
+#include "tracing.hpp"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ using namespace std;
 void init_counterCopyNums(copyCounters& counterArrays, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject, int totalSpeciesNum)
 {
+    TRACE();
     int i, j;
 
     int index;

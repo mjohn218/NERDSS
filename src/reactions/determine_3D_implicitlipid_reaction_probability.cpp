@@ -1,12 +1,14 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
+#include "tracing.hpp"
 
 void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, const int& relStateIndex)
 {
+    TRACE();
     /*3D reaction*/
     double Dr1 {};
     if (complexList[biMolData.com1Index].D.z == 0) {

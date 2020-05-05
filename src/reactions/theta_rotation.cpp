@@ -1,14 +1,16 @@
 #include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1, Molecule& reactMol2, double targAngle,
     Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList)
 {
+    TRACE();
     Vector v1 { reactIface1 - reactMol1.tmpComCoord };
     Vector sigma { reactIface1 - reactIface2 };
     v1.calc_magnitude();
-    if(v1.magnitude<1E-12){
-	     std::cout <<"No theta rotation for a POINT particle \n";
-	     return;
+    if (v1.magnitude < 1E-12) {
+        std::cout << "No theta rotation for a POINT particle \n";
+        return;
     }
     sigma.calc_magnitude();
 
@@ -16,16 +18,15 @@ void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1,
     std::cout << "Desired theta: " << targAngle << " Current theta: " << currTheta << std::endl;
 
     // Determine if we even need to rotate (i.e. if the theta is already aligned )
-    if (std::abs(targAngle - currTheta) < 1E-8 )
+    if (std::abs(targAngle - currTheta) < 1E-8)
         std::cout << "No theta rotation needed" << std::endl;
     else {
-        
+
         // if sigma and v1 are parallel, rotation axis can't be determined by the cross product
         // so we need to find an arbitrary vector orthogonal to either. Choose either x or y axis,
-	     //whichever one is not parallel. 
+        //whichever one is not parallel.
         Vector rotAxis = (areParallel(currTheta)) ? create_arbitrary_vector(v1) : sigma.cross(v1);
         rotAxis.normalize();
-
 
         // Determine how far to rotate each Molecule, based on their respective rotation diffusion constants
         double rotAngPos {};

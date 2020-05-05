@@ -399,6 +399,11 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
             coupledRxn = CoupledRxn { line };
             break;
         }
+        case 20: {
+            kcat = std::stod(line);
+	    
+            break;
+        }
         default: {
             throw std::invalid_argument("Not a valid keyword.");
         }

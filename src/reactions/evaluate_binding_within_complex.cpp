@@ -2,6 +2,7 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/bimolecular/bimolecular_reactions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
+#include "tracing.hpp"
 
 #include <algorithm>
 
@@ -9,6 +10,7 @@ void write_debug_info(int pro1Index, int pro2Index, int iface1Index, int iface2I
     const copyCounters& counterArrays, double R1, double Keq, double probvec1, int Nc, double pdiss, double self,
     double Volume)
 {
+    TRACE();
     // just writes debug info to cout, function call is easier to comment out
     std::cout << " WITHIN COMPLEX: Proteins are R1=: " << R1 << " < bindRadSameCom: " << oneRxn.bindRadSameCom
               << " Proteins: " << pro1Index << ' ' << pro2Index << " interfaces: " << iface1Index << ' ' << iface2Index
@@ -20,7 +22,7 @@ void write_debug_info(int pro1Index, int pro2Index, int iface1Index, int iface2I
 void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Index, int iface2Index, int rxnIndex,
     int rateIndex, bool isBiMolStateChange, const Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList, const ForwardRxn& oneRxn,
-    const std::vector<BackRxn>& backRxns, copyCounters& counterArrays)
+    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, copyCounters& counterArrays)
 {
     if (moleculeList[pro1Index].trajStatus != TrajStatus::propagated
         && moleculeList[pro2Index].trajStatus != TrajStatus::propagated) {
@@ -34,7 +36,7 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
             double R1 { 0 };
             double bindSep { oneRxn.bindRadSameCom * oneRxn.bindRadius };
             withinRmax = get_distance(pro1Index, pro2Index, iface1Index, iface2Index, rxnIndex, rateIndex,
-                isBiMolStateChange, sep, R1, bindSep, complexList, oneRxn, moleculeList);
+                isBiMolStateChange, sep, R1, bindSep, complexList, oneRxn, moleculeList, membraneObject);
             /*Proteins are in the same complex!*/
             /*If these proteins are at contact (sep=0) or close to at contact (<bindrad) then
             they will associate.
@@ -65,8 +67,8 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
                 // If SELF, KD=kb*2/ka. Else, KD=kb/ka.
                 double self = 1.0;
                 // double Volume, Ka;
-		if (iface1Index == iface2Index)
-		  self = 2.0;
+                if (iface1Index == iface2Index)
+                    self = 2.0;
                 // if (complexList[moleculeList[pro1Index].myComIndex].D.z == 0) { // This is a reaction on the membrane
                 //                     // here again, assuming the forward reaction has only 1 rate
                 //                     Keq = ka / (2.0 * oneRxn.bindRadius) / kb * 1E6 / self * coop;
@@ -85,8 +87,8 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
                 */
                 double c0_nm3 = 0.602; // standard state 1M in units of /nm^3
                 //double m = kb / (ka * 1E6 * c0_nm3) * 2.0; // 1E6 is to convert ka to units of /s
-                double rateClose = ka * c0_nm3* coop / self;//(1.0 + m); // ka*c0/(1+m) where m is defined above
-		
+                double rateClose = ka * c0_nm3 * coop / self; //(1.0 + m); // ka*c0/(1+m) where m is defined above
+
                 // rateClose will be in units of /us (due to ka units), so no need for 1E-6 factor, since timeStep has
                 // units of us!!!!!
                 double probvec1 = 1 - exp(-params.timeStep * rateClose);

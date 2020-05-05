@@ -1,10 +1,12 @@
 #include "classes/class_Molecule_Complex.hpp"
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <iostream>
 
 double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
     std::vector<MolTemplate>& molTemplateList, int nImplicitLipids)
 {
+    TRACE();
     int i { 0 };
     int j { 0 };
     int size { 0 };

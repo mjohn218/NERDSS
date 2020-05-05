@@ -1,4 +1,5 @@
 #include "reactions/association/association.hpp"
+#include "tracing.hpp"
 
 /*Evaluates overlap between newly bound complex, based on distance only of COMs,
   If distance between them is < systems' params.overlapSepLimit (default 10),
@@ -8,6 +9,7 @@ void check_for_structure_overlap(bool& cancelAssoc, const Complex& reactCom1, co
     const std::vector<Molecule>& moleculeList, const Parameters& params,
     const std::vector<MolTemplate>& molTemplateList)
 {
+    TRACE();
     double overlapTolerance { params.overlapSepLimit * params.overlapSepLimit };
     for (int memMol : reactCom1.memberList) {
         if (molTemplateList[moleculeList[memMol].molTypeIndex].checkOverlap) {

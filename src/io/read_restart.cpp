@@ -1,4 +1,5 @@
 #include "io/io.hpp"
+#include "tracing.hpp"
 #include <chrono>
 #include <ctime>
 
@@ -9,6 +10,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
     std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
     std::vector<int>& emptyComList, Membrane& membraneObject, copyCounters& counterArrays)
 {
+    TRACE();
     try {
         // Read parameters
         std::cout << "READ IN PARMATERS from restart file" << std::endl;
@@ -66,7 +68,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             }
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
-            restartFile >> membraneObject.implicitLipid >> membraneObject.TwoD >> membraneObject.isBox >> membraneObject.isSphere >> membraneObject.sphereRadius;
+            restartFile >> membraneObject.implicitLipid >> membraneObject.TwoD >> membraneObject.isBox >> membraneObject.isSphere >> membraneObject.sphereR;
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.overlapSepLimit;
@@ -358,7 +360,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 if (tmpRxn.isCoupled) {
                     rxnType = -1;
                     std::cout << "did not enter iscoupled loop " << '\n';
-                    restartFile >> tmpRxn.coupledRxn.absRxnIndex >> tmpRxn.coupledRxn.relRxnIndex >> rxnType >> tmpRxn.coupledRxn.label;
+                    restartFile >> tmpRxn.coupledRxn.absRxnIndex >> tmpRxn.coupledRxn.relRxnIndex >> rxnType >> tmpRxn.coupledRxn.label >> tmpRxn.coupledRxn.probCoupled;
                     if (rxnType != -1) {
                         tmpRxn.coupledRxn.rxnType = static_cast<ReactionType>(rxnType);
                     } else {
