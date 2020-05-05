@@ -10,4 +10,4 @@ sample_inputs
 
 should initiate the simulations. 
 
-3. Detailed documentation in NERDSS_USER_GUIDE_GIT.pdf
+3. Detailed documentation in NERDSS_USER_GUIDE.pdf
