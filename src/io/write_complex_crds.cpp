@@ -5,7 +5,7 @@
 
 void write_complex_crds(std::string name, const Complex& complex1, const Complex& complex2, std::vector<Molecule>& moleculeList)
 {
-    TRACE();
+    // TRACE();
     for (auto& mp : complex1.memberList) {
         std::ofstream out("out/c" + std::to_string(complex1.index) + "_p" + std::to_string(mp) + "_" + name + ".dat");
         out << moleculeList[mp].molTypeIndex << ' ' << moleculeList[mp].myComIndex << std::endl;

@@ -13,7 +13,72 @@ void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecu
     std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns)
 {
-    TRACE();
+    // if (reactMol1.index + reactMol2.index == 72 && std::abs(reactMol1.index - reactMol2.index) == 10) {
+    //     std::cout << "Before associate: " << std::endl;
+    //     std::cout << "reactMol1: " << std::endl;
+    //     reactMol1.display(molTemplateList[reactMol1.molTypeIndex]);
+    //     std::cout << "reactMol2: " << std::endl;
+    //     reactMol2.display(molTemplateList[reactMol2.molTypeIndex]);
+    //     std::cout << "currRxn: " << std::endl;
+    //     currRxn.display();
+
+    //     std::cout << "------reactMol1.cross--------" << std::endl;
+    //     std::cout << "reactMol1.crossbase.size(): " << reactMol1.crossbase.size() << std::endl;
+    //     std::cout << "reactMol1.crossbase: ";
+    //     for (auto& tmpOne : reactMol1.crossbase) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol1.crossrxn.size(): " << reactMol1.crossrxn.size() << std::endl;
+    //     std::cout << "reactMol1.crossrxn: ";
+    //     for (auto& tmpOne : reactMol1.crossrxn) {
+    //         std::cout << "\trxnIndex: " << tmpOne[0];
+    //         std::cout << "\trateIndex: " << tmpOne[1];
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol1.probvec.size(): " << reactMol1.probvec.size() << std::endl;
+    //     std::cout << "reactMol1.probvec: ";
+    //     for (auto& tmpOne : reactMol1.probvec) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol1.mycrossint.size(): " << reactMol1.mycrossint.size() << std::endl;
+    //     std::cout << "reactMol1.mycrossint: ";
+    //     for (auto& tmpOne : reactMol1.mycrossint) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "complexList[reactMol1.myComIndex].ncross: " << complexList[reactMol1.myComIndex].ncross << std::endl;
+
+    //     std::cout << "------reactMol2.cross--------" << std::endl;
+    //     std::cout << "reactMol2.crossbase.size(): " << reactMol2.crossbase.size() << std::endl;
+    //     std::cout << "reactMol2.crossbase: ";
+    //     for (auto& tmpOne : reactMol2.crossbase) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol2.crossrxn.size(): " << reactMol2.crossrxn.size() << std::endl;
+    //     std::cout << "reactMol2.crossrxn: ";
+    //     for (auto& tmpOne : reactMol2.crossrxn) {
+    //         std::cout << "\trxnIndex: " << tmpOne[0];
+    //         std::cout << "\trateIndex: " << tmpOne[1];
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol2.probvec.size(): " << reactMol2.probvec.size() << std::endl;
+    //     std::cout << "reactMol2.probvec: ";
+    //     for (auto& tmpOne : reactMol2.probvec) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "reactMol2.mycrossint.size(): " << reactMol2.mycrossint.size() << std::endl;
+    //     std::cout << "reactMol2.mycrossint: ";
+    //     for (auto& tmpOne : reactMol2.mycrossint) {
+    //         std::cout << "\t" << tmpOne;
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "complexList[reactMol2.myComIndex].ncross: " << complexList[reactMol2.myComIndex].ncross << std::endl;
+    // }
+    // TRACE();
     if (reactCom1.index == reactCom2.index) {
         // skip to protein interation updates
         std::cout << "Closing a loop, no rotations performed.\n";
@@ -40,6 +105,12 @@ void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecu
 
         int slowPro = reactMol2.index;
 
+        if (reactCom1.D.x < reactCom2.D.x) {
+            slowPro = reactMol1.index;
+            memProtein = reactMol1; // rotate relative to the slower protein.
+        } else
+            memProtein = reactMol2;
+
         double tol = 1E-14;
         /*Calculate COM of the two complexes pre-association. The COM of the new complex after should be close to this
      * Here, we will force it back, as rotation can cause large displacements*/
@@ -65,12 +136,6 @@ void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecu
             if (DzSum < 1E-14) {
                 isOnMembrane = true;
                 /*Store coordinates of one protein to recover membrane-bound orientation*/
-
-                if (reactCom1.D.x < reactCom2.D.x) {
-                    slowPro = reactMol1.index;
-                    memProtein = reactMol1; // rotate relative to the slower protein.
-                } else
-                    memProtein = reactMol2;
 
                 //	memProtein.display_assoc_icoords("MEMORIENTATION_STORED");
                 DzSum = 1; // to prevent divide by 0
@@ -461,5 +526,14 @@ void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecu
         if (obsItr != observablesList.end())
             ++obsItr->second;
     }
-    //  reactCom1.display();
+
+    // if (reactMol1.index + reactMol2.index == 72 && std::abs(reactMol1.index - reactMol2.index) == 10) {
+    //     std::cout << "After associate: " << std::endl;
+    //     std::cout << "reactMol1: " << std::endl;
+    //     reactMol1.display(molTemplateList[reactMol1.molTypeIndex]);
+    //     std::cout << "reactMol2: " << std::endl;
+    //     reactMol2.display(molTemplateList[reactMol2.molTypeIndex]);
+    //     std::cout << "currRxn: " << std::endl;
+    //     currRxn.display();
+    // }
 }

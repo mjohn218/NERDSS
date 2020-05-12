@@ -5,7 +5,7 @@
 
 Quat orient_crds_to_template(const MolTemplate& oneTemplate, Molecule& targMol)
 {
-    TRACE();
+    // TRACE();
     Quat firstRot {};
     Quat secondRot {};
     { // first rotation

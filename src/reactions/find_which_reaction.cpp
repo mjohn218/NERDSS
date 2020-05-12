@@ -6,7 +6,7 @@ void find_which_reaction(int ifaceIndex1, int ifaceIndex2, int& rxnIndex, int& r
     const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
     const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     for (auto rxnItr : currState.myForwardRxns) {
         const ForwardRxn& oneRxn = forwardRxns[rxnItr];
         // see if we can find both of the reactants in the reaction's reactantList

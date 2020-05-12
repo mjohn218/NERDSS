@@ -8,7 +8,7 @@ using namespace std;
 // write the header for file tracking all species
 int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns)
 {
-    TRACE();
+    // TRACE();
     int nSpecies = 0;
     speciesFile << "Itr";
     for (const auto& oneTemp : molTemplateList) {

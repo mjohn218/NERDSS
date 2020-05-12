@@ -1,4 +1,5 @@
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
+#include "tracing.hpp"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_matrix.h>
@@ -19,7 +20,7 @@ double dissociate2D(paramsIL& parameters2D)
     int Na = parameters2D.Na;
     int Nlipid = parameters2D.Nlipid;
     double A = parameters2D.area;
-    if (kb < 1E-25) {
+    if (kb < 1E-15) {
         return 0.0;
     }
 
@@ -74,15 +75,15 @@ double integral_for_blockdistance2D(paramsIL& parameters2D)
     F.function = &function2D;
     F.params = &params;
     gsl_set_error_handler_off();
-    int status = gsl_integration_qagiu(&F, 0, eps1, eps2, 1e6, w, &result, &error);
+    int status = gsl_integration_qagiu(&F, 0, eps1, eps2, 1000000, w, &result, &error);
     if (status != GSL_SUCCESS) {
         double u1 = 0;
         double u2 = 1.0e4;
-        while (abs(function2D(u2, F.params)) > 1.0e-5) {
+        while (std::abs(function2D(u2, F.params)) > 1.0e-5) {
             u2 = u2 * 1.5;
         }
         while (status != GSL_SUCCESS) {
-            int status = gsl_integration_qags(&F, u1, u2, eps1, eps1, 1e6, w, &result, &error);
+            status = gsl_integration_qags(&F, u1, u2, eps1, eps1, 1000000, w, &result, &error);
             u2 = u2 * 0.9;
         }
     }
@@ -103,7 +104,7 @@ void block_distance(paramsIL& parameters2D)
     double rmin = sigma;
     double rmax = Rmax;
     double rmean, right;
-    while (abs(rmax - rmin) > criterion) {
+    while (std::abs(rmax - rmin) > criterion) {
         rmean = 0.5 * (rmax + rmin);
         parameters2D.R2D = rmean;
         right = 4 * kb * integral_for_blockdistance2D(parameters2D);
@@ -122,12 +123,11 @@ void block_distance(paramsIL& parameters2D)
 double pimplicitlipid_2D(paramsIL& parameters2D)
 {
     double ka = parameters2D.ka;
-    if (ka < 1E-25) {
+    if (ka < 1E-15) {
         return 0.0;
     }
     block_distance(parameters2D);
-    //std::cout<<parameters2D.R2D<<std::endl;
-
+    // std::cout<<parameters2D.R2D<<std::endl;
     paramsIL params = parameters2D;
     gsl_integration_workspace* w = gsl_integration_workspace_alloc(1e6);
     double result, error;
@@ -137,21 +137,22 @@ double pimplicitlipid_2D(paramsIL& parameters2D)
     F.function = &function2D;
     F.params = &params;
     gsl_set_error_handler_off();
-    int status = gsl_integration_qagiu(&F, 0, eps1, eps2, 1e6, w, &result, &error);
+    int status = gsl_integration_qagiu(&F, 0, eps1, eps2, 1000000, w, &result, &error);
     if (status != GSL_SUCCESS) {
         double u1 = 0;
         double u2 = 1.0e4;
-        while (abs(function2D(u2, F.params)) > 1.0e-5) {
+        while (std::abs(function2D(u2, F.params)) > 1.0e-5) {
             u2 = u2 * 1.5;
         }
         while (status != GSL_SUCCESS) {
-            int status = gsl_integration_qags(&F, u1, u2, eps1, eps1, 1e6, w, &result, &error);
+            status = gsl_integration_qags(&F, u1, u2, eps1, eps1, 1000000, w, &result, &error);
             u2 = u2 * 0.9;
         }
     }
     gsl_integration_workspace_free(w);
     gsl_set_error_handler(NULL);
 
+    //double ka = parameters2D.ka;
     return result * 4 * ka;
 }
 
@@ -165,7 +166,7 @@ double dissociate3D(double h, double D, double sigma, double ka, double kbsecond
     //double ka = parameters3D.ka;
     //double kb = parameters3D.kb;
     double kb = kbsecond / 1.0e6; // change the unit S into us.
-    if (kb < 1E-25) {
+    if (kb < 1E-15) {
         return 0.0;
     }
     double KD = 2.0 * kb / ka;
@@ -182,7 +183,7 @@ double pimplicitlipid_3D(double z, paramsIL& parameters3D)
     double D = parameters3D.Dtot;
     double sigma = parameters3D.sigma;
     double ka = parameters3D.ka;
-    if (ka < 1E-25) {
+    if (ka < 1E-15) {
         return 0.0;
     }
 

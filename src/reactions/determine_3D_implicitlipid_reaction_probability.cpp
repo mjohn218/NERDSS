@@ -8,7 +8,7 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, const int& relStateIndex)
 {
-    TRACE();
+    // TRACE();
     /*3D reaction*/
     double Dr1 {};
     if (complexList[biMolData.com1Index].D.z == 0) {

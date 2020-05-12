@@ -11,7 +11,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
     const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
     const std::vector<int>& emptyComList, const Membrane& membraneObject, const copyCounters& counterArrays)
 {
-    TRACE();
+    // TRACE();
     // Write parameters
     {
         restartFile << "#Parameters--update these for restart \n";
@@ -163,7 +163,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << oneRxn.norm2.x << ' ' << oneRxn.norm2.y << ' ' << oneRxn.norm2.z << '\n';
             restartFile << oneRxn.isCoupled;
             if (oneRxn.isCoupled)
-                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label << ' ' << oneRxn.coupledRxn.probCoupled;
+                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label << ' ' << std::setprecision(20) << oneRxn.coupledRxn.probCoupled;
             restartFile << '\n';
 
             // integer reactants
@@ -199,7 +199,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             // rate list
             restartFile << oneRxn.rateList.size() << '\n';
             for (auto& oneRate : oneRxn.rateList) {
-                restartFile << oneRate.rate << '\n';
+                restartFile << std::setprecision(20) << oneRate.rate << '\n';
                 restartFile << oneRate.otherIfaceLists.size() << '\n';
                 for (const auto& otherIfaceList : oneRate.otherIfaceLists) {
                     restartFile << otherIfaceList.size() << '\n';
@@ -253,7 +253,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             // rate list
             restartFile << oneRxn.rateList.size() << '\n';
             for (const auto& oneRate : oneRxn.rateList) {
-                restartFile << oneRate.rate << '\n';
+                restartFile << std::setprecision(20) << oneRate.rate << '\n';
                 restartFile << oneRate.otherIfaceLists.size() << '\n';
                 for (const auto& oneList : oneRate.otherIfaceLists) {
                     restartFile << oneList.size() << '\n';
@@ -314,7 +314,7 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
 
             restartFile << oneRxn.rateList.size() << '\n';
             for (auto& oneRate : oneRxn.rateList) {
-                restartFile << oneRate.rate << '\n';
+                restartFile << std::setprecision(20) << oneRate.rate << '\n';
                 restartFile << oneRate.otherIfaceLists.size() << '\n';
                 // if (oneRate.otherIfaceLists.size() != 0) {
                 //     for (const auto& anccIface : oneRate.otherIfaceLists[0]) {

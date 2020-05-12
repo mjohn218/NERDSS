@@ -7,7 +7,7 @@
 void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     if (membraneObject.isSphere)
         sweep_separation_complex_rot_memtest_sphere(simItr, pro1Index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
     else

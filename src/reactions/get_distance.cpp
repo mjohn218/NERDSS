@@ -20,7 +20,8 @@ bool get_distance(int pro1, int pro2, int iface1, int iface2, int rxnIndex, int 
     } else {
         double dx = moleculeList[pro1].interfaceList[iface1].coord.x - moleculeList[pro2].interfaceList[iface2].coord.x;
         double dy = moleculeList[pro1].interfaceList[iface1].coord.y - moleculeList[pro2].interfaceList[iface2].coord.y;
-        double dz { (complexList[moleculeList[pro1].myComIndex].D.z == 0 && complexList[moleculeList[pro2].myComIndex].D.z == 0)
+        double dz { (std::abs(complexList[moleculeList[pro1].myComIndex].D.z - 0) < 1E-10
+                        && std::abs(complexList[moleculeList[pro2].myComIndex].D.z - 0) < 1E-10)
                 ? 0
                 : moleculeList[pro1].interfaceList[iface1].coord.z - moleculeList[pro2].interfaceList[iface2].coord.z };
         R1 = sqrt((dx * dx) + (dy * dy) + (dz * dz));

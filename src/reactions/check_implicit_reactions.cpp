@@ -13,7 +13,7 @@ void check_implicit_reactions(int pro1Index, int pro2Index, int simItr,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
 {
-    TRACE();
+    // TRACE();
     // only consider when pro2 IS implicit-lipid
     if (moleculeList[pro2Index].isImplicitLipid == false)
         return;

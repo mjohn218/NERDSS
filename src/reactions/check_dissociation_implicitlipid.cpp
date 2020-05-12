@@ -13,7 +13,7 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
     std::vector<Complex>& complexList, const std::vector<BackRxn>& backRxns, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
 {
-    TRACE();
+    // TRACE();
     double Dtot;
     for (int relIface1Itr { 0 }; relIface1Itr < moleculeList[molItr].bndlist.size(); ++relIface1Itr) {
         int relIface1 { moleculeList[molItr].bndlist[relIface1Itr] };
@@ -159,257 +159,257 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
                 }
             }
 
-            double rnum { rand_gsl() };
-            if (prob > rnum) {
-                double rnum2 { rnum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
-                if (prob > rnum2) {
-                    std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
-                              << " from the membrane, with probability: " << prob << '\n';
-                    std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
-                              << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
-                    std::cout << " protein coords for : " << molItr << std::endl;
-                    moleculeList[molItr].display_my_coords("proteinonsurface");
-                    /*std::cout << "Complex members:";
+            // double rnum { rand_gsl() };
+            if (prob > rand_gsl()) {
+                // double rnum2 { rnum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
+                // if (prob > rnum2) {
+                std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
+                          << " from the membrane, with probability: " << prob << '\n';
+                std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
+                          << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
+                std::cout << " protein coords for : " << molItr << std::endl;
+                moleculeList[molItr].display_my_coords("proteinonsurface");
+                /*std::cout << "Complex members:";
                         for (const auto& memMol : complexList[moleculeList[molItr].myComIndex].memberList)
                             std::cout << ' ' << memMol;
                         std::cout << '\n';
 			*/
 
-                    // 'break_interaction' frees certain protein and its interface
-                    break_interaction_implicitlipid(relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
-                        backRxns[mu], emptyComList, moleculeList, complexList, molTemplateList);
+                // 'break_interaction' frees certain protein and its interface
+                break_interaction_implicitlipid(relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
+                    backRxns[mu], emptyComList, moleculeList, complexList, molTemplateList);
 
-                    // Change the number of bound pairs in the system.
-                    update_Nboundpairs(moleculeList[molItr].molTypeIndex, moleculeList[pro2Index].molTypeIndex, -1,
-                        params, counterArrays);
-                    //Update species copy numbers
-                    //std::cout <<"Add new to index:" <<backRxns[mu].productListNew[0].absIfaceIndex<<' '<<backRxns[mu].productListNew[1].absIfaceIndex;
-                    //std::cout <<"Subtract from index: "<<backRxns[mu].reactantListNew[0].absIfaceIndex<<std::endl;
-                    counterArrays.copyNumSpecies[backRxns[mu].reactantListNew[0].absIfaceIndex] -= 1;
-                    counterArrays.copyNumSpecies[backRxns[mu].productListNew[0].absIfaceIndex] += 1;
-                    counterArrays.copyNumSpecies[backRxns[mu].productListNew[1].absIfaceIndex] += 1;
-                    //counterArrays.copyNumSpecies[moleculeList[molItr].interfaceList[relIface1].index]  += 1;
-                    //counterArrays.copyNumSpecies[moleculeList[pro2Index].interfaceList[relIface2].index]  += 1;
+                // Change the number of bound pairs in the system.
+                update_Nboundpairs(moleculeList[molItr].molTypeIndex, moleculeList[pro2Index].molTypeIndex, -1,
+                    params, counterArrays);
+                //Update species copy numbers
+                //std::cout <<"Add new to index:" <<backRxns[mu].productListNew[0].absIfaceIndex<<' '<<backRxns[mu].productListNew[1].absIfaceIndex;
+                //std::cout <<"Subtract from index: "<<backRxns[mu].reactantListNew[0].absIfaceIndex<<std::endl;
+                counterArrays.copyNumSpecies[backRxns[mu].reactantListNew[0].absIfaceIndex] -= 1;
+                counterArrays.copyNumSpecies[backRxns[mu].productListNew[0].absIfaceIndex] += 1;
+                counterArrays.copyNumSpecies[backRxns[mu].productListNew[1].absIfaceIndex] += 1;
+                //counterArrays.copyNumSpecies[moleculeList[molItr].interfaceList[relIface1].index]  += 1;
+                //counterArrays.copyNumSpecies[moleculeList[pro2Index].interfaceList[relIface2].index]  += 1;
 
-                    //update No_free_lipids according to state of IL
-                    const BackRxn& currRxn = backRxns[mu];
-                    RxnIface implicitLipidState {};
-                    const auto& implicitLipidStateList = molTemplateList[moleculeList[membraneObject.implicitlipidIndex].molTypeIndex].interfaceList[0].stateList;
-                    if (molTemplateList[currRxn.productListNew[1].molTypeIndex].isImplicitLipid == true) {
-                        implicitLipidState = currRxn.productListNew[1];
-                    } else {
-                        implicitLipidState = currRxn.productListNew[0];
+                //update No_free_lipids according to state of IL
+                const BackRxn& currRxn = backRxns[mu];
+                RxnIface implicitLipidState {};
+                const auto& implicitLipidStateList = molTemplateList[moleculeList[membraneObject.implicitlipidIndex].molTypeIndex].interfaceList[0].stateList;
+                if (molTemplateList[currRxn.productListNew[1].molTypeIndex].isImplicitLipid == true) {
+                    implicitLipidState = currRxn.productListNew[1];
+                } else {
+                    implicitLipidState = currRxn.productListNew[0];
+                }
+                int relStateIndex { -1 };
+                for (auto& state : implicitLipidStateList) {
+                    if (state.index == implicitLipidState.absIfaceIndex) {
+                        relStateIndex = static_cast<int>(&state - &implicitLipidStateList[0]);
+                        break;
                     }
-                    int relStateIndex { -1 };
-                    for (auto& state : implicitLipidStateList) {
-                        if (state.index == implicitLipidState.absIfaceIndex) {
-                            relStateIndex = static_cast<int>(&state - &implicitLipidStateList[0]);
-                            break;
-                        }
-                    }
-                    membraneObject.numberOfFreeLipidsEachState[relStateIndex] += 1;
+                }
+                membraneObject.numberOfFreeLipidsEachState[relStateIndex] += 1;
 
-                    // update the number of bonds that this complex has connected to the membrane surface.
-                    //this also needs to be done for the individual proteins.
-                    complexList[moleculeList[molItr].myComIndex].linksToSurface -= 1;
-                    moleculeList[molItr].linksToSurface--;
-                    // consider the reflecting-surface movement
-                    Vector transVec1 {};
-                    if (complexList[moleculeList[molItr].myComIndex].linksToSurface < 1 && membraneObject.TwoD == false) {
-                        if (membraneObject.isSphere) {
-                            Coord coord = moleculeList[molItr].interfaceList[relIface1].coord;
-                            double rtmp = membraneObject.sphereR - RS3D;
-                            Coord coordnew = rtmp / coord.get_magnitude() * coord;
-                            transVec1.x = coordnew.x - coord.x;
-                            transVec1.y = coordnew.y - coord.y;
-                            transVec1.z = coordnew.z - coord.z;
-                        } else {
-                            transVec1.x = 0;
-                            transVec1.y = 0;
-                            //transVec1.z = 0;
-                            transVec1.z = (-membraneObject.waterBox.z / 2.0 + RS3D) - moleculeList[molItr].interfaceList[relIface1].coord.z; //move this interface to the RS3D position in z.
-                            std::cout << " unbinding POSITION UPDATE IN Z: " << transVec1.z << std::endl;
-                        }
-                        complexList[moleculeList[molItr].myComIndex].OnSurface = false; // the complex is not bound to the membrane anymore.
+                // update the number of bonds that this complex has connected to the membrane surface.
+                //this also needs to be done for the individual proteins.
+                complexList[moleculeList[molItr].myComIndex].linksToSurface -= 1;
+                moleculeList[molItr].linksToSurface--;
+                // consider the reflecting-surface movement
+                Vector transVec1 {};
+                if (complexList[moleculeList[molItr].myComIndex].linksToSurface < 1 && membraneObject.TwoD == false) {
+                    if (membraneObject.isSphere) {
+                        Coord coord = moleculeList[molItr].interfaceList[relIface1].coord;
+                        double rtmp = membraneObject.sphereR - RS3D;
+                        Coord coordnew = rtmp / coord.get_magnitude() * coord;
+                        transVec1.x = coordnew.x - coord.x;
+                        transVec1.y = coordnew.y - coord.y;
+                        transVec1.z = coordnew.z - coord.z;
                     } else {
                         transVec1.x = 0;
                         transVec1.y = 0;
-                        transVec1.z = 0;
-                        complexList[moleculeList[molItr].myComIndex].OnSurface = true;
+                        //transVec1.z = 0;
+                        transVec1.z = (-membraneObject.waterBox.z / 2.0 + RS3D) - moleculeList[molItr].interfaceList[relIface1].coord.z; //move this interface to the RS3D position in z.
+                        std::cout << " unbinding POSITION UPDATE IN Z: " << transVec1.z << std::endl;
                     }
-                    //BINDING CURRENT PUTS PROTEINS AT RS3D, SO NO DISPLACEMENT AFTER DISSOCIATIONS
-                    // update the temporary coordinates. If binding places it at RS, do not move here!!
-                    for (auto& mp : complexList[moleculeList[molItr].myComIndex].memberList)
-                        moleculeList[mp].update_association_coords(transVec1);
+                    complexList[moleculeList[molItr].myComIndex].OnSurface = false; // the complex is not bound to the membrane anymore.
+                } else {
+                    transVec1.x = 0;
+                    transVec1.y = 0;
+                    transVec1.z = 0;
+                    complexList[moleculeList[molItr].myComIndex].OnSurface = true;
+                }
+                //BINDING CURRENT PUTS PROTEINS AT RS3D, SO NO DISPLACEMENT AFTER DISSOCIATIONS
+                // update the temporary coordinates. If binding places it at RS, do not move here!!
+                for (auto& mp : complexList[moleculeList[molItr].myComIndex].memberList)
+                    moleculeList[mp].update_association_coords(transVec1);
 
-                    for (auto memMol : complexList[moleculeList[molItr].myComIndex].memberList) {
-                        moleculeList[memMol].comCoord = moleculeList[memMol].tmpComCoord;
-                        for (unsigned int i { 0 }; i < moleculeList[memMol].interfaceList.size(); ++i)
-                            moleculeList[memMol].interfaceList[i].coord = moleculeList[memMol].tmpICoords[i];
-                        moleculeList[memMol].clear_tmp_association_coords();
-                    }
-                    //*/
-                    complexList[moleculeList[molItr].myComIndex].update_properties(moleculeList, molTemplateList); // recalculate the properties of the first complex
-                    //reflect_complex_rad_rot(membraneObject, complexList[moleculeList[molItr].myComIndex], moleculeList);
+                for (auto memMol : complexList[moleculeList[molItr].myComIndex].memberList) {
+                    moleculeList[memMol].comCoord = moleculeList[memMol].tmpComCoord;
+                    for (unsigned int i { 0 }; i < moleculeList[memMol].interfaceList.size(); ++i)
+                        moleculeList[memMol].interfaceList[i].coord = moleculeList[memMol].tmpICoords[i];
+                    moleculeList[memMol].clear_tmp_association_coords();
+                }
+                //*/
+                complexList[moleculeList[molItr].myComIndex].update_properties(moleculeList, molTemplateList); // recalculate the properties of the first complex
+                //reflect_complex_rad_rot(membraneObject, complexList[moleculeList[molItr].myComIndex], moleculeList);
 
-                    std::cout << "Coords of p1 (COM) after dissociation: \n"; // << moleculeList[molItr].comCoord << '\n';
-                    moleculeList[molItr].display_my_coords("proteinatRS");
-                    std::cout << "The partner was an implicit lipid" << '\n';
-                    complexList[moleculeList[molItr].myComIndex].display();
-                    // change the traj Status
-                    //complexList[moleculeList[molItr].myComIndex].trajStatus = TrajStatus::propagated;
-                    for (auto memMol : complexList[moleculeList[molItr].myComIndex].memberList)
-                        moleculeList[memMol].trajStatus = TrajStatus::propagated;
+                std::cout << "Coords of p1 (COM) after dissociation: \n"; // << moleculeList[molItr].comCoord << '\n';
+                moleculeList[molItr].display_my_coords("proteinatRS");
+                std::cout << "The partner was an implicit lipid" << '\n';
+                complexList[moleculeList[molItr].myComIndex].display();
+                // change the traj Status
+                //complexList[moleculeList[molItr].myComIndex].trajStatus = TrajStatus::propagated;
+                for (auto memMol : complexList[moleculeList[molItr].myComIndex].memberList)
+                    moleculeList[memMol].trajStatus = TrajStatus::propagated;
 
-                    // TODO: Temporary implementation for destruction coupled to dissociation
-                    /*Must be a C->A+B
+                // TODO: Temporary implementation for destruction coupled to dissociation
+                /*Must be a C->A+B
                           Find out if A or B is being destroyed.
                          */
-                    if (backRxns[mu].isCoupled) {
-                        if (backRxns[mu].coupledRxn.rxnType == ReactionType::destruction) {
-                            int destroyProIndex { -1 };
-                            const CreateDestructRxn& coupledRxn
-                                = createDestructRxns[backRxns[mu].coupledRxn.relRxnIndex]; // which reaction is being
-                            // performed.
-                            if (moleculeList[molItr].molTypeIndex == coupledRxn.reactantMolList[0].molTypeIndex) {
-                                destroyProIndex = molItr; // Is it A or B?
-                            } else {
-                                destroyProIndex = pro2Index;
-                            }
-                            if (moleculeList[destroyProIndex].isImplicitLipid == true) {
-                                int indexIlState = coupledRxn.reactantMolList.at(0).interfaceList.at(0).absIfaceIndex;
-                                std::cout << "Performing coupled IL destruction reaction.\n";
-                                --counterArrays.copyNumSpecies[indexIlState];
-                                --membraneObject.numberOfFreeLipidsEachState[indexIlState];
-                            } else {
-                                std::cout << "Performing coupled destruction reaction.\n";
-                                // decrement the copy number array for everything in complex
-                                for (auto& memMol : complexList[moleculeList[destroyProIndex].myComIndex].memberList) {
-                                    for (auto& iface : moleculeList[memMol].interfaceList) {
-                                        --counterArrays.copyNumSpecies[iface.index];
-                                    }
+                if (backRxns[mu].isCoupled) {
+                    if (backRxns[mu].coupledRxn.rxnType == ReactionType::destruction) {
+                        int destroyProIndex { -1 };
+                        const CreateDestructRxn& coupledRxn
+                            = createDestructRxns[backRxns[mu].coupledRxn.relRxnIndex]; // which reaction is being
+                        // performed.
+                        if (moleculeList[molItr].molTypeIndex == coupledRxn.reactantMolList[0].molTypeIndex) {
+                            destroyProIndex = molItr; // Is it A or B?
+                        } else {
+                            destroyProIndex = pro2Index;
+                        }
+                        if (moleculeList[destroyProIndex].isImplicitLipid == true) {
+                            int indexIlState = coupledRxn.reactantMolList.at(0).interfaceList.at(0).absIfaceIndex;
+                            std::cout << "Performing coupled IL destruction reaction.\n";
+                            --counterArrays.copyNumSpecies[indexIlState];
+                            --membraneObject.numberOfFreeLipidsEachState[indexIlState];
+                        } else {
+                            std::cout << "Performing coupled destruction reaction.\n";
+                            // decrement the copy number array for everything in complex
+                            for (auto& memMol : complexList[moleculeList[destroyProIndex].myComIndex].memberList) {
+                                for (auto& iface : moleculeList[memMol].interfaceList) {
+                                    --counterArrays.copyNumSpecies[iface.index];
                                 }
-                                complexList[moleculeList[destroyProIndex].myComIndex].destroy(moleculeList, emptyMolList,
-                                    complexList, emptyComList); // destroying the entire complex that this molecule is a part of.
+                            }
+                            complexList[moleculeList[destroyProIndex].myComIndex].destroy(moleculeList, emptyMolList,
+                                complexList, emptyComList); // destroying the entire complex that this molecule is a part of.
 
-                                // remove the molecule from the SimulVolume subsCellList
-                                // have this here to avoid circular header calls with SimulVolume and
-                                // Molecule_Complex
-                                for (auto itr = simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.begin();
-                                     itr != simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.end();
-                                     ++itr) {
-                                    if (*itr == moleculeList[destroyProIndex].index) {
-                                        simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.erase(itr);
-                                        break;
-                                    }
+                            // remove the molecule from the SimulVolume subsCellList
+                            // have this here to avoid circular header calls with SimulVolume and
+                            // Molecule_Complex
+                            for (auto itr = simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.begin();
+                                 itr != simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.end();
+                                 ++itr) {
+                                if (*itr == moleculeList[destroyProIndex].index) {
+                                    simulVolume.subCellList[moleculeList[destroyProIndex].mySubVolIndex].memberMolList.erase(itr);
+                                    break;
                                 }
-                                moleculeList[destroyProIndex].mySubVolIndex = -1; // reinitialize index
                             }
-                            if (coupledRxn.isObserved) {
-                                auto observeItr = observablesList.find(coupledRxn.observeLabel);
-                                if (observeItr == observablesList.end()) {
-                                    std::cerr << "WARNING: Observable " << coupledRxn.observeLabel << " not defined.\n";
-                                } else {
-                                    --observeItr->second;
-                                }
+                            moleculeList[destroyProIndex].mySubVolIndex = -1; // reinitialize index
+                        }
+                        if (coupledRxn.isObserved) {
+                            auto observeItr = observablesList.find(coupledRxn.observeLabel);
+                            if (observeItr == observablesList.end()) {
+                                std::cerr << "WARNING: Observable " << coupledRxn.observeLabel << " not defined.\n";
+                            } else {
+                                --observeItr->second;
                             }
                         }
-
-                        if (backRxns[mu].coupledRxn.rxnType == ReactionType::uniMolStateChange) {
-                            int stateChangeProIndex { -1 };
-                            int relIndex { -1 };
-                            const ForwardRxn& coupledRxn = forwardRxns[backRxns[mu].coupledRxn.relRxnIndex]; // which reaction is being performed.
-                            if (molTemplateList[coupledRxn.reactantListNew[0].molTypeIndex].isImplicitLipid == true) {
-                                int indexIlState = coupledRxn.reactantListNew[0].absIfaceIndex;
-                                int indexIlStateNew = coupledRxn.productListNew[0].absIfaceIndex;
-
-                                std::cout << "Performing coupled IL uniMolStateChange reaction.\n";
-
-                                --counterArrays.copyNumSpecies[indexIlState];
-                                ++counterArrays.copyNumSpecies[indexIlStateNew];
-                                --membraneObject.numberOfFreeLipidsEachState[indexIlState];
-                                ++membraneObject.numberOfFreeLipidsEachState[indexIlStateNew];
-
-                                // check observables
-                                bool isObserved { false };
-                                std::string observeLabel {};
-
-                                isObserved = coupledRxn.isObserved;
-                                observeLabel = coupledRxn.observeLabel;
-
-                                if (isObserved) {
-                                    auto observeItr = observablesList.find(observeLabel);
-                                    if (observeItr == observablesList.end()) {
-                                        std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
-                                    } else {
-                                        ++observeItr->second;
-                                    }
-                                }
-                            } else {
-                                // make sure the molecule iface have the same state with the uniMolStateChange reaction's reactant
-                                for (auto& tmpIface : moleculeList[molItr].interfaceList) {
-                                    if (tmpIface.index == coupledRxn.reactantListNew[0].absIfaceIndex) {
-                                        stateChangeProIndex = molItr; // Is it A or B?
-                                        relIndex = tmpIface.relIndex;
-                                    }
-                                }
-                                for (auto& tmpIface : moleculeList[pro2Index].interfaceList) {
-                                    if (tmpIface.index == coupledRxn.reactantListNew[0].absIfaceIndex) {
-                                        stateChangeProIndex = pro2Index; // Is it A or B?
-                                        relIndex = tmpIface.relIndex;
-                                    }
-                                }
-
-                                if (stateChangeProIndex == -1) {
-                                    std::cerr << "The products of the disscociation do not match the corresponding uniMolStateChange reactant." << std::endl;
-                                    exit(1);
-                                }
-
-                                std::cout << "Performing coupled uniMolStateChange reaction.\n";
-
-                                const auto& stateList = molTemplateList[moleculeList[stateChangeProIndex].molTypeIndex].interfaceList[relIndex].stateList;
-                                const auto& newState = coupledRxn.productListNew[0];
-                                int relStateIndex { -1 };
-                                for (auto& state : stateList) {
-                                    if (state.index == newState.absIfaceIndex) {
-                                        relStateIndex = static_cast<int>(&state - &stateList[0]);
-                                        break;
-                                    }
-                                }
-
-                                // check observables
-                                bool isObserved { false };
-                                std::string observeLabel {};
-
-                                isObserved = coupledRxn.isObserved;
-                                observeLabel = coupledRxn.observeLabel;
-
-                                if (isObserved) {
-                                    auto observeItr = observablesList.find(observeLabel);
-                                    if (observeItr == observablesList.end()) {
-                                        std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
-                                    } else {
-                                        ++observeItr->second;
-                                    }
-                                }
-
-                                --counterArrays.copyNumSpecies[coupledRxn.reactantListNew[0].absIfaceIndex];
-                                ++counterArrays.copyNumSpecies[coupledRxn.productListNew[0].absIfaceIndex];
-                                moleculeList[stateChangeProIndex].interfaceList[relIndex].change_state(
-                                    relStateIndex, newState.absIfaceIndex, newState.requiresState);
-
-                                moleculeList[stateChangeProIndex].trajStatus = TrajStatus::propagated;
-                                complexList[moleculeList[stateChangeProIndex].myComIndex].trajStatus = TrajStatus::propagated;
-                            }
-                        }
-                    } // finished with IsCoupled?
-
-                    if (backRxns[mu].isObserved) {
-                        auto obsItr = observablesList.find(backRxns[mu].observeLabel);
-                        if (obsItr != observablesList.end())
-                            --obsItr->second;
                     }
+
+                    if (backRxns[mu].coupledRxn.rxnType == ReactionType::uniMolStateChange) {
+                        int stateChangeProIndex { -1 };
+                        int relIndex { -1 };
+                        const ForwardRxn& coupledRxn = forwardRxns[backRxns[mu].coupledRxn.relRxnIndex]; // which reaction is being performed.
+                        if (molTemplateList[coupledRxn.reactantListNew[0].molTypeIndex].isImplicitLipid == true) {
+                            int indexIlState = coupledRxn.reactantListNew[0].absIfaceIndex;
+                            int indexIlStateNew = coupledRxn.productListNew[0].absIfaceIndex;
+
+                            std::cout << "Performing coupled IL uniMolStateChange reaction.\n";
+
+                            --counterArrays.copyNumSpecies[indexIlState];
+                            ++counterArrays.copyNumSpecies[indexIlStateNew];
+                            --membraneObject.numberOfFreeLipidsEachState[indexIlState];
+                            ++membraneObject.numberOfFreeLipidsEachState[indexIlStateNew];
+
+                            // check observables
+                            bool isObserved { false };
+                            std::string observeLabel {};
+
+                            isObserved = coupledRxn.isObserved;
+                            observeLabel = coupledRxn.observeLabel;
+
+                            if (isObserved) {
+                                auto observeItr = observablesList.find(observeLabel);
+                                if (observeItr == observablesList.end()) {
+                                    std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
+                                } else {
+                                    ++observeItr->second;
+                                }
+                            }
+                        } else {
+                            // make sure the molecule iface have the same state with the uniMolStateChange reaction's reactant
+                            for (auto& tmpIface : moleculeList[molItr].interfaceList) {
+                                if (tmpIface.index == coupledRxn.reactantListNew[0].absIfaceIndex) {
+                                    stateChangeProIndex = molItr; // Is it A or B?
+                                    relIndex = tmpIface.relIndex;
+                                }
+                            }
+                            for (auto& tmpIface : moleculeList[pro2Index].interfaceList) {
+                                if (tmpIface.index == coupledRxn.reactantListNew[0].absIfaceIndex) {
+                                    stateChangeProIndex = pro2Index; // Is it A or B?
+                                    relIndex = tmpIface.relIndex;
+                                }
+                            }
+
+                            if (stateChangeProIndex == -1) {
+                                std::cerr << "The products of the disscociation do not match the corresponding uniMolStateChange reactant." << std::endl;
+                                exit(1);
+                            }
+
+                            std::cout << "Performing coupled uniMolStateChange reaction.\n";
+
+                            const auto& stateList = molTemplateList[moleculeList[stateChangeProIndex].molTypeIndex].interfaceList[relIndex].stateList;
+                            const auto& newState = coupledRxn.productListNew[0];
+                            int relStateIndex { -1 };
+                            for (auto& state : stateList) {
+                                if (state.index == newState.absIfaceIndex) {
+                                    relStateIndex = static_cast<int>(&state - &stateList[0]);
+                                    break;
+                                }
+                            }
+
+                            // check observables
+                            bool isObserved { false };
+                            std::string observeLabel {};
+
+                            isObserved = coupledRxn.isObserved;
+                            observeLabel = coupledRxn.observeLabel;
+
+                            if (isObserved) {
+                                auto observeItr = observablesList.find(observeLabel);
+                                if (observeItr == observablesList.end()) {
+                                    std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
+                                } else {
+                                    ++observeItr->second;
+                                }
+                            }
+
+                            --counterArrays.copyNumSpecies[coupledRxn.reactantListNew[0].absIfaceIndex];
+                            ++counterArrays.copyNumSpecies[coupledRxn.productListNew[0].absIfaceIndex];
+                            moleculeList[stateChangeProIndex].interfaceList[relIndex].change_state(
+                                relStateIndex, newState.absIfaceIndex, newState.requiresState);
+
+                            moleculeList[stateChangeProIndex].trajStatus = TrajStatus::propagated;
+                            complexList[moleculeList[stateChangeProIndex].myComIndex].trajStatus = TrajStatus::propagated;
+                        }
+                    }
+                } // finished with IsCoupled?
+
+                if (backRxns[mu].isObserved) {
+                    auto obsItr = observablesList.find(backRxns[mu].observeLabel);
+                    if (obsItr != observablesList.end())
+                        --obsItr->second;
                 }
+                // }
             }
         }
     }

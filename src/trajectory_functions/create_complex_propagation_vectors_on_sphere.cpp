@@ -6,7 +6,7 @@
 // only works for complex on sphere surface
 Coord create_complex_propagation_vectors_on_sphere(const Parameters& params, Complex& targCom)
 {
-    TRACE();
+    // TRACE();
     Coord trajTrans;
 
     double dx = sqrt(2.0 * params.timeStep * targCom.D.x) * GaussV();

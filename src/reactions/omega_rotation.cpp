@@ -5,7 +5,7 @@ void omega_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Mol
     Complex& reactCom1, Complex& reactCom2, double targOmega, const ForwardRxn& currRxn,
     std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     /*! \ingroup Associate
      * \brief Performs a rotation of two molecules to some target omega angle, the com-iface1 to sigma to com-iface2
      * dihedral angle

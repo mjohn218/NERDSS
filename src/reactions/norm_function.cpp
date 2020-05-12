@@ -5,7 +5,7 @@
 
 double norm_function(double x, void* p)
 {
-    TRACE();
+    // TRACE();
     IntegrandParams& params = *reinterpret_cast<IntegrandParams*>(p);
     double temp { x * params.r0 / (2.0 * params.D * params.t) };
     double temp2 { x / (2.0 * params.D * params.t) };

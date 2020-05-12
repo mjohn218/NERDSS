@@ -11,7 +11,7 @@ using namespace std;
 void init_counterCopyNums(copyCounters& counterArrays, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject, int totalSpeciesNum)
 {
-    TRACE();
+    // TRACE();
     int i, j;
 
     int index;

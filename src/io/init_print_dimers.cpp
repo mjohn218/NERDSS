@@ -8,7 +8,7 @@ using namespace std;
 /*first line description of the MONODIMER output file.*/
 void init_print_dimers(std::ofstream& outfile, Parameters params, std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     int i, j;
     int size;
     int p1;

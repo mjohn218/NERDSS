@@ -3,7 +3,7 @@
 
 Vector determine_normal(Vector normal, const MolTemplate& molTemplate, Molecule oneMol)
 {
-    TRACE();
+    // TRACE();
     if (oneMol.interfaceList.empty()) {
         std::cout << "Molecule is a point, has no normal." << std::endl;
         return { 0, 0, 0 };

@@ -8,7 +8,7 @@ void determine_2D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, Membrane& membraneObject, const int& relStateIndex)
 {
-    TRACE();
+    // TRACE();
     double Dr1 {};
     {
         double cf { cos(sqrt(2.0 * complexList[biMolData.com1Index].Dr.x * params.timeStep)) };

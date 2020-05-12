@@ -9,7 +9,7 @@
 
 void write_all_species(unsigned simItr, std::ofstream& speciesFile, const copyCounters& counterArray)
 {
-    TRACE();
+    // TRACE();
     speciesFile << simItr;
     for (auto elem : counterArray.copyNumSpecies)
         speciesFile << ',' << elem;

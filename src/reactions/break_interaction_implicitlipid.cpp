@@ -5,7 +5,7 @@ void break_interaction_implicitlipid(size_t relIface1, size_t relIface2, Molecul
     const BackRxn& currRxn, std::vector<int>& emptyComList, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     /*Find the new absIface for mol1*/
     int absIface1 { -1 };
     int absIface2 { -1 };

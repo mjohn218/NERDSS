@@ -8,7 +8,7 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
     std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices)
 {
-    TRACE();
+    // TRACE();
     double Dr1 {};
     {
         double cf { cos(sqrt(2.0 * complexList[biMolData.com1Index].Dr.x * params.timeStep)) };

@@ -10,7 +10,7 @@ void write_debug_info(int pro1Index, int pro2Index, int iface1Index, int iface2I
     const copyCounters& counterArrays, double R1, double Keq, double probvec1, int Nc, double pdiss, double self,
     double Volume)
 {
-    TRACE();
+    // TRACE();
     // just writes debug info to cout, function call is easier to comment out
     std::cout << " WITHIN COMPLEX: Proteins are R1=: " << R1 << " < bindRadSameCom: " << oneRxn.bindRadSameCom
               << " Proteins: " << pro1Index << ' ' << pro2Index << " interfaces: " << iface1Index << ' ' << iface2Index

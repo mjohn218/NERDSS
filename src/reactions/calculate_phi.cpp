@@ -4,7 +4,7 @@
 double calculate_phi(Coord reactIface1, int ifaceIndex2, Molecule reactMol1, Molecule reactMol2, const Vector& normal,
     Vector axis, const ForwardRxn& currRxn, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     // coordinate transform along com-iface vector
     transform(reactIface1, reactMol1, reactMol2, axis);
 

@@ -15,7 +15,7 @@ void measure_complex_displacement(bool& flag, Complex& reactCom1, Complex& react
     std::vector<Molecule>& moleculeList, const Parameters& params,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList)
 {
-    TRACE();
+    // TRACE();
     double dx, dy, dz;
     double R2;
     double LARGE_DISP = 1000.0; //nm

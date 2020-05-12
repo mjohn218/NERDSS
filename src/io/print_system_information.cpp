@@ -11,7 +11,7 @@
 void print_system_information(int simItr, std::ofstream& systemFile, const std::vector<Molecule>& moleculeList,
     const std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     systemFile << "Iteration: " << simItr << '\n';
     systemFile << llinebreak << llinebreak << "\t\t\tMOLECULES\n"
                << llinebreak << llinebreak << linebreak;

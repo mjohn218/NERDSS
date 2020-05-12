@@ -12,7 +12,7 @@
 void measure_overlap_free_protein_interfaces(Molecule base1, Molecule baseTmp, bool& flagCancel,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns)
 {
-    TRACE();
+    // TRACE();
     int pro1MolType = base1.molTypeIndex;
 
     bool canInteract { false };

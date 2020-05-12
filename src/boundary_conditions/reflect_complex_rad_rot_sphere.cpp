@@ -14,7 +14,7 @@
 
 void reflect_complex_rad_rot_sphere(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     // only works for the complex after association or diffusion, spherical system
     // For the sphere system, many times of reflections may need to move the complex back inside the sphere!!
 

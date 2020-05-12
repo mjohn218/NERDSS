@@ -10,7 +10,7 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
     std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
     std::vector<int>& emptyComList, Membrane& membraneObject, copyCounters& counterArrays)
 {
-    TRACE();
+    // TRACE();
     try {
         // Read parameters
         std::cout << "READ IN PARMATERS from restart file" << std::endl;

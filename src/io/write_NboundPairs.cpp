@@ -6,7 +6,7 @@ using namespace std;
 
 void write_NboundPairs(copyCounters& counterArrays, ofstream& outfile, int it, const Parameters& params, std::vector<Molecule>& moleculeList)
 {
-    TRACE();
+    // TRACE();
     // if (params.implicitLipid == true) {
     //     //update NboundPairs with Implicit Lipid
     //     for (int typeIndex = 0; typeIndex < params.numMolTypes; typeIndex++) {

@@ -8,7 +8,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
     std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices)
 {
-    TRACE();
+    // TRACE();
     /*3D reaction*/
     double Dr1 {};
     if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10) {

@@ -3,6 +3,7 @@
 #ifndef TRACING_H
 #define TRACING_H
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -38,17 +39,33 @@ public:
         , line_number { line }
     {
         std::clog << "TRACE: Entering function " << function_name << " (" << file_name << ':' << line_number << ')' << std::endl;
+        startTime = std::chrono::system_clock::now();
+        auto startTimeFormat = std::chrono::system_clock::to_time_t(startTime);
+        char charTime[24];
+        std::clog << "Entering time: ";
+        if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&startTimeFormat)))
+            std::clog << charTime << std::endl;
     }
 
     ~tracer()
     {
         std::clog << "TRACE: Leaving function " << function_name << std::endl;
+        auto endTime = std::chrono::system_clock::now();
+        auto endTimeFormat = std::chrono::system_clock::to_time_t(endTime);
+        char charTime[24];
+        std::clog << "Leaving time: ";
+        if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
+            std::clog << charTime << std::endl;
+        std::chrono::duration<double> wallTime = endTime - startTime;
+        std::clog << "\tWall Time: ";
+        std::cout << wallTime.count() << " seconds" << std::endl;
     }
 
 private:
     std::string function_name;
     std::string file_name;
     int line_number;
+    std::chrono::system_clock::time_point startTime {};
 };
 }
 #endif // TRACING_ENABLED

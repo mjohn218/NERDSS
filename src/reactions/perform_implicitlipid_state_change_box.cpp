@@ -14,7 +14,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
     std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     const auto& stateList = molTemplateList[stateChangeMol.molTypeIndex].interfaceList[stateChangeIface].stateList;
     double bindRadius { 0 };
     bool isStateChangeBackRxn { static_cast<bool>(rxnItr[2]) };

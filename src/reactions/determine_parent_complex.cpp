@@ -4,7 +4,7 @@
 bool determine_parent_complex(int pro1Index, int pro2Index, int newComIndex, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList)
 {
-    TRACE();
+    // TRACE();
     // TODO: clean this up
     int c1 { moleculeList[pro1Index].myComIndex };
     std::vector<int> origlist = complexList[c1].memberList;

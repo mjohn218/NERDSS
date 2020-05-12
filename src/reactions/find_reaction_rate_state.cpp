@@ -5,7 +5,7 @@
 int find_reaction_rate_state(int simItr, int relIfaceIndex1, int relIfaceIndex2, const Molecule& reactMol1,
     const Molecule& reactMol2, const BackRxn& backRxn, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     int matches { 0 };
     std::vector<std::array<int, 2>> matchList {};
     int reactIndex1 { -1 };

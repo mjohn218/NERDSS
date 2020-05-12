@@ -20,7 +20,7 @@ void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, const P
      stored new displacements. If a protein has already updated its position (done in sequential order) then it cannot
      resample a new position, the current protein must still continue to avoid overlapping, however.
     */
-    TRACE();
+    // TRACE();
     int comIndex1 { moleculeList[pro1Index].myComIndex };
     int startProIndex = pro1Index;
     int com1Size = complexList[comIndex1].memberList.size();

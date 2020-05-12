@@ -7,21 +7,16 @@ void rotate(Coord& rotOrigin, Quat& rotQuat, Complex& targCom,
     // protein p1, and translate them by vector
     for (auto& mol : targCom.memberList) {
         Vector comVec { moleculeList[mol].tmpComCoord - rotOrigin };
-        comVec.calc_magnitude();
-        if (comVec.magnitude > 1E-8) {
-            rotQuat.rotate(comVec);
-        }
+        rotQuat.rotate(comVec);
+
         moleculeList[mol].tmpComCoord = Coord(comVec.x, comVec.y, comVec.z) + Coord(rotOrigin.x, rotOrigin.y, rotOrigin.z);
 
         // now rotate each member molecule of the complex
         for (auto& iface : moleculeList[mol].tmpICoords) {
             // get the vector from the interface to the target interface
             Vector ifaceVec { iface - rotOrigin };
-            ifaceVec.calc_magnitude();
-            // rotate
-            if (ifaceVec.magnitude > 1E-8) {
-                rotQuat.rotate(ifaceVec);
-            }
+            rotQuat.rotate(ifaceVec);
+
             iface = Coord(ifaceVec.x, ifaceVec.y, ifaceVec.z) + Coord(rotOrigin.x, rotOrigin.y, rotOrigin.z);
         }
     }

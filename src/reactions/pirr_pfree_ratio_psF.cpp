@@ -5,7 +5,7 @@
 double pirr_pfree_ratio_psF(
     double rCurr, double r0, double tCurr, double Dtot, double bindrad, double alpha, double ps_prev, double rtol)
 {
-    TRACE();
+    // TRACE();
 
     double fDt = 4.0 * Dtot * tCurr;
     double sq_fDt = sqrt(fDt);

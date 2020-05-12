@@ -7,7 +7,7 @@
 void write_xyz(std::string filename, const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     std::ofstream out(filename);
     std::string lett { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     std::vector<std::string> names;

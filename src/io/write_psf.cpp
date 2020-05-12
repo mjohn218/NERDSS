@@ -7,7 +7,7 @@
 void write_psf(const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     // TODO: Not currently working properly
 
     std::cout << "Writing system PSF to system.psf...\n";

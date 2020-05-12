@@ -6,7 +6,7 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
     const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     // First create all the molecules and their corresponding complexes, with random center of mass coordinates
     for (const auto& oneTemp : molTemplateList) {
         if (oneTemp.isImplicitLipid == false) {

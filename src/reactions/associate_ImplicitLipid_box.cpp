@@ -14,7 +14,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
     std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns)
 {
-    TRACE();
+    // TRACE();
     double RS3D { -1.0 };
     for (int RS3Di = 0; RS3Di < 100; RS3Di++) {
         if ((std::abs(membraneObject.RS3Dvect[RS3Di] - currRxn.bindRadius) < 1E-15) && (std::abs(membraneObject.RS3Dvect[RS3Di + 100] - currRxn.rateList[0].rate) < 1E-15) && std::abs(membraneObject.RS3Dvect[RS3Di + 200] - (1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.x + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.x) + 1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.y + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.y) + 1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.z + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.z))) < 1E-15) {
@@ -53,8 +53,13 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
     // }
 
     // mol2 is implicit-lipid, then we need to set its temporary position according to mol1.
-    reactMol2.create_position_implicit_lipid(reactMol1, ifaceIndex2, currRxn.bindRadius, membraneObject);
-    reactCom2.comCoord = reactMol2.comCoord;
+    if (reactMol2.isImplicitLipid == true) {
+        reactMol2.create_position_implicit_lipid(reactMol1, ifaceIndex2, currRxn.bindRadius, membraneObject);
+        reactCom2.comCoord = reactMol2.comCoord;
+    } else {
+        reactMol1.create_position_implicit_lipid(reactMol2, ifaceIndex1, currRxn.bindRadius, membraneObject);
+        reactCom1.comCoord = reactMol1.comCoord;
+    }
 
     // set up temporary coordinates
     for (auto& memMol : reactCom1.memberList)
@@ -183,7 +188,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         com_of_two_tmp_complexes(reactCom1, reactCom2, finalCOM, moleculeList); // com of c1+c2 (final (tmp) coordinates).
         // std::cout <<"Pre-MEMBRANE ROT: COMPLEX PAIR COM: "<<finalCOM.x<<' '<<finalCOM.y<<' '<<finalCOM.z<<std::endl;
 
-        {
+        if (isOnMembrane == true || transitionToSurface == true) {
             /*return orientation of normal back to starting position*/
             std::cout << " IMPLICIT LIPID 2D IS ON MEMBRANE, CORRECT ORIENTATION ! " << std::endl;
             Quat memRot;
@@ -219,15 +224,40 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         for (auto& mp : reactCom2.memberList)
             moleculeList[mp].update_association_coords(dtrans);
 
-        {
+        double zchg = 0;
+        if (isOnMembrane == true || transitionToSurface == true) {
             /*RECHECK HERE IF ANY OF THE LIPIDS ARE SLIGHTLY BELOW THE MEMBRANE. THIS CAN HAPPEN DUE TO PRECISION ISSUES
                always use tmpCoords in this associate routine.
               */
             dtrans.x = 0;
             dtrans.y = 0;
-            dtrans.z = -membraneObject.waterBox.z / 2.0 - reactIface1.z;
+            for (auto& mp : reactCom1.memberList) {
+                if (moleculeList[mp].isLipid == true) { // this is a lipid
+                    if (moleculeList[mp].tmpComCoord.z < -membraneObject.waterBox.z / 2.0) {
+                        double ztmp = (-membraneObject.waterBox.z / 2.0)
+                            - moleculeList[mp].tmpComCoord.z; // lipid COM is below box bottom
+                        if (ztmp > zchg)
+                            zchg = ztmp; // largest dip below membrane
+                    }
+                }
+            }
+            for (auto& mp : reactCom2.memberList) {
+                if (moleculeList[mp].isLipid == true) { // this is a lipid
+                    if (moleculeList[mp].tmpComCoord.z < -membraneObject.waterBox.z / 2.0) {
+                        double ztmp = (-membraneObject.waterBox.z / 2.0)
+                            - moleculeList[mp].tmpComCoord.z; // lipid COM is below box bottom
+                        if (ztmp > zchg)
+                            zchg = ztmp; // largest dip below membrane
+                    }
+                }
+            }
+            dtrans.z = zchg;
+            dtrans.z = zchg;
+
             // update the temporary coordinates for both complexes
             for (auto& mp : reactCom1.memberList)
+                moleculeList[mp].update_association_coords(dtrans);
+            for (auto& mp : reactCom2.memberList)
                 moleculeList[mp].update_association_coords(dtrans);
         }
     } //only correct orientations if both particles are not points.

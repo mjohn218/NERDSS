@@ -3,12 +3,12 @@
 void initialize_states(std::vector<Molecule>& moleculeList, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject)
 {
     for (auto& tmpMol : molTemplateList) {
-        std::cout << "molName: " << tmpMol.molName << std::endl;
-        std::cout << "copies: " << tmpMol.copies << std::endl;
+        //std::cout << "molName: " << tmpMol.molName << std::endl;
+        //std::cout << "copies: " << tmpMol.copies << std::endl;
         int tmpLength { 0 };
         tmpLength = tmpMol.startingNumState.nameEachState.size();
         for (int i = 0; i < tmpLength; i++) {
-            std::cout << tmpMol.startingNumState.nameEachState[i] << ": " << tmpMol.startingNumState.numberEachState[i] << std::endl;
+            //std::cout << tmpMol.startingNumState.nameEachState[i] << ": " << tmpMol.startingNumState.numberEachState[i] << std::endl;
         }
 
         if (tmpLength > 0) {

@@ -6,7 +6,7 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     // get which box the Molecule belongs to
     int xItr { int((createdMol.comCoord.x + membraneObject.waterBox.x / 2) / simulVolume.subCellSize.x) };
     int yItr { int((createdMol.comCoord.y + membraneObject.waterBox.y / 2) / simulVolume.subCellSize.y) };

@@ -11,7 +11,7 @@
  */
 void measure_overlap_protein_interfaces(Molecule base1, Molecule baseTmp, bool& flagCancel)
 {
-    TRACE();
+    // TRACE();
     for (unsigned i { 0 }; i < base1.interfaceList.size(); i++) {
         // just check all interfaces.
         for (int m = 0; m < baseTmp.interfaceList.size(); m++) {

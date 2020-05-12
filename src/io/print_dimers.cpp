@@ -8,7 +8,7 @@ using namespace std;
 void print_dimers(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
     std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     int i, j;
     int size;
     int p1;

@@ -29,7 +29,7 @@ message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR} with ${NUM_
 
 include_directories(include)
 
-add_definitions(-D_DEBUG) # comment this line if no need _DEBUG
+#add_definitions(-D_DEBUG) # comment this line if no need _DEBUG
 
 file(GLOB SOURCES "src/*/*.cpp")
 add_executable(nerdss ${SOURCES} EXEs/nerdss.cpp)

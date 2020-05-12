@@ -10,7 +10,7 @@
 void reflect_traj_tmp_crds_sphere(
     const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     /*This routine updated April 2020 to test if a large complex that spans the sphere could extend out in both directions
     if so, it attempts to correct for this by resampling the complex's translational updates.
     */

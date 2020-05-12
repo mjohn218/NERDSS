@@ -334,6 +334,6 @@ void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Mole
         //Test that new coordinates have not pushed you out of the box for a very large complex, if so, resample  rotation matrix.
         //std::cout << "RECHECK THAT COMPLEX DOES NOT SPAN BOX IN SUBROUTINE REFLECT_TRAJ_COMPLEX_RAD_ROT. Complex: "
         //          << targCom.index << " size:" << targCom.memberList.size() << '\n';
-        reflect_traj_check_span(params, targCom, moleculeList, membraneObject, RS3Dinput);
+        reflect_traj_check_span_box(params, targCom, moleculeList, membraneObject, RS3Dinput);
     }
 }

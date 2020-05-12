@@ -5,7 +5,7 @@ bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, 
     const BackRxn& currRxn, std::vector<int>& emptyComList, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList, int ILindexMol)
 {
-    TRACE();
+    // TRACE();
     bool breakLinkComplex { false };
     unsigned newComIndex = complexList.size();
     std::cout << "empty complexes: " << Complex::emptyComList.size() << "\nMembers:";

@@ -10,7 +10,7 @@ double rand_gsl()
     //++randNum;
     //if (!the_generator)
     //    the_generator = gsl_rng_alloc(gsl_rng_taus);
-    return gsl_rng_uniform(r);
+    return gsl_rng_uniform(r) + 1.0 / (gsl_rng_max(r) + 1.0) * gsl_rng_uniform(r);
 }
 
 void srand_gsl(int num)
@@ -79,8 +79,8 @@ double GaussV()
     double V1 {};
 
     while (R >= 1.0) {
-        V1 = 2.0 * rand_gsl() - 1.0;
-        double V2 = 2.0 * rand_gsl() - 1.0;
+        V1 = 2.0 * gsl_rng_uniform(r) - 1.0;
+        double V2 = 2.0 * gsl_rng_uniform(r) - 1.0;
         R = (V1 * V1) + (V2 * V2);
     }
     return (V1 * sqrt(-2.0 * log(R) / R));

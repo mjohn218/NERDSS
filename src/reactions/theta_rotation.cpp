@@ -4,7 +4,7 @@
 void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1, Molecule& reactMol2, double targAngle,
     Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList)
 {
-    TRACE();
+    // TRACE();
     Vector v1 { reactIface1 - reactMol1.tmpComCoord };
     Vector sigma { reactIface1 - reactIface2 };
     v1.calc_magnitude();

@@ -11,7 +11,7 @@
 void check_if_spans_sphere(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2,
     std::vector<Molecule>& moleculeList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     // Associating proteins have been moved to contact. Before assigning them to the complexsame complex,
     // test to see if the complex is too big to fit in the box.
 

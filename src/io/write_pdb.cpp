@@ -7,7 +7,7 @@
 void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     long long int totFrames { params.nItr / params.trajWrite };
     //    std::ofstream pdbFile { "pdb/" + std::to_string(frameNum) + ".pdb" };
     // if (!pdbFile) {

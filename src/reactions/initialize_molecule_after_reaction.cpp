@@ -6,7 +6,7 @@
 Molecule initialize_molecule_after_zeroth_reaction(
     int index, Parameters& params, const MolTemplate& molTemplate, const CreateDestructRxn& currRxn, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     /*!
      * \brief Creates a molecule according to a creation from concentration reaction (CreateDestructRxn), assigns
      * coords.

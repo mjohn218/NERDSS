@@ -11,7 +11,7 @@ void check_bimolecular_reactions(int pro1Index, int pro2Index, int simItr, doubl
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     int pro1MolType = moleculeList[pro1Index].molTypeIndex;
     /* if(pro1Index== 21)
  	std::cout <<"In check bimolecular Reaction for protein 21 ! to  "<<pro2Index<<std::endl;

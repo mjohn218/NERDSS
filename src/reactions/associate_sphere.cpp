@@ -18,7 +18,7 @@ void associate_sphere(
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns)
 {
-    TRACE();
+    // TRACE();
     if (reactCom1.index == reactCom2.index) {
         // skip to protein interation updates
         std::cout << "Closing a loop, no rotations performed.\n";

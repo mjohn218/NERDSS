@@ -9,7 +9,7 @@
 void reflect_traj_tmp_crds_box(
     const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     /*This routine updated October 2019 to test if a large complex that spans the box could extend out in both directions
     if so, it attempts to correct for this by resampling the complex's translational and rotational updates.
     */

@@ -3,7 +3,7 @@
 
 double pir_function(double x, void* p)
 {
-    TRACE();
+    // TRACE();
     double alp, bet, tet, P, T, h, f;
     IntegrandParams& params = *reinterpret_cast<IntegrandParams*>(p);
 

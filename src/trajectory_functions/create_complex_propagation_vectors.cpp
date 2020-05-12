@@ -7,7 +7,7 @@
 void create_complex_propagation_vectors(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     // the diffusion inside the sphere is the same as inside a box system.
     // on sphere surface, we set D.z = 0.
 

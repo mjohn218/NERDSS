@@ -5,7 +5,7 @@
 
 void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     bool needsRecheck { true };
     int maxItr { 50 };
     int checkItr { 0 };
@@ -113,7 +113,7 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
         if (std::abs(posWallX - negWallX) > 2.0 / 3.0 * std::abs(posX - negX))
             maxItr = 10;
         if (std::abs(posWallX - negWallX) > 4.0 / 5.0 * std::abs(posX - negX))
-            maxItr = 1;
+            maxItr = 5;
 
         if (posWallY > posY) {
             outsidePosY = true;
@@ -128,7 +128,7 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
         if (std::abs(posWallY - negWallY) > 2.0 / 3.0 * std::abs(posY - negY))
             maxItr = 10;
         if (std::abs(posWallY - negWallY) > 4.0 / 5.0 * std::abs(posY - negY))
-            maxItr = 1;
+            maxItr = 5;
 
         if (posWallZ > posZ) {
             outsidePosZ = true;
@@ -143,7 +143,7 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
         if (std::abs(posWallZ - negWallZ) > 2.0 / 3.0 * std::abs(posZ - negZ))
             maxItr = 10;
         if (std::abs(posWallZ - negWallZ) > 4.0 / 5.0 * std::abs(posZ - negZ))
-            maxItr = 1;
+            maxItr = 5;
 
         if (outsideBox) {
             // Check the x-dimension

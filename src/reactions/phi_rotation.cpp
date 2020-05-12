@@ -6,7 +6,7 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
     Complex& reactCom1, Complex& reactCom2, const Vector& normal, const double& targPhi, const ForwardRxn& currRxn,
     std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     /*! \ingroup Associate
      * \brief Function to rotate a Molecule to some a target dihedral phi, relative to sigma (the
      (sigma)-(interface)-(normal) dihedral)

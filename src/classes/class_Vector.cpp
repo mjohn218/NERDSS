@@ -18,7 +18,7 @@ Vector::Vector(double x, double y)
 
 Vector::Vector(const double& x, const double& y, const double& z)
 {
-    this->x= x;
+    this->x = x;
     this->y = y;
     this->z = z;
 }
@@ -58,7 +58,7 @@ Vector::Vector(std::vector<double> arr)
     y = arr[1];
     z = arr[2];
 
-//    magnitude = sqrt(x*x + y*y + z*z);
+    //    magnitude = sqrt(x*x + y*y + z*z);
 }
 
 /* OPERATORS */
@@ -75,7 +75,7 @@ Vector Vector::cross(const Vector& vec) const
     double u1 = this->z * vec.x - this->x * vec.z;
     double u2 = this->x * vec.y - this->y * vec.x;
 
-    Vector test{ u0, u1, u2 };
+    Vector test { u0, u1, u2 };
     test.normalize();
     return test;
 }
@@ -84,10 +84,10 @@ double Vector::dot(const Vector& vec) const { return ((this->x * vec.x) + (this-
 
 double Vector::dot_theta(const Vector& vec) const
 {
-    double dp{ this->dot(vec) };
+    double dp { this->dot(vec) };
     double cTheta = dp / (this->magnitude * vec.magnitude);
 
-    if (std::abs(cTheta-1) < 1E-12)
+    if (std::abs(cTheta - 1) < 1E-12)
         cTheta = 1;
     if (std::abs(-1 - cTheta) < 1E-12)
         cTheta = -1;
@@ -101,21 +101,20 @@ double Vector::dot_theta(const Vector& vec) const
 
 Vector Vector::vector_projection(Vector normal)
 {
-    double coefficient{ this->dot(normal) / normal.dot(normal) };
-    Vector sTerm{normal * coefficient};
+    double coefficient { this->dot(normal) / normal.dot(normal) };
+    Vector sTerm { normal * coefficient };
     sTerm.calc_magnitude();
-    return {*this - sTerm};
+    return { *this - sTerm };
 }
 
 void Vector::normalize()
 {
-    if (magnitude == 0)
-        calc_magnitude();
-     if(magnitude == 0){
-     //dividing by zero results in NANs
-     magnitude=1;
-     //    std::cout <<"WARNING: NORMALIZING A VECTOR OF ZERO LENGTH "<<std::endl;
-     }
+    calc_magnitude();
+    if (magnitude == 0) {
+        //dividing by zero results in NANs
+        magnitude = 1;
+        //    std::cout <<"WARNING: NORMALIZING A VECTOR OF ZERO LENGTH "<<std::endl;
+    }
     *this = *this /= magnitude;
     calc_magnitude();
 }

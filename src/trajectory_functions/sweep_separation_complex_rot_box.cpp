@@ -8,7 +8,7 @@ void sweep_separation_complex_rot_box(int simItr, int pro1Index, const Parameter
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     /*
       In this version, complex com1Index is in the solution.
       In this _complex_ version, itr tests overlap not just for each protein, but for each complex, so all the proteins

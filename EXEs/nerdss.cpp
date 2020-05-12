@@ -43,7 +43,7 @@ unsigned long totMatches = 0;
 
 int main(int argc, char* argv[])
 {
-    TRACE(); // this can trace the function calling
+    // TRACE(); // this can trace the function calling
     /* SIMULATION SETUP */
     // Get seed for random number generation
     // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
@@ -154,6 +154,12 @@ int main(int argc, char* argv[])
     T = gsl_rng_default;
     r = gsl_rng_alloc(T);
     gsl_rng_set(r, seed);
+
+    // std::cout << "gsl_rng_max(r)+1: " << gsl_rng_max(r) + 1 << std::endl;
+    // std::cout << "gsl_rng_min(r): " << gsl_rng_min(r) << std::endl;
+    // std::cout << "1/(gsl_rng_max(r)+1): " << std::setprecision(20) << 1.0 / (gsl_rng_max(r) + 1.0) << std::endl;
+    // std::cout << "Constants::iRandMax: " << std::setprecision(20) << Constants::iRandMax << std::endl;
+    // exit(1);
 
     /* SET UP SOME IMPORTANT VARIABLES */
     // 2D reaction probability tables
@@ -694,6 +700,13 @@ int main(int argc, char* argv[])
                     //int comIndex2 { moleculeList[molItr2].myComIndex };
                     std::array<int, 3> rxnIndex = moleculeList[molItr].crossrxn[crossIndex1];
 
+                    // if (moleculeList[molItr].index + moleculeList[molItr2].index == 72 && std::abs(moleculeList[molItr].index - moleculeList[molItr2].index) == 10) {
+                    //     std::cout << "crossIndex1: " << crossIndex1 << std::endl;
+                    //     std::cout << "crossIndex2: " << crossIndex2 << std::endl;
+
+                    //     std::cout << "\trxnIndex: " << rxnIndex[0] << std::endl;
+                    // }
+
                     /*First if statement is to determine if reactants are physically associating*/
                     if (forwardRxns[rxnIndex[0]].rxnType == ReactionType::bimolecular) {
 
@@ -721,10 +734,21 @@ int main(int argc, char* argv[])
                             //         moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
                             //         counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                             // }
-                            associate_implicitlipid(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
-                                complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                                counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+
+                            if (moleculeList[molItr].interfaceList[ifaceIndex1].index
+                                == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
+
+                                associate_implicitlipid(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
+                                    complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
+                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                            } else {
+                                //IL is listed first as the reactant.
+                                associate_implicitlipid(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
+                                    complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
+                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                            }
                         }
                         if (moleculeList[molItr2].isImplicitLipid == false) {
                             std::cout << "Performing association between molecules " << molItr << " and " << molItr2 << " ["
@@ -893,17 +917,25 @@ int main(int argc, char* argv[])
                         sweep_separation_complex_rot(
                             simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
                     }
-                    reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                    if (membraneObject.isSphere == true)
+                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
                 }
             } else {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
                     //For proteins with ncross=0, they either moved independently, or their displacements
                     //were selected based on the complex they were part of, and they may not yet been moved.
-
-                    create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
-                        complexList, molTemplateList, membraneObject);
-                    complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
-                    reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                    if (membraneObject.isSphere == true) {
+                        create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
+                            complexList, molTemplateList, membraneObject);
+                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
+                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                    } else {
+                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[mol.myComIndex], membraneObject, RS3Dinput);
+                        create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
+                            complexList, molTemplateList, membraneObject);
+                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
+                        //reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                    }
                 }
             }
         }
@@ -924,6 +956,115 @@ int main(int argc, char* argv[])
                 write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
             }
         }
+
+        //remove the empty complexes
+        //first remove the empty complexes in the tail
+        while (complexList.back().isEmpty == true) {
+            int tempIndex { complexList.back().index }; // the removed complex's index
+            complexList.pop_back();
+            //update Complex::emptyComList
+            for (auto& tempEmpty : Complex::emptyComList) {
+                if (tempEmpty == tempIndex) {
+                    tempEmpty = Complex::emptyComList.back();
+                    Complex::emptyComList.pop_back();
+                    break;
+                }
+            }
+        }
+
+        // put the last non-empty complex in the list to the non-last empty slot
+        while (Complex::emptyComList.empty() == false) {
+            int slotIndex { Complex::emptyComList.back() };
+            int previousIndex { complexList.back().index };
+
+            complexList[slotIndex] = complexList.back();
+            complexList[slotIndex].index = slotIndex;
+            complexList.pop_back();
+
+            // change the mol.myComIndex with previousIndex to slotIndex
+            for (auto mp : complexList[slotIndex].memberList) {
+                moleculeList[mp].myComIndex = slotIndex;
+            }
+
+            //update Complex::emptyComList
+            Complex::emptyComList.pop_back();
+
+            //remove the empty complexes in the tail
+            while (complexList.back().isEmpty == true) {
+                int tempIndex { complexList.back().index }; // the removed complex's index
+                complexList.pop_back();
+                //update Complex::emptyComList
+                for (auto& tempEmpty : Complex::emptyComList) {
+                    if (tempEmpty == tempIndex) {
+                        tempEmpty = Complex::emptyComList.back();
+                        Complex::emptyComList.pop_back();
+                        break;
+                    }
+                }
+            }
+        }
+
+        //------------------------------------------------------------------------------------
+        //remove the empty molecules
+        //first remove the empty molecule in the tail
+        while (moleculeList.back().isEmpty == true) {
+            int tempIndex { moleculeList.back().index }; // the removed molecule's index
+            moleculeList.pop_back();
+            //update Molecule::emptyMolList
+            for (auto& tempEmpty : Molecule::emptyMolList) {
+                if (tempEmpty == tempIndex) {
+                    tempEmpty = Molecule::emptyMolList.back();
+                    Molecule::emptyMolList.pop_back();
+                    break;
+                }
+            }
+        }
+
+        // put the last non-empty molecule in the list to the non-last empty slot
+        while (Molecule::emptyMolList.empty() == false) {
+            int slotIndex { Molecule::emptyMolList.back() };
+            int previousIndex { moleculeList.back().index };
+
+            moleculeList[slotIndex] = moleculeList.back();
+            moleculeList[slotIndex].index = slotIndex;
+            moleculeList.pop_back();
+
+            // change the mol.index with previousIndex to slotIndex, include complex.memberlist; interface.interaction.partnerIndex;mol.bndpartner
+            int tmpComIndex { moleculeList[slotIndex].myComIndex };
+            for (auto& tmpMember : complexList[tmpComIndex].memberList) {
+                if (tmpMember == previousIndex)
+                    tmpMember = slotIndex;
+            }
+
+            for (auto& tmpPartner : moleculeList[slotIndex].bndpartner) {
+                for (auto& partner : moleculeList[tmpPartner].bndpartner) {
+                    if (partner == previousIndex)
+                        partner = slotIndex;
+                }
+                for (auto& tmpIface : moleculeList[tmpPartner].interfaceList) {
+                    if (tmpIface.interaction.partnerIndex == previousIndex)
+                        tmpIface.interaction.partnerIndex = slotIndex;
+                }
+            }
+
+            //update Molecule::emptyMolList
+            Molecule::emptyMolList.pop_back();
+
+            //remove the empty molecules in the tail
+            while (moleculeList.back().isEmpty == true) {
+                int tempIndex { moleculeList.back().index }; // the removed molecule's index
+                moleculeList.pop_back();
+                //update Molecule::emptyMolList
+                for (auto& tempEmpty : Molecule::emptyMolList) {
+                    if (tempEmpty == tempIndex) {
+                        tempEmpty = Molecule::emptyMolList.back();
+                        Molecule::emptyMolList.pop_back();
+                        break;
+                    }
+                }
+            }
+        }
+        //------------------------------------------------------------------------------------
 
         //write restart
         if (simItr % params.restartWrite == 0) {
@@ -1037,53 +1178,6 @@ int main(int argc, char* argv[])
             if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&estTimeEnd)))
                 std::cout << charTime << '\n';
             std::cout << llinebreak;
-        }
-
-        //remove the empty complexes
-        //first remove the empty complexes in the tail
-        while (complexList.back().isEmpty == true) {
-            int tempIndex { complexList.back().index }; // the removed complex's index
-            complexList.pop_back();
-            //update Complex::emptyComList
-            for (auto& tempEmpty : Complex::emptyComList) {
-                if (tempEmpty == tempIndex) {
-                    tempEmpty = Complex::emptyComList.back();
-                    Complex::emptyComList.pop_back();
-                    break;
-                }
-            }
-        }
-
-        // put the last non-empty complex in the list to the non-last empty slot
-        while (Complex::emptyComList.empty() == false) {
-            int slotIndex { Complex::emptyComList.back() };
-            int previousIndex { complexList.back().index };
-
-            complexList[slotIndex] = complexList.back();
-            complexList[slotIndex].index = slotIndex;
-            complexList.pop_back();
-
-            // change the mol.myComIndex with previousIndex to slotIndex
-            for (auto mp : complexList[slotIndex].memberList) {
-                moleculeList[mp].myComIndex = slotIndex;
-            }
-
-            //update Complex::emptyComList
-            Complex::emptyComList.pop_back();
-
-            //remove the empty complexes in the tail
-            while (complexList.back().isEmpty == true) {
-                int tempIndex { complexList.back().index }; // the removed complex's index
-                complexList.pop_back();
-                //update Complex::emptyComList
-                for (auto& tempEmpty : Complex::emptyComList) {
-                    if (tempEmpty == tempIndex) {
-                        tempEmpty = Complex::emptyComList.back();
-                        Complex::emptyComList.pop_back();
-                        break;
-                    }
-                }
-            }
         }
     } // end iterating over time steps
 

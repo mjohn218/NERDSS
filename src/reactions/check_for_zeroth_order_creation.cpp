@@ -10,7 +10,7 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::v
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, Membrane& membraneObject)
 {
-    TRACE();
+    // TRACE();
     for (auto& oneRxn : createDestructRxns) {
         if (oneRxn.rxnType == ReactionType::zerothOrderCreation) {
             const MolTemplate& oneTemp = molTemplateList[oneRxn.productMolList.at(0).molTypeIndex];
@@ -30,10 +30,13 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::v
                 }
                 long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * Volume * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
                 long double prob { exp(-lambda) };
+                // std::cout << "create prob: " << std::setprecision(20) << prob << std::endl;
+                // exit(1);
                 unsigned numEvents { 0 };
-                double rNum { 1.0 * rand_gsl() };
+                // double rNum { 1.0 * rand_gsl() };
+                // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
 
-                while (rNum > prob) {
+                while (rand_gsl() > prob) {
                     ++numEvents;
                     prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
                 }
@@ -66,9 +69,16 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, std::v
                     * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
                 long double prob { exp(-lambda) };
                 unsigned numEvents { 0 };
-                double rNum { 1.0 * rand_gsl() };
+                // double rNum { 1.0 * rand_gsl() };
+                // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
 
-                while (rNum > prob) {
+                // std::cout << "create prob: " << std::setprecision(20) << prob << std::endl;
+                // exit(1);
+
+                while (rand_gsl() > prob) {
+                    // std::cout << "create prob: " << std::setprecision(20) << prob << std::endl;
+                    // std::cout << "rNum: " << std::setprecision(20) << rNum << std::endl;
+                    // std::cout << "rNum2: " << std::setprecision(20) << rNum2 << std::endl;
                     ++numEvents;
                     prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
                 }

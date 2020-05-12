@@ -4,7 +4,7 @@
 double calculate_omega(Coord reactIface1, int reactIface2, Vector& sigma,
     const ForwardRxn& currRxn, Molecule reactMol1, Molecule reactMol2, const std::vector<MolTemplate>& molTemplateList)
 {
-    TRACE();
+    // TRACE();
     /*Re-aligns the molecules so that Sigma faces purely along the z-axis. 
      */
     transform(reactIface1, reactMol1, reactMol2, sigma);

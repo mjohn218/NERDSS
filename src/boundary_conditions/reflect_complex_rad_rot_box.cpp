@@ -14,7 +14,7 @@
 
 void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     // only works for the complex after association or diffusion, box system.
     double RS3D;
     if (targCom.D.z < 1E-8) { // one surface
