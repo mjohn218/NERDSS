@@ -11,8 +11,9 @@
 #  -- now the makefile looks a bit cleaner                    Kent milfeld@tacc.utexas.edu
 #
 # TODO: use function to create VPATH
-# TODO: Check this out on OSX
 # TODO: Fix MPI after learning purpose
+# TODO: Make rules for *.hpp's
+#
 #
 VPATH=src/boundary_conditions:src/classes:src/io:src/math:src/parser:src/reactions:src/system_setup:src/trajectory_functions
 
@@ -28,10 +29,10 @@ EPDIR  = EXE_PAR
 
 hasGSL = $(shell type gsl-config >/dev/null 2>&1; echo $$?)
 ifeq ($(hasGSL),1)
-	$(error " GSL must be installed, and gsl-config must be in path.")
+$(error " GSL must be installed, and gsl-config must be in path.")
 else
-	$(shell mkdir -p bin)
-	$(shell mkdir -p obj)
+$(shell mkdir -p bin)
+$(shell mkdir -p obj)
 endif
 
 #               EXECUTABLE SETUP for serial, MPI, OpenMP (omp)
@@ -59,7 +60,8 @@ endif
 
 
 OS    := $(shell uname)
-INTEL  = $(shell type icpc       >/dev/null 2>&1; echo $$?)
+INTEL  = $(shell type icpc  >/dev/null 2>&1; echo $$?)
+GCC    = $(shell type g++   >/dev/null 2>&1; echo $$?)
 
 CFLAGS = $(shell gsl-config --cflags) -std=c++0x
 LIBS   = $(shell gsl-config --libs)
@@ -107,15 +109,16 @@ $(MAKECMDGOALS):$(EXEC)
 
 $(EXEC): $(OBJS)
 	@echo "Compiling $(EDIR)/$(@F).cpp"
-	$(CC) $(CFLAGS) $(CFLAGS2) -o $@ $(EDIR)/$(@F).cpp $(OBJS) $(LIBS) $(PLANG)
+	$(CC) $(CFLAGS) $(CFLAGS2) -o $@ $(EDIR)/$(@F).cpp -Iinclude $(OBJS) $(LIBS) $(PLANG)
 	@echo "------------"
 
 obj/%.o: %.cpp
-	@echo "Compiling $<"
-	$(CC) $(CFLAGS) $(CFLAGS2) -c $< -o $@  $(PLANG) $(DEFS)
+	@echo "Compiling $< at $(<F) $(<D)"
+	$(CC) $(CFLAGS) $(CFLAGS2) -c $< -o $@ -Iinclude $(PLANG) $(DEFS)
 	@echo "------------"
 
 clean:
 	rm -rf $(ODIR) bin
 
 # Reference: https://www.gnu.org/software/make/manual/html_node/Quick-Reference.html
+#            https://www.cmcrossroads.com/article/basics-vpath-and-vpath
