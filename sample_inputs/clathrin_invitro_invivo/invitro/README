@@ -1,5 +1,7 @@
 these inputs are used to mimic the in vitro experimental conditions of https://doi.org/10.1091/mbc.e16-06-0399
 
+suggest using the nerdss_cluster executable
+
 distinct labeled self interactions multiplied by 2.
 
 Clathrin is a flat trimer, it has a clathrin leg length of 6nm, so two bound clathrin have COM separated by 17nm (including 5nm binding radius).
