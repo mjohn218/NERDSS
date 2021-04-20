@@ -1,0 +1,18 @@
+these inputs are the case of curved clathrin assembly in the solution (alpha = 98 degree)
+
+distinct labeled self interactions multiplied by 2.
+
+Clathrin is a flat trimer, it has a clathrin leg length of 6nm, so two bound clathrin have COM separated by 17nm (including 5nm binding radius).
+
+In this model, the Clath + AP2_on_mem/pip2 is 25uM. koff=0.03s-1 (Clath + AP2_on_mem/IL 25uM)
+Clath + Clath is 120uM. koff=10s-1. (Clath + Clath 120uM)
+
+Increase Clath + Clath if either molecule is bound to an AP2_on_mem/pip2, by a factor of 154.
+
+Use loopCoopFactor=0.01.
+
+Add reflecting site at clathrin COM to prevent passing through each other.
+
+length3Dto2D is 30nm for all binding reactions.
+
+the volume/area ratio = 1nm, ap2 concentration is 1.6 uM, and clathrin concentration in the solution is 0.65 uM.

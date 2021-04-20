@@ -1,0 +1,298 @@
+# Input file
+
+start parameters
+    nItr = 500000000
+    timeStep = 3
+
+    timeWrite = 50
+    trajWrite = 500000000
+    pdbWrite = 50000
+    restartWrite = 50000
+    checkPoint = 5000000
+    scaleMaxDisplace = 10.0
+    overlapSepLimit = 7.0
+end parameters
+
+start boundaries
+    WaterBox = [700,700,1000]
+    xBCtype = reflect
+    yBCtype = reflect
+    zBCtype = reflect
+end boundaries
+
+start molecules
+    pip2 : 10000
+    ap2 : 59 #0.2uM
+    clat : 192 #0.65uM
+end molecules
+
+start reactions
+    #### pip2 - AP2 ####
+    ap2(m2muh) + pip2(head) <-> ap2(m2muh!1).pip2(head!1)
+    onRate3Dka = 0.554
+    offRatekb = 1.002
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5707963, 1.5707963, nan, nan, M_PI]
+    observeLabel = ap2Mem
+
+    #### AP2 - CLAT ####
+    ##only binds to clathrin if it is on the membrane
+    ap2(b2clat,m2muh!*) + clat(td1) <-> ap2(b2clat!1,m2muh!*).clat(td1!1)
+    onRate3Dka = 0.00199
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ap2(b2clat,m2muh!*) + clat(td2) <-> ap2(b2clat!1,m2muh!*).clat(td2!1)
+    onRate3Dka = 0.00199
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ap2(b2clat,m2muh!*) + clat(td3) <-> ap2(b2clat!1,m2muh!*).clat(td3!1)
+    onRate3Dka = 0.00199
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ##only binds to clathrin if it is on the membrane, unbinds always!
+    ap2(b2clat) + clat(td1) <-> ap2(b2clat!1).clat(td1!1)
+    onRate3Dka = 0
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ap2(b2clat) + clat(td2) <-> ap2(b2clat!1).clat(td2!1)
+    onRate3Dka = 0
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ap2(b2clat) + clat(td3) <-> ap2(b2clat!1).clat(td3!1)
+    onRate3Dka = 0
+    offRatekb = 0.03
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 30 # in nm
+    assocAngles = [1.5707963, 2.466852, nan, pi, pi]
+
+    ### CLAT - CLAT IN SOLUTION###
+    clat(cd1,td1,td2,td3) + clat(cd2,td1,td2,td3) <-> clat(cd1!1,td1,td2,td3).clat(cd2!1,td1,td2,td3)
+    onRate3Dka = 0.277
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1,td1,td2,td3) + clat(cd3,td1,td2,td3) <-> clat(cd1!1,td1,td2,td3).clat(cd3!1,td1,td2,td3)
+    onRate3Dka = 0.277
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2,td1,td2,td3) + clat(cd3,td1,td2,td3) <-> clat(cd2!1,td1,td2,td3).clat(cd3!1,td1,td2,td3)
+    onRate3Dka = 0.277
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd1,td1,td2,td3) + clat(cd1,td1,td2,td3) <-> clat(cd1!1,td1,td2,td3).clat(cd1!1,td1,td2,td3)
+    onRate3Dka = 0.1385
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd2,td1,td2,td3) + clat(cd2,td1,td2,td3) <-> clat(cd2!1,td1,td2,td3).clat(cd2!1,td1,td2,td3)
+    onRate3Dka = 0.1385
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    clat(cd3,td1,td2,td3) + clat(cd3,td1,td2,td3) <-> clat(cd3!1,td1,td2,td3).clat(cd3!1,td1,td2,td3)
+    onRate3Dka = 0.1385
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 5.0
+    bindRadSameCom = 1.1
+    loopCoopFactor = 0.001
+    length3Dto2D = 30 # in nm
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    observeLabel = leg
+
+    #prevent overlap when all sites are bound, via COM.
+    clat(ref) + clat(ref) <-> clat(ref!1).clat(ref!1)
+    onRate3Dka = 0
+    offRatekb = 10
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 10.0
+    bindRadSameCom = 0.5
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+
+    #CLAT-CLAT, AT LEAST ONE HAD An AP-2 BOUND
+    #1+2
+    clat(cd1,td1!*) + clat(cd2) <-> clat(cd1!1,td1!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd1,td2!*) + clat(cd2) <-> clat(cd1!1,td2!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd1,td3!*) + clat(cd2) <-> clat(cd1!1,td3!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    #2+1
+    clat(cd2,td1!*) + clat(cd1) <-> clat(cd2!1,td1!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd2,td2!*) + clat(cd1) <-> clat(cd2!1,td2!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd2,td3!*) + clat(cd1) <-> clat(cd2!1,td3!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    #1+3
+    clat(cd1,td1!*) + clat(cd3) <-> clat(cd1!1,td1!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd1,td2!*) + clat(cd3) <-> clat(cd1!1,td2!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd1,td3!*) + clat(cd3) <-> clat(cd1!1,td3!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    #3+1
+    clat(cd3,td1!*) + clat(cd1) <-> clat(cd3!1,td1!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd3,td2!*) + clat(cd1) <-> clat(cd3!1,td2!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd3,td3!*) + clat(cd1) <-> clat(cd3!1,td3!*).clat(cd1!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    #2+3
+    clat(cd2,td1!*) + clat(cd3) <-> clat(cd2!1,td1!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd2,td2!*) + clat(cd3) <-> clat(cd2!1,td2!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd2,td3!*) + clat(cd3) <-> clat(cd2!1,td3!*).clat(cd3!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    #3+2
+    clat(cd3,td1!*) + clat(cd2) <-> clat(cd3!1,td1!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd3,td2!*) + clat(cd2) <-> clat(cd3!1,td2!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+    clat(cd3,td3!*) + clat(cd2) <-> clat(cd3!1,td3!*).clat(cd2!1)
+    onRate3Dka = 3.047 #0.277*11
+    offRatekb = 10
+
+
+    #2+2
+    clat(cd2,td1!*) + clat(cd2) <-> clat(cd2!1,td1!*).clat(cd2!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd2,td2!*) + clat(cd2) <-> clat(cd2!1,td2!*).clat(cd2!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd2,td3!*) + clat(cd2) <-> clat(cd2!1,td3!*).clat(cd2!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    #1+1
+    clat(cd1,td1!*) + clat(cd1) <-> clat(cd1!1,td1!*).clat(cd1!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd1,td2!*) + clat(cd1) <-> clat(cd1!1,td2!*).clat(cd1!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd1,td3!*) + clat(cd1) <-> clat(cd1!1,td3!*).clat(cd1!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    #3+3
+    clat(cd3,td1!*) + clat(cd3) <-> clat(cd3!1,td1!*).clat(cd3!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd3,td2!*) + clat(cd3) <-> clat(cd3!1,td2!*).clat(cd3!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+
+    clat(cd3,td3!*) + clat(cd3) <-> clat(cd3!1,td3!*).clat(cd3!1)
+    onRate3Dka = 1.5235 #0.1385*11
+    offRatekb = 10
+end reactions
