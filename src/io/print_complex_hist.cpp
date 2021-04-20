@@ -41,7 +41,7 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
     histogram.reserve(nTypes);
 
     if (complexList.size() == 0) {
-        outfile << "iter: " << it << '\n';
+        outfile << "Time (s): " << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << "\n";
         outfile << "NA\n";
         return 0.0;
     }
@@ -104,7 +104,7 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
     double meanComplexSize = 0.0; // This will count mean complex size over all complexes >1 protein
     int numComplexTypes = 0;
     int totProteins = 0;
-    outfile << "iter: " << it << std::endl;
+    outfile << "Time (s): " << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << "\n";
     for (int a = 0; a < assemblylist.size(); a++) {
         int c1 = complexrep[a];
         if (complexList[c1].memberList.size() == 1) {
@@ -137,7 +137,7 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
 
         if (assemblylist[a] == 0)
             outfile << "PI1: 1. ";
-        outfile << std::endl;
+        outfile << "\n";
         if (totProteins > 1) {
             numComplexTypes += histogram[a];
             meanComplexSize += histogram[a] * totProteins;
@@ -148,6 +148,10 @@ double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outf
         // this is also = NtotPro_inAssemblies/NAssemblies, so the numerator is all proteins that are not monomers
         meanComplexSize = meanComplexSize / (1.0 * numComplexTypes);
     }
+
+    // if (it % params.restartWrite == 0) {
+    outfile << std::flush;
+    // }
 
     return meanComplexSize;
 }

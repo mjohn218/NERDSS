@@ -26,22 +26,22 @@ void omega_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Mol
     double currOmega { calculate_omega(reactIface1, ifaceIndex2, rotAxis, currRxn, reactMol1, reactMol2, molTemplateList) };
 
     // double omega {dotproduct(norm1, norm2)};
-    std::cout << "Desired omega: " << targOmega << " current omega: " << currOmega << std::endl;
+    // std::cout << "Desired omega: " << targOmega << " current omega: " << currOmega << std::endl;
 
     if (std::abs(targOmega - currOmega) < 1E-8) {
-        std::cout << "No omega rotation needed" << std::endl;
+        // std::cout << "No omega rotation needed" << std::endl;
         return;
-    } else if ((areSameAngle(targOmega, M_PI) || areSameAngle(targOmega, 0)) && areSameAngle(targOmega, currOmega))
-        std::cout << "No omega rotation needed" << std::endl;
-    else {
+    } else if ((areSameAngle(targOmega, M_PI) || areSameAngle(targOmega, 0)) && areSameAngle(targOmega, currOmega)) {
+        //std::cout << "No omega rotation needed" << std::endl;
+    } else {
 
         // both complexes rotate around the axis of rotation
         // proportional to their respective rotational diffusion constants
         double posOmegaRotAngle { 0 };
         double negOmegaRotAngle { 0 };
         determine_rotation_angles(targOmega, currOmega, posOmegaRotAngle, negOmegaRotAngle, reactCom1, reactCom2);
-        std::cout << "Positive half angle: " << posOmegaRotAngle << "\nNegative half angle: " << negOmegaRotAngle
-                  << std::endl;
+        // std::cout << "Positive half angle: " << posOmegaRotAngle << "\nNegative half angle: " << negOmegaRotAngle
+        //           << std::endl;
 
         // Create the quaternions
         Quat omegaPos(cos(posOmegaRotAngle / 2), sin(posOmegaRotAngle / 2) * rotAxis.x,
@@ -62,27 +62,27 @@ void omega_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Mol
         currOmega = calculate_omega(reactIface1, ifaceIndex2, rotAxis, currRxn, reactMol1, reactMol2, molTemplateList);
 
         if ((areSameAngle(targOmega, M_PI) || areSameAngle(targOmega, 0)) && areSameAngle(targOmega, currOmega)) {
-            std::cout << "Omega After: " << currOmega << std::endl;
+            // std::cout << "Omega After: " << currOmega << std::endl;
             return;
         }
         if (areSameAngle(targOmega, M_PI) && areSameAngle(-M_PI, currOmega)) {
-            std::cout << "Omega After (-pi==pi): " << currOmega << std::endl;
+            // std::cout << "Omega After (-pi==pi): " << currOmega << std::endl;
             return;
         }
 
         double tol = 1e-8;
         if (std::abs(currOmega - targOmega) > tol) {
-            std::cout << "Rotated to omega in the wrong direction. " << currOmega << " Reversing and rotating the other way." << '\n';
+            // std::cout << "Rotated to omega in the wrong direction. " << currOmega << " Reversing and rotating the other way." << '\n';
             reverse_rotation(reactIface1, reactMol1, reactMol2, reactCom1, reactCom2, omegaPos, omegaNeg, moleculeList);
 
             currOmega = calculate_omega(reactIface1, ifaceIndex2, rotAxis, currRxn, reactMol1, reactMol2, molTemplateList);
-            std::cout << "Omega after reset: " << currOmega << std::endl;
+            // std::cout << "Omega after reset: " << currOmega << std::endl;
 
             determine_rotation_angles(targOmega, currOmega, posOmegaRotAngle, negOmegaRotAngle, reactCom2, reactCom1);
 
-            std::cout << "Reversed, new rotation with\n";
-            std::cout << "Positive half angle: " << posOmegaRotAngle << "\nNegative half angle: " << negOmegaRotAngle
-                      << std::endl;
+            // std::cout << "Reversed, new rotation with\n";
+            // std::cout << "Positive half angle: " << posOmegaRotAngle << "\nNegative half angle: " << negOmegaRotAngle
+            //           << std::endl;
             omegaPos = Quat(cos(posOmegaRotAngle / 2), sin(posOmegaRotAngle / 2) * rotAxis.x,
                 sin(posOmegaRotAngle / 2) * rotAxis.y, sin(posOmegaRotAngle / 2) * rotAxis.z);
             omegaNeg = Quat(cos(negOmegaRotAngle / 2), sin(negOmegaRotAngle / 2) * rotAxis.x,
@@ -100,10 +100,10 @@ void omega_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Mol
 
             currOmega = calculate_omega(reactIface1, ifaceIndex2, rotAxis, currRxn, reactMol1, reactMol2, molTemplateList);
             if ((areSameAngle(targOmega, M_PI) || areSameAngle(targOmega, 0)) && areSameAngle(targOmega, currOmega)) {
-                std::cout << "Omega After: " << currOmega << std::endl;
+                // std::cout << "Omega After: " << currOmega << std::endl;
                 return;
             } else {
-                std::cout << "WARNING: OMEGA NOT CONVERGED TO CORRECT VALUE, CURR VALUE: " << currOmega << std::endl;
+                // std::cout << "WARNING: OMEGA NOT CONVERGED TO CORRECT VALUE, CURR VALUE: " << currOmega << std::endl;
             }
         }
     }

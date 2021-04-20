@@ -19,7 +19,7 @@
 /* INTERFACE */
 // Static Variables
 int Interface::State::totalNumOfStates = 0;
-std::vector<int> MolTemplate::absToRelIface{};
+std::vector<int> MolTemplate::absToRelIface {};
 unsigned MolTemplate::numMolTypes = 0;
 std::vector<int> MolTemplate::numEachMolType {};
 
@@ -31,26 +31,26 @@ Interface::State::State(int index)
 
 Interface::Interface(std::string name, const Coord& iCoord)
     : iCoord(iCoord)
-      , name(std::move(name))
+    , name(std::move(name))
 {
 }
 
 Interface::State::State(const std::string& ifaceAndStateName, char iden, int index)
     : ifaceAndStateName(ifaceAndStateName)
-      , iden(iden)
-      , index(index)
+    , iden(iden)
+    , index(index)
 {
 }
 Interface::State::State(const std::string& ifaceAndStateName, int index)
     : ifaceAndStateName(ifaceAndStateName)
-      , index(index)
+    , index(index)
 {
 }
 
 Interface::Interface(std::string name, std::vector<Interface::State> states, Coord iCoord)
     : iCoord(iCoord)
-      , name(name)
-      , stateList(states)
+    , name(name)
+    , stateList(states)
 {
     set_ifaceAndStateNames();
 }
@@ -74,13 +74,13 @@ void Interface::set_ifaceAndStateNames()
 // Constructors
 MolTemplate::MolTemplate(std::string molName, std::vector<Interface>& interfaceList)
     : molName(molName)
-      , interfaceList(interfaceList)
+    , interfaceList(interfaceList)
 {
 }
 
 MolTemplate::MolTemplate(Coord& comCoord, std::vector<Interface>& Interfaces)
     : comCoord(comCoord)
-      , interfaceList(Interfaces)
+    , interfaceList(Interfaces)
 {
 }
 
@@ -90,7 +90,15 @@ void MolTemplate::display() const
     std::cout << "Molecule template " << molTypeIndex << '\n';
     std::cout << "Name: " << molName << '\n';
     std::cout << "Copy number:" << copies << '\n';
-    std::cout << "Is a lipid: " << std::boolalpha << isLipid << '\n';
+    std::cout <<" Diffusion trans: "<<D.x <<' '<<D.y<<' '<<D.z<<'\n';
+    std::cout <<" Diffusion Rot: "<<Dr.x <<' '<<Dr.y<<' '<<Dr.z<<'\n';
+    
+    if (isLipid) {
+        if (isImplicitLipid)
+            std::cout << "Is a implicitLipid: " << std::boolalpha << isImplicitLipid << '\n';
+        else
+            std::cout << "Is a lipid: " << std::boolalpha << isLipid << '\n';
+    }
     std::cout << "Is a rod: " << std::boolalpha << isRod << '\n';
     std::cout << "Is a point: " << std::boolalpha << isPoint << '\n';
     std::cout << "Radius: " << radius << '\n';
@@ -103,13 +111,13 @@ void MolTemplate::display() const
             if (!iface.stateList[0].myForwardRxns.empty()) {
                 std::cout << "Forward Reactions: ";
                 for (auto& rxn : iface.stateList[0].myForwardRxns)
-                    std::cout << " (" << rxn <<")";
+                    std::cout << " (" << rxn << ")";
                 std::cout << '\n';
             }
             if (!iface.stateList[0].myCreateDestructRxns.empty()) {
                 std::cout << "Creation/Destruction Reactions: ";
                 for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
-                    std::cout << " (" << rxn <<")";
+                    std::cout << " (" << rxn << ")";
                 std::cout << '\n';
             }
             std::cout << '\n';
@@ -120,24 +128,24 @@ void MolTemplate::display() const
             for (auto& state : iface.stateList) {
                 std::cout << ""
                           << "(identity: " << state.iden << ", absolute index: " << state.index << ")\n";
-//                if (!state.myForwardRxns.empty()) {
-//                    std::cout << "Forward Reactions: ";
-//                    for (auto& rxn : state.myForwardRxns)
-//                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
-//                    std::cout << '\n';
-//                }
-//                if (!state.stateChangeRxns.empty()) {
-//                    std::cout << "State Change Reactions: ";
-//                    for (auto& rxn : state.stateChangeRxns)
-//                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
-//                    std::cout << '\n';
-//                }
-//                if (!state.myCreateDestructRxns.empty()) {
-//                    std::cout << "Creation/Destruction Reactions: ";
-//                    for (auto& rxn : state.myCreateDestructRxns)
-//                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
-//                    std::cout << '\n';
-//                }
+                //                if (!state.myForwardRxns.empty()) {
+                //                    std::cout << "Forward Reactions: ";
+                //                    for (auto& rxn : state.myForwardRxns)
+                //                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
+                //                    std::cout << '\n';
+                //                }
+                //                if (!state.stateChangeRxns.empty()) {
+                //                    std::cout << "State Change Reactions: ";
+                //                    for (auto& rxn : state.stateChangeRxns)
+                //                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
+                //                    std::cout << '\n';
+                //                }
+                //                if (!state.myCreateDestructRxns.empty()) {
+                //                    std::cout << "Creation/Destruction Reactions: ";
+                //                    for (auto& rxn : state.myCreateDestructRxns)
+                //                        for (auto& rxn : iface.stateList[0].myCreateDestructRxns)
+                //                    std::cout << '\n';
+                //                }
                 std::cout << '\n';
             }
         }
@@ -162,7 +170,7 @@ int MolTemplate::find_relIndex_from_absIndex(int targStateIndex) const
      */
 
     // subroutine to find the Interface index from the State index
-    int i{ 0 };
+    int i { 0 };
     for (auto& iface : interfaceList) {
         for (auto& state : iface.stateList) {
             if (state.index == targStateIndex) {
@@ -212,22 +220,27 @@ void MolTemplate::set_value(std::string& line, MolKeyword molKeyword)
     }
     case 3: {
         isLipid = read_boolean(line);
+        std::cout << "Read in isLipid: " << std::boolalpha << isLipid << std::endl;
         break;
     }
     case 4: {
         D = Coord(parse_input_array(line));
+        std::cout << "Read in D: [" << D.x << "um^2s^-1, " << D.y << "um^2s^-1, " << D.z << "um^2s^-1]" << std::endl;
         break;
     }
     case 5: {
         Dr = Coord(parse_input_array(line));
+        std::cout << "Read in Dr: [" << Dr.x << "rad^2s^-1, " << Dr.y << "rad^2s^-1, " << Dr.z << "rad^2s^-1]" << std::endl;
         break;
     }
     case 8: {
         mass = std::stod(line);
+        std::cout << "Read in mass: " << std::boolalpha << mass << std::endl;
         break;
     }
     case 9: {
         checkOverlap = read_boolean(line);
+        std::cout << "Read in checkOverlap: " << std::boolalpha << checkOverlap << std::endl;
         break;
     }
     case 11: {
@@ -239,6 +252,7 @@ void MolTemplate::set_value(std::string& line, MolKeyword molKeyword)
         if (isImplicitLipid == true) {
             isLipid = true;
         }
+        std::cout << "Read in isImplicitLipid: " << std::boolalpha << isImplicitLipid << std::endl;
         break;
     }
     default: {

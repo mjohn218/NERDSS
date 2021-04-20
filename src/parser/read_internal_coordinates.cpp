@@ -16,6 +16,7 @@ void read_internal_coordinates(std::ifstream& molFile, MolTemplate& molTemplate)
         else {
             molTemplate.interfaceList.emplace_back(iface, Coord { x, y, z });
         }
+        std::cout << iface << ": [" << x << "nm, " << y << "nm, " << z << "nm]" << std::endl;
         molFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore the comment
 
         initialPos = molFile.tellg();

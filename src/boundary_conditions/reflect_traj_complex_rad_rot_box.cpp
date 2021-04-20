@@ -4,7 +4,7 @@
 
 void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     // NOTE: it only works for a box system with the membrane surface located on the Z-bottom.
 
     // for implicit-lipid model, the boundary surface must consider the reflecting-surface RS3D
@@ -131,18 +131,18 @@ void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Mole
 
             if (outsideNeg && outsidePos) {
                 // For a large complex, test if it could be pushed back out the other side
-                std::cout << "Complex extends both X sides of the box. Out posX side " << Posdx
-                          << ", and out negX side " << Negdx << '\n';
+                // std::cout << "Complex extends both X sides of the box. Out posX side " << Posdx
+                //           << ", and out negX side " << Negdx << '\n';
                 recheck = true;
             } else if (outsideNeg && PosWallX - 2.0 * Negdx > PosSideX) {
                 // Also need to check that update will not push you out the other side
                 recheck = true;
-                std::cout << " Will push out the other side. negwallx " << NegWallX << ", poswallx: " << PosWallX
-                          << ". 2*xtot: " << -2.0 * Negdx << '\n';
+                // std::cout << " Will push out the other side. negwallx " << NegWallX << ", poswallx: " << PosWallX
+                //           << ". 2*xtot: " << -2.0 * Negdx << '\n';
             } else if (outsidePos && NegWallX - 2.0 * Posdx < NegSideX) {
                 recheck = true;
-                std::cout << " Will push out the other side. negwallx " << NegWallX << ", poswallx: " << PosWallX
-                          << ". 2*xtot: " << -2.0 * Posdx << '\n';
+                // std::cout << " Will push out the other side. negwallx " << NegWallX << ", poswallx: " << PosWallX
+                //           << ". 2*xtot: " << -2.0 * Posdx << '\n';
             }
         }
     }
@@ -222,18 +222,18 @@ void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Mole
 
             if (outsideNeg && outsidePos) {
                 // For a large complex, test if it could be pushed back out the other side
-                std::cout << "Complex extends both Y sides of the box. Out posY side " << Posdy
-                          << ", and out negY side " << Negdy << '\n';
+                // std::cout << "Complex extends both Y sides of the box. Out posY side " << Posdy
+                //           << ", and out negY side " << Negdy << '\n';
                 recheck = true;
             } else if (outsideNeg && PosWallY - 2.0 * Negdy > PosSideY) {
                 // Also need to check that update will not push you out the other side
                 recheck = true;
-                std::cout << " Will push out the other side. negwally " << NegWallY << ", poswally: " << PosWallY
-                          << ". 2*ytot: " << -2.0 * Negdy << '\n';
+                // std::cout << " Will push out the other side. negwally " << NegWallY << ", poswally: " << PosWallY
+                //           << ". 2*ytot: " << -2.0 * Negdy << '\n';
             } else if (outsidePos && NegWallY - 2.0 * Posdy < NegSideY) {
                 recheck = true;
-                std::cout << " Will push out the other side. negwally " << NegWallY << ", poswally: " << PosWallY
-                          << ". 2*ytot: " << -2.0 * Posdy << '\n';
+                // std::cout << " Will push out the other side. negwally " << NegWallY << ", poswally: " << PosWallY
+                //           << ". 2*ytot: " << -2.0 * Posdy << '\n';
             }
         }
     }
@@ -313,18 +313,18 @@ void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Mole
 
             if (outsideNeg && outsidePos) {
                 // For a large complex, test if it could be pushed back out the other side
-                std::cout << "Complex extends both Z sides of the box. Out posZ side " << Posdz
-                          << ", and out negZ side " << Negdz << '\n';
+                // std::cout << "Complex extends both Z sides of the box. Out posZ side " << Posdz
+                //           << ", and out negZ side " << Negdz << '\n';
                 recheck = true;
             } else if (outsideNeg && PosWallZ - 2.0 * Negdz > PosSideZ) {
                 // Also need to check that update will not push you out the other side
                 recheck = true;
-                std::cout << " Will push out the other side. negwallz " << NegWallZ << ", poswallz: " << PosWallZ
-                          << ". 2*ztot: " << -2.0 * Negdz << '\n';
+                // std::cout << " Will push out the other side. negwallz " << NegWallZ << ", poswallz: " << PosWallZ
+                //           << ". 2*ztot: " << -2.0 * Negdz << '\n';
             } else if (outsidePos && NegWallZ - 2.0 * Posdz < NegSideZ) {
                 recheck = true;
-                std::cout << " Will push out the other side. negwallz " << NegWallZ << ", poswallz: " << PosWallZ
-                          << ". 2*ztot: " << -2.0 * Posdz << '\n';
+                // std::cout << " Will push out the other side. negwallz " << NegWallZ << ", poswallz: " << PosWallZ
+                //           << ". 2*ztot: " << -2.0 * Posdz << '\n';
             }
         }
     }

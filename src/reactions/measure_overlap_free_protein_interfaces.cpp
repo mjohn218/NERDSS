@@ -74,8 +74,8 @@ void measure_overlap_free_protein_interfaces(Molecule base1, Molecule baseTmp, b
 
                             d2 = dx * dx + dy * dy + dz * dz;
                             if (d2 < bindrad2) {
-                                std::cout << " WARNING: Cancel Association, overlap with INTERFACES in SYSTEM ! " << relIface1 << ' ' << relIface2
-                                          << " separation : " << sqrt(d2) << " from proteins: " << '\t';
+                                // std::cout << " WARNING: Cancel Association, overlap with INTERFACES in SYSTEM ! " << relIface1 << ' ' << relIface2
+                                //           << " separation : " << sqrt(d2) << " from proteins: " << '\t';
                                 // cout <<" UNBOUND PROTEINSs "<<mp<<' '<<mp2 <<" Interfaces: "<<myIfaceIndex<<' '<<m<<  " WITHIN A
                                 // COMPLEX ARE CLOSE TOGETHER: "<<d<<endl;
                                 flagCancel = true;

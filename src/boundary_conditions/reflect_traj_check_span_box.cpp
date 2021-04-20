@@ -149,84 +149,84 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
             // Check the x-dimension
             if (outsideNegX && outsidePosX) {
                 // For a large complex, test if checkItr could be pushed back out the other side
-                std::cout << " extends in both directions of X. negwall " << negWallX
-                          << " poswall: " << posWallX << '\n';
-                std::cout << "Pushed back out of box X, resample M and traj " << '\n';
+                // std::cout << " extends in both directions of X. negwall " << negWallX
+                //           << " poswall: " << posWallX << '\n';
+                // std::cout << "Pushed back out of box X, resample M and traj " << '\n';
                 moveFailed = true;
             }
             if (outsideNegX && !outsidePosX) {
                 targCom.trajTrans.x -= 2.0 * (negWallX - negX);
                 // Also need to check that update will not push you out the other side
-                std::cout << "Pushed back out of box X, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box X, resample M and traj " << '\n';
                 if (posWallX - 2.0 * (negWallX - negX) > posX) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallX << " poswall: " << posWallX
-                              << " Trans.x: " << targCom.trajTrans.x << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallX << " poswall: " << posWallX
+                    //           << " Trans.x: " << targCom.trajTrans.x << '\n';
                 }
             }
             if (!outsideNegX && outsidePosX) {
-                std::cout << "Pushed back out of box X, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box X, resample M and traj " << '\n';
                 targCom.trajTrans.x -= 2.0 * (posWallX - posX);
                 if (negWallX - 2.0 * (posWallX - posX) < negX) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallX << " poswall: " << posWallX
-                              << " Trans.x: " << targCom.trajTrans.x << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallX << " poswall: " << posWallX
+                    //           << " Trans.x: " << targCom.trajTrans.x << '\n';
                 }
             }
 
             // Check the y-dimension
             if (outsideNegY && outsidePosY) {
                 // For a large complex, test if checkItr could be pushed back out the other side
-                std::cout << " extends in both directions of Y. negwall " << negWallY
-                          << " poswall: " << posWallY << '\n';
-                std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
+                // std::cout << " extends in both directions of Y. negwall " << negWallY
+                //           << " poswall: " << posWallY << '\n';
+                // std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
                 moveFailed = true;
             }
             if (outsideNegY && !outsidePosY) {
                 targCom.trajTrans.y -= 2.0 * (negWallY - negY);
                 // Also need to check that update will not push you out the other side
-                std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
                 if (posWallY - 2.0 * (negWallY - negY) > posY) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallY << " poswall: " << posWallY
-                              << " Trans.y: " << targCom.trajTrans.y << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallY << " poswall: " << posWallY
+                    //           << " Trans.y: " << targCom.trajTrans.y << '\n';
                 }
             }
             if (!outsideNegY && outsidePosY) {
-                std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box Y, resample M and traj " << '\n';
                 targCom.trajTrans.y -= 2.0 * (posWallY - posY);
                 if (negWallY - 2.0 * (posWallY - posY) < negY) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallY << " poswall: " << posWallY
-                              << " Trans.y: " << targCom.trajTrans.y << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallY << " poswall: " << posWallY
+                    //           << " Trans.y: " << targCom.trajTrans.y << '\n';
                 }
             }
 
             // Check the z-dimension
             if (outsideNegZ && outsidePosZ) {
                 // For a large complex, test if checkItr could be pushed back out the other side
-                std::cout << " extends in both directions of Z. negwall " << negWallZ
-                          << " poswall: " << posWallZ << '\n';
-                std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
+                // std::cout << " extends in both directions of Z. negwall " << negWallZ
+                //           << " poswall: " << posWallZ << '\n';
+                // std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
                 moveFailed = true;
             }
             if (outsideNegZ && !outsidePosZ) {
                 targCom.trajTrans.z -= 2.0 * (negWallZ - negZ);
                 // Also need to check that update will not push you out the other side
-                std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
                 if (posWallZ - 2.0 * (negWallZ - negZ) > posZ) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallZ << " poswall: " << posWallZ
-                              << " Trans.z: " << targCom.trajTrans.z << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallZ << " poswall: " << posWallZ
+                    //           << " Trans.z: " << targCom.trajTrans.z << '\n';
                 }
             }
             if (!outsideNegZ && outsidePosZ) {
-                std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
+                // std::cout << "Pushed back out of box Z, resample M and traj " << '\n';
                 targCom.trajTrans.z -= 2.0 * (posWallZ - posZ);
                 if (negWallZ - 2.0 * (posWallZ - posZ) < negZ) {
                     moveFailed = true;
-                    std::cout << " Will push out the other side. negwall " << negWallZ << " poswall: " << posWallZ
-                              << " Trans.z: " << targCom.trajTrans.z << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWallZ << " poswall: " << posWallZ
+                    //           << " Trans.z: " << targCom.trajTrans.z << '\n';
                 }
             }
         } // recheck span
@@ -246,19 +246,19 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
         }
     } // loop over iterations and flag condition
 
-    std::cout << "ITERATIONS TO CONVERGE POSITION WITHIN BOX: " << checkItr
-              << " flag at end: 0 = success: " << needsRecheck << '\n';
+    // std::cout << "ITERATIONS TO CONVERGE POSITION WITHIN BOX: " << checkItr
+    //           << " flag at end: 0 = success: " << needsRecheck << '\n';
     if (needsRecheck) {
-        std::cout << "WARNING: DID NOT CONVERGE POSITION, NEW POS: " << '\n';
+        // std::cout << "WARNING: DID NOT CONVERGE POSITION, NEW POS: " << '\n';
         for (auto memMol : targCom.memberList) {
             Vector comVec { moleculeList[memMol].comCoord - targCom.comCoord };
             Vector rotComVec { matrix_rotate(comVec, M) };
 
             // first would make xcom=targCom.comCoord.x+vr, then would also add dx
-            std::cout << "i: " << checkItr << " P: " << memMol
-                      << " com:" << targCom.comCoord.x + targCom.trajTrans.x + rotComVec.x << ' '
-                      << targCom.comCoord.y + targCom.trajTrans.y + rotComVec.y << ' '
-                      << targCom.comCoord.z + targCom.trajTrans.z + rotComVec.z << '\n';
+            // std::cout << "i: " << checkItr << " P: " << memMol
+            //           << " com:" << targCom.comCoord.x + targCom.trajTrans.x + rotComVec.x << ' '
+            //           << targCom.comCoord.y + targCom.trajTrans.y + rotComVec.y << ' '
+            //           << targCom.comCoord.z + targCom.trajTrans.z + rotComVec.z << '\n';
 
             // update interface coords
             for (const auto& iface : moleculeList[memMol].interfaceList) {
@@ -266,9 +266,9 @@ void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std
                 Vector rotIfaceVec { matrix_rotate(ifaceVec, M) };
 
                 /*first would make xcom=targCom.comCoord.x+vr, then would also add dx */
-                std::cout << targCom.comCoord.x + targCom.trajTrans.x + rotIfaceVec.x << ' '
-                          << targCom.comCoord.y + targCom.trajTrans.y + rotIfaceVec.y << ' '
-                          << targCom.comCoord.z + targCom.trajTrans.z + rotIfaceVec.z << '\n';
+                // std::cout << targCom.comCoord.x + targCom.trajTrans.x + rotIfaceVec.x << ' '
+                //           << targCom.comCoord.y + targCom.trajTrans.y + rotIfaceVec.y << ' '
+                //           << targCom.comCoord.z + targCom.trajTrans.z + rotIfaceVec.z << '\n';
             }
         }
     } // DID NOT CONVERGE

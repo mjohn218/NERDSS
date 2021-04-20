@@ -59,15 +59,27 @@ void clear_reweight_vecs(Molecule& oneMol);
  *
  * Membrane version of sweep_separation_complex_rot
  */
-void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot_memtest(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
-void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
-void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_memtest_cluster(int simItr, int pro1Index, Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_memtest_cluster_box(int simItr, int pro1Index, Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_memtest_cluster_sphere(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
@@ -77,15 +89,27 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, cons
  *
  * 3D version of sweep_separation_complex_rot_memtest
  */
-void sweep_separation_complex_rot(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
-void sweep_separation_complex_rot_box(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot_box(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
-void sweep_separation_complex_rot_sphere(int simItr, int pro1Index, const Parameters& params,
+void sweep_separation_complex_rot_sphere(int simItr, int pro1Index, Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+// void sweep_separation_complex_rot_cluster(int simItr, int pro1Index, const Parameters& params,
+//     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+//     const std::vector<ForwardRxn>& forwardRxns,
+//     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+// void sweep_separation_complex_rot_cluster_box(int simItr, int pro1Index, const Parameters& params,
+//     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+//     const std::vector<ForwardRxn>& forwardRxns,
+//     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+// void sweep_separation_complex_rot_cluster_sphere(int simItr, int pro1Index, const Parameters& params,
+//     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+//     const std::vector<ForwardRxn>& forwardRxns,
+//     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);

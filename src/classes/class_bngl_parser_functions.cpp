@@ -311,38 +311,44 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
         switch (key) {
         case 0: {
             onRate3Dka = std::stod(line);
+            std::cout << "Read in value of onRate3Dka: " << onRate3Dka << "nm^3us^-1\n";
             break;
         }
         case 1: {
             onRate3DMacro = std::stod(line);
+            std::cout << "Read in value of onRate3DMacro: " << onRate3DMacro << "uM^-1us^-1\n";
             break;
         }
         case 2: {
             offRatekb = std::stod(line);
+            std::cout << "Read in value of offRatekb: " << offRatekb << "s^-1\n";
             break;
         }
         case 3: {
             offRateMacro = std::stod(line);
+            std::cout << "Read in value of offRateMacro: " << offRateMacro << "s^-1\n";
             break;
         }
         case 4: {
             norm1 = Vector { parse_input_array(line) };
             norm1.calc_magnitude();
+            std::cout << "Read in value of norm1: " << norm1 << '\n';
             break;
         }
         case 5: {
             norm2 = Vector { parse_input_array(line) };
             norm2.calc_magnitude();
+            std::cout << "Read in value of norm2: " << norm2 << '\n';
             break;
         }
         case 6: {
-            //            sigma = Vector{ parse_input_array(line) };
             bindRadius = std::stod(line);
-            std::cout << "Read in value of sigma: " << bindRadius << '\n';
+            std::cout << "Read in value of sigma: " << bindRadius << "nm\n";
             break;
         }
         case 7: {
             assocAngles = Angles { parse_input_array(line) };
+            std::cout << "Read in value of assocAngles: [theta1: " << assocAngles.theta1 << ", theta2: " << assocAngles.theta2 << ", phi1: " << assocAngles.phi1 << ", phi2: " << assocAngles.phi2 << ", omega: " << assocAngles.omega << "]" << '\n';
             break;
         }
         case 8: {
@@ -351,11 +357,13 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
         }
         case 9: {
             onRate3Dka = std::stod(line);
+            std::cout << "Read in value of rate: " << onRate3Dka << '\n';
             break;
         }
         case 10: {
             isCoupled = true;
             coupledRxn = CoupledRxn { std::stoi(line) };
+            std::cout << "Read in value of coupledRxn: absRxnIndex, " << coupledRxn.absRxnIndex << '\n';
             break;
         }
         case 11: {
@@ -365,6 +373,7 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
         case 12: {
             isObserved = true;
             observeLabel = line;
+            std::cout << "Read in value of observeLabel: " << observeLabel << '\n';
             break;
         }
         case 13: {
@@ -387,21 +396,27 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
         }
         case 17: {
             length3Dto2D = std::stod(line);
-            std::cout << "Read in value of length3Dto2D: " << length3Dto2D << '\n';
+            std::cout << "Read in value of length3Dto2D: " << length3Dto2D << "nm\n";
             break;
         }
         case 18: {
             rxnLabel = line;
+            std::cout << "Read in value of rxnLabel: " << rxnLabel << '\n';
             break;
         }
         case 19: {
             isCoupled = true;
             coupledRxn = CoupledRxn { line };
+            std::cout << "Read in value of coupledRxn: label, " << coupledRxn.label << '\n';
             break;
         }
         case 20: {
             kcat = std::stod(line);
-	    
+            std::cout << "Read in value of kcat: " << kcat << '\n';
+            break;
+        }
+        case 21: {
+            excludeVolumeBound = read_boolean(line);
             break;
         }
         default: {
@@ -735,9 +750,10 @@ bool ParsedRxn::check_for_conditional_rates(
             oneRxn.rateList.emplace_back(onRate3Dka, otherIfaceLists);
             // ...and the conjugate BackRxn the off rate and list of ancillary interfaces. and interfaces which change
             // state (swapped, of course)
-            backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRatekb, otherIfaceLists);
+            if (oneRxn.isReversible) {
+                backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRatekb, otherIfaceLists);
+            }
             --totSpecies; // since it's not a new reaction, reduce the number of total species...
-            std::cout << linebreak;
             std::cout << "Forward Reaction " << &oneRxn - &forwardRxns[0]
                       << " has been updated with a new rate:\nRate:" << onRate3Dka << '\n';
             std::cout << "Reactant 1 requires interfaces:\n";

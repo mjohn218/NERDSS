@@ -7,23 +7,20 @@
 
 //this is used to generate the added molecules and complexes
 void generate_coordinates_for_restart(Parameters& params, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, std::vector<int>& emptyMolList,
-    std::vector<int>& emptyComList, const std::vector<MolTemplate>& molTemplateList,
+    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList,
     const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject, int numMolTemplateBeforeAdd, int numForwardRxnBdeforeAdd)
 {
     for (int molTemplateListIndex = numMolTemplateBeforeAdd; molTemplateListIndex < molTemplateList.size(); molTemplateListIndex++) {
         MolTemplate oneTemp {};
         oneTemp = molTemplateList[molTemplateListIndex];
         for (unsigned itr { 0 }; itr < oneTemp.copies; ++itr) {
-            create_molecule_and_complex_for_restart(oneTemp, params, emptyMolList,
-                emptyComList, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
+            create_molecule_and_complex_for_restart(oneTemp, params, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
         }
     }
 }
 
-void create_molecule_and_complex_for_restart(const MolTemplate& createdMolTemp, Parameters& params, std::vector<int>& emptyMolLis,
-    std::vector<int>& emptyComLis, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
+void create_molecule_and_complex_for_restart(MolTemplate& createdMolTemp, Parameters& params, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
     int newMolIndex = 0;
     int newComIndex = 0;
@@ -77,10 +74,12 @@ void create_molecule_and_complex_for_restart(const MolTemplate& createdMolTemp, 
     moleculeList[newMolIndex].myComIndex = newComIndex;
     complexList[newComIndex] = Complex { newComIndex, moleculeList.at(newMolIndex), createdMolTemp };
     ++Complex::numberOfComplexes;
+
+    createdMolTemp.monomerList.emplace_back(newMolIndex); //add this new molecule to the monomerList
 }
 
 Molecule initialize_molecule_for_restart(
-    int index, Parameters& params, const MolTemplate& molTemplate, const Membrane& membraneObject)
+    int index, Parameters& params, MolTemplate& molTemplate, const Membrane& membraneObject)
 {
     /*!
      * \brief Creates a molecule according to add.inp, assigns

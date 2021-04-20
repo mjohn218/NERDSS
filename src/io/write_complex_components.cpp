@@ -3,7 +3,7 @@
 #include <chrono>
 #include <ctime>
 
-void write_complex_components(int simItr, std::ofstream& complexFile, const Parameters& params,
+void write_complex_components(long long int simItr, std::ofstream& complexFile, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList)
 {
@@ -19,6 +19,6 @@ void write_complex_components(int simItr, std::ofstream& complexFile, const Para
                 totMols += complex.numEachMol[i];
             }
         } else
-            complexFile << complex.index << " EMPTY\n";
+            complexFile << complex.index << " EMPTY" << std::endl;
     }
 }

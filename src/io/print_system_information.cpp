@@ -8,7 +8,7 @@
 #include "io/io.hpp"
 #include "tracing.hpp"
 
-void print_system_information(int simItr, std::ofstream& systemFile, const std::vector<Molecule>& moleculeList,
+void print_system_information(long long int simItr, std::ofstream& systemFile, const std::vector<Molecule>& moleculeList,
     const std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList)
 {
     // TRACE();

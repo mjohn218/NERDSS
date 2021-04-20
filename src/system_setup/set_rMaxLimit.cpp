@@ -3,11 +3,11 @@
 
 void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, int numDoubleBeforeAdd, int numMolTemplateBeforeAdd)
 {
-    // TRACE();
     /*For each reaction, need distance from the interface to the COM for both partners, plus the
      * bindrad+sqrt(6*Dtot*deltat)
      */
     double rMaxTot { 0 };
+    params.rMaxLimit = 0.0;
     for (auto& oneRxn : forwardRxns) {
         if (oneRxn.rxnType == ReactionType::bimolecular) {
             const RxnIface& rxnIface1 = oneRxn.reactantListNew.at(0);
@@ -17,11 +17,6 @@ void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTempla
             const MolTemplate& pro1Temp = molTemplateList.at(rxnIface1.molTypeIndex);
             const MolTemplate& pro2Temp = molTemplateList.at(rxnIface2.molTypeIndex);
 
-            // MolTemplate Interfaces which are involved in the reaction
-            //const Interface& iface1 = molTemplateList.at(rxnIface1.molTypeIndex)
-            //                              .interfaceList.at(MolTemplate::absToRelIface.at(rxnIface1.absIfaceIndex));
-            //const Interface& iface2 = molTemplateList.at(rxnIface2.molTypeIndex)
-            //                              .interfaceList.at(MolTemplate::absToRelIface.at(rxnIface2.absIfaceIndex));
             Interface iface1;
             Interface iface2;
             if (rxnIface1.molTypeIndex < numMolTemplateBeforeAdd) {
@@ -39,7 +34,6 @@ void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTempla
                              .interfaceList.at(MolTemplate::absToRelIface.at(rxnIface2.absIfaceIndex - numDoubleBeforeAdd));
             }
 
-            //            double Dtot = pro1.D.x + pro2.D.x;
             double scal { 1.0 / 3.0 };
             double Dtot { (scal * (pro1Temp.D.x + pro2Temp.D.x)) + (scal * (pro1Temp.D.y + pro2Temp.D.y))
                 + (scal * (pro1Temp.D.z + pro2Temp.D.z)) };
@@ -49,7 +43,7 @@ void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTempla
             double pro1R1 { 0 };
             double pro2R1 { 0 };
             // pro1
-            if (std::abs(pro1Temp.Dr.z) < 1E-10) {
+            if (std::abs(pro1Temp.D.z) < 1E-10) {
                 double R2 = (iface1.iCoord.x * iface1.iCoord.x) + (iface1.iCoord.y * iface1.iCoord.y);
                 pro1R1 = sqrt(R2);
                 double einsStks = cos(sqrt(2.0 * pro1Temp.Dr.z * params.timeStep));
@@ -65,7 +59,7 @@ void set_rMaxLimit(Parameters& params, const std::vector<MolTemplate>& molTempla
             }
 
             // pro2
-            if (std::abs(pro2Temp.Dr.z) < 1E-10) {
+            if (std::abs(pro2Temp.D.z) < 1E-10) {
                 double R2 = (iface2.iCoord.x * iface2.iCoord.x) + (iface2.iCoord.y * iface2.iCoord.y);
                 pro2R1 = sqrt(R2);
                 double einsStks = cos(sqrt(2.0 * pro2Temp.Dr.z * params.timeStep));

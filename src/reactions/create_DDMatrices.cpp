@@ -7,14 +7,14 @@ void create_DDMatrices(gsl_matrix*& survMatrix, gsl_matrix*& normMatrix, gsl_mat
     double RStepSize { sqrt(Dtot * params.timeStep) / 50 };
 
     create_normMatrix(normMatrix, bindRadius, Dtot, ktemp, comRMax, RStepSize, params);
-    std::cout << "Norm matrix successfully created for Dtot: " << Dtot << " timeStep "
-              << ", bindRadius: " << bindRadius << '\n';
+    // std::cout << "Norm matrix successfully created for Dtot: " << Dtot << " timeStep "
+    //           << ", bindRadius: " << bindRadius << '\n';
 
     create_survMatrix(survMatrix, bindRadius, Dtot, ktemp, comRMax, RStepSize, params);
-    std::cout << "Survival matrix successfully created for Dtot: " << Dtot << " timeStep "
-              << ", bindRadius: " << bindRadius << '\n';
+    // std::cout << "Survival matrix successfully created for Dtot: " << Dtot << " timeStep "
+    //           << ", bindRadius: " << bindRadius << '\n';
 
     create_pirMatrix(pirMatrix, bindRadius, Dtot, ktemp, comRMax, RStepSize, params);
-    std::cout << "Pir matrix successfully created for Dtot: " << Dtot << " timeStep "
-              << ", bindRadius: " << bindRadius << '\n';
+    // std::cout << "Pir matrix successfully created for Dtot: " << Dtot << " timeStep "
+    //           << ", bindRadius: " << bindRadius << '\n';
 }

@@ -21,21 +21,31 @@ void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
         case 1:
             this->waterBox = WaterBox(parse_input_array(value));
             this->isBox = true;
+            std::cout << "Read in waterBox: "
+                      << "[" << waterBox.x << " nm, " << waterBox.y << " nm, " << waterBox.z << " nm]" << std::endl;
             break;
         case 2:
             this->xBCtype = value;
+            std::cout << "Read in xBCtype: "
+                      << value << std::endl;
             break;
         case 3:
             this->yBCtype = value;
+            std::cout << "Read in yBCtype: "
+                      << value << std::endl;
             break;
         case 4:
             this->zBCtype = value;
+            std::cout << "Read in zBCtype: "
+                      << value << std::endl;
             break;
         case 5:
             this->isSphere = read_boolean(value);
+            std::cout << "Read in isSphere: " << std::boolalpha << this->isSphere << std::endl;
             break;
         case 6:
             this->sphereR = std::stod(value);
+            std::cout << "Read in sphereR: " << this->sphereR << " nm" << std::endl;
             this->isSphere = true;
             break;
         default:
@@ -79,6 +89,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
     std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject)
 {
+    bool hasParsedMol = false;
     std::ifstream inputFile { fileName };
     if (!inputFile) {
         std::cerr << "Reaction file cannot be opened. Exiting..." << std::endl;
@@ -102,7 +113,6 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
         } else if (tmpLine == "startboundaries") {
             // read in boundaries
             std::cout << "Parsing simulation boundary conditions..." << '\n';
-            //params.parse_paramFile(inputFile);
             while (getline(inputFile, line)) {
                 tmpLine = create_tmp_line(line);
                 if (skipLine(tmpLine))
@@ -129,8 +139,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                             line.erase(line.begin(), lineItr + 1); // + 1 removes the '=' sign. could make this erase(remove_if)
                             // find the value type from the keyword and then set that parameter
                             if (keyFind != bcKeywords.end()) {
-                                std::cout << "Keyword found: " << keyFind->first << '\n';
-                                //this->set_value(line, keyFind->second);
+                                // std::cout << "Keyword found: " << keyFind->first << '\n';
                                 membraneObject.set_value_BC(line, keyFind->second);
                                 gotValue = true;
                                 break;
@@ -143,6 +152,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                 }
             }
         } else if (tmpLine == "startmolecules") {
+            hasParsedMol = true;
             // get the molecule names and copy numbers from the parameter input file
             std::cout << "Parsing mol file information..." << '\n';
             std::vector<std::string> providedMols {};
@@ -215,9 +225,14 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                     tmp = 1;
                 params.restartWrite = tmp * params.timeWrite;
             }
+
+            // set the isPoint and isRod for molecule
             determine_shape_molecule(molTemplateList);
         } else if (tmpLine == "startreactions") {
-            // TODO: make sure this can only be read in after molecule templates
+            if (hasParsedMol == false) {
+                std::cerr << "Error, molecule section must be before reaction section in input file, exiting...\n";
+                exit(1);
+            }
             // index of the last template. should. starts out as number of interface states
             int totSpecies { (molTemplateList.back().interfaceList.back().stateList.back().index) }; // last iface index
             int numProvidedRxns { 0 };
@@ -322,10 +337,6 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
         }
     }
 
-    // TODO: PARSE OBSERVABLES HERE
-    //    for (const auto& obs : providedObs)
-    //        observableList.emplace_back(parse_observable(obs, molTemplateList, forwardRxns, createDestructRxns));
-
     // populate the list of reactions on each state
     populate_reaction_lists(forwardRxns, backRxns, createDestructRxns, molTemplateList);
     for (auto& oneTemp : molTemplateList) {
@@ -351,33 +362,27 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
 
     std::cout << '\n'
               << "Input file parsing complete\n";
-    std::cout << "Simulation Parameters\n";
-    params.display();
-    std::cout << "Molecule Information\n";
-    display_all_MolTemplates(molTemplateList);
-    std::cout << "Reactions\n";
-    display_all_reactions(forwardRxns, backRxns, createDestructRxns);
+    // std::cout << "Simulation Parameters\n";
+    // params.display();
+    // std::cout << "Molecule Information\n";
+    // display_all_MolTemplates(molTemplateList);
+    // std::cout << "Reactions\n";
+    // display_all_reactions(forwardRxns, backRxns, createDestructRxns);
 }
 
 void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
     std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd)
 {
+    bool hasParsedMol = false;
     int addForwardRxnNum { static_cast<int>(forwardRxns.size()) }; //this is the origin number of forwardRxns for add case
     int addBackRxnNum { static_cast<int>(backRxns.size()) }; //this is the origin number of backRxns for add case
     int addCreateDestructRxnNum { static_cast<int>(createDestructRxns.size()) }; //this is the origin number of createDestructRxns for add case
     int addMolTemplateListNum { static_cast<int>(molTemplateList.size()) };
-    //determine how many double already in the system
-    /*    int numDoubleBeforeAdd { 0 };
-    for (auto& oneRxn : forwardRxns) {
-        if (oneRxn.rxnType == ReactionType::bimolecular) {
-            numDoubleBeforeAdd++;
-        }
-    }
-*/
+
     std::ifstream inputFile { fileName };
     if (!inputFile) {
-        std::cerr << "Reaction file cannot be opened. Exiting..." << std::endl;
+        std::cerr << "Add reaction file cannot be opened. Exiting..." << std::endl;
         exit(1);
     }
 
@@ -425,7 +430,7 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
                             line.erase(line.begin(), lineItr + 1); // + 1 removes the '=' sign. could make this erase(remove_if)
                             // find the value type from the keyword and then set that parameter
                             if (keyFind != bcKeywords.end()) {
-                                std::cout << "Keyword found: " << keyFind->first << '\n';
+                                // std::cout << "Keyword found: " << keyFind->first << '\n';
                                 //this->set_value(line, keyFind->second);
                                 membraneObject.set_value_BC(line, keyFind->second);
                                 gotValue = true;
@@ -620,12 +625,6 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
         }
     }
 
-    // TODO: PARSE OBSERVABLES HERE
-    //    for (const auto& obs : providedObs)
-    //        observableList.emplace_back(parse_observable(obs, molTemplateList, forwardRxns, createDestructRxns));
-
-    // populate the list of reactions on each state
-
     //here wew need to add three new inputs for pop_react_lists
     populate_reaction_lists_for_add(forwardRxns, backRxns, createDestructRxns, molTemplateList, addForwardRxnNum, addBackRxnNum, addCreateDestructRxnNum);
 
@@ -651,11 +650,11 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
     params.isNonEQ = createDestructRxns.size() > 0;
 
     std::cout << '\n'
-              << "Input file parsing complete\n";
-    std::cout << "Simulation Parameters\n";
-    params.display();
-    std::cout << "Molecule Information\n";
-    display_all_MolTemplates(molTemplateList);
-    std::cout << "Reactions\n";
-    display_all_reactions(forwardRxns, backRxns, createDestructRxns);
+              << "Add input file parsing complete\n";
+    // std::cout << "Simulation Parameters\n";
+    // params.display();
+    // std::cout << "Molecule Information\n";
+    // display_all_MolTemplates(molTemplateList);
+    // std::cout << "Reactions\n";
+    // display_all_reactions(forwardRxns, backRxns, createDestructRxns);
 }

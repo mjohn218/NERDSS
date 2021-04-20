@@ -5,7 +5,7 @@ Vector determine_normal(Vector normal, const MolTemplate& molTemplate, Molecule 
 {
     // TRACE();
     if (oneMol.interfaceList.empty()) {
-        std::cout << "Molecule is a point, has no normal." << std::endl;
+        // std::cout << "Molecule is a point, has no normal." << std::endl;
         return { 0, 0, 0 };
     }
 
@@ -35,7 +35,7 @@ Vector determine_normal(Vector normal, const MolTemplate& molTemplate, Molecule 
             totalRotQuat.rotate(tmpVec);
             oneMol.tmpICoords[ifaceIndex] = Coord(tmpVec.x, tmpVec.y, tmpVec.z);
             if (oneMol.tmpICoords[ifaceIndex] != tmpMol.tmpICoords[ifaceIndex]) {
-                std::cout << "Backwards rotation unsuccessful on interface " << ifaceIndex << std::endl;
+                // std::cout << "Backwards rotation unsuccessful on interface " << ifaceIndex << std::endl;
                 return { 0, 0, 0 };
             }
         }

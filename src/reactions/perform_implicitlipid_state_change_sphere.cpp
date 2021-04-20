@@ -159,7 +159,7 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
             isOnMembrane = true;
         } else { // note not on the membrane
             transitionToSurface = true;
-            std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
+            // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
             sigmaMag = sqrt((sigma.x * sigma.x) + (sigma.y * sigma.y) + (sigma.z * sigma.z));
             displaceFrac = (sigmaMag - currRxn.bindRadius) / sigmaMag;
             transVec1.x = -sigma.x * displaceFrac;
@@ -176,21 +176,21 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
     // TODO: do something else if only one is a point
     if (molTemplateList[facilitatorMol.molTypeIndex].isPoint) {
         /*If both molecules are points, no orientations to specify*/
-        std::cout << " Move two point particles to contact along current separation vector, NO ORIENTATION \n";
+        // std::cout << " Move two point particles to contact along current separation vector, NO ORIENTATION \n";
     } else {
 
         /* THETA */
-        std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
-                  << "THETA 1" << std::endl
-                  << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
+        //           << "THETA 1" << std::endl
+        //           << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
         theta_rotation(reactIface1, reactIface2, facilitatorMol, stateChangeMol, assocAngles.theta1, facilitatorCom,
             stateChangeCom, moleculeList);
 
         //        write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
-        std::cout << "THETA 2" << std::endl
-                  << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << "THETA 2" << std::endl
+        //           << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
         theta_rotation(reactIface2, reactIface1, stateChangeMol, facilitatorMol, assocAngles.theta2, stateChangeCom,
             facilitatorCom, moleculeList);
 
@@ -198,23 +198,23 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
 
         /* OMEGA */
         // if protein has theta M_PI, uses protein norm instead of com_iface vector
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "OMEGA" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "OMEGA" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
         if (!std::isnan(currRxn.assocAngles.omega)) {
             omega_rotation(reactIface1, reactIface2, stateChangeIface, facilitatorMol, stateChangeMol, facilitatorCom,
                 stateChangeCom, assocAngles.omega, currRxn, moleculeList, molTemplateList);
 
             //            write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P1 or P2 is a rod-type protein, no dihedral for associated complex." << std::endl;
+        } //else
+        // std::cout << "P1 or P2 is a rod-type protein, no dihedral for associated complex." << std::endl;
 
         /* PHI */
         // PHI 1
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "PHI 1" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "PHI 1" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
         if (!std::isnan(assocAngles.phi1)) {
             phi_rotation(reactIface1, reactIface2, stateChangeIface, facilitatorMol, stateChangeMol, facilitatorCom,
@@ -222,13 +222,13 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
 
             //            write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P1 has no valid phi angle." << std::endl;
+        } //else
+        // std::cout << "P1 has no valid phi angle." << std::endl;
 
         // PHI 2
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "PHI 2" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "PHI 2" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
         if (!std::isnan(assocAngles.phi2)) {
             phi_rotation(reactIface2, reactIface1, facilitatorIface, stateChangeMol, facilitatorMol, stateChangeCom,
@@ -236,8 +236,8 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
 
             //           write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P2 has no valid phi angle." << std::endl;
+        } //else
+        // std::cout << "P2 has no valid phi angle." << std::endl;
     } //only rotate if they are not both points.
 
     // need to adjust Lipid's orientation, make it verticle to sphere
@@ -254,8 +254,8 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
         //make sure reactIface1 is sticking on sphere.
         double lamda = (membraneObject.sphereR - reactIface1.get_magnitude()) / reactIface1.get_magnitude();
         Vector dtrans = Vector { lamda * reactIface1 };
-        std::cout << " In ImplicitLipid model, protein interface is off spherical membrane, shift up by: " << dtrans.x << " " << dtrans.y << " " << dtrans.z
-                  << std::endl;
+        // std::cout << " In ImplicitLipid model, protein interface is off spherical membrane, shift up by: " << dtrans.x << " " << dtrans.y << " " << dtrans.z
+        //           << std::endl;
         // update the temporary coordinates for both complexes
         for (auto& mp : facilitatorCom.memberList)
             moleculeList[mp].update_association_coords(dtrans);
@@ -284,8 +284,8 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
         for (auto& mp : stateChangeCom.memberList)
             moleculeList[mp].update_association_coords(vtraj);
 
-        std::cout << "CRDS after reflecting off of the sphere by " << traj[0] << ' ' << traj[1] << ' ' << traj[2] << std::endl;
-        write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
+        // std::cout << "CRDS after reflecting off of the sphere by " << traj[0] << ' ' << traj[1] << ' ' << traj[2] << std::endl;
+        // write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
     }
     /* CHECKS */
     bool cancelAssoc { false };
@@ -297,7 +297,7 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
         check_for_structure_overlap_system(cancelAssoc, facilitatorCom, stateChangeCom, moleculeList, params, molTemplateList, complexList, forwardRxns, backRxns);
 
     if (cancelAssoc) {
-        std::cout << "Canceling association, returning complexes to original state.\n";
+        // std::cout << "Canceling association, returning complexes to original state.\n";
         for (auto memMol : facilitatorCom.memberList)
             moleculeList[memMol].clear_tmp_association_coords();
         for (auto memMol : stateChangeCom.memberList)
@@ -397,14 +397,14 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
     if (!isStateChangeBackRxn && forwardRxns[rxnIndex].isObserved) {
         auto observeItr = observablesList.find(forwardRxns[rxnIndex].observeLabel);
         if (observeItr == observablesList.end()) {
-            std::cerr << "WARNING: Observable " << forwardRxns[rxnIndex].observeLabel << " not defined.\n";
+            // std::cerr << "WARNING: Observable " << forwardRxns[rxnIndex].observeLabel << " not defined.\n";
         } else {
             ++observeItr->second;
         }
     } else if (isStateChangeBackRxn && backRxns[rxnIndex].isObserved) {
         auto observeItr = observablesList.find(backRxns[rxnIndex].observeLabel);
         if (observeItr == observablesList.end()) {
-            std::cerr << "WARNING: Observable " << backRxns[rxnIndex].observeLabel << " not defined.\n";
+            // std::cerr << "WARNING: Observable " << backRxns[rxnIndex].observeLabel << " not defined.\n";
         } else {
             --observeItr->second;
         }

@@ -3,16 +3,16 @@
 #include "tracing.hpp"
 
 void generate_coordinates(const Parameters& params, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList,
+    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList,
     const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
-    // TRACE();
     // First create all the molecules and their corresponding complexes, with random center of mass coordinates
-    for (const auto& oneTemp : molTemplateList) {
+    for (auto& oneTemp : molTemplateList) {
         if (oneTemp.isImplicitLipid == false) {
             for (unsigned itr { 0 }; itr < oneTemp.copies; ++itr) {
                 moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
                 complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
+                oneTemp.monomerList.emplace_back(moleculeList.back().index);
             }
         } else {
             moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
@@ -26,8 +26,7 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
         return;
     }
 
-    std::cout << bon << "Finding and fixing overlapping proteins.\n"
-              << boff;
+    std::cout << "\nFinding and fixing overlapping proteins.\n";
     int currItr { 0 };
     while (currItr < 50) {
         bool hasOverlap { false };
@@ -86,7 +85,6 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
                   << "): " << numOverlap << '\n';
         if (!hasOverlap) {
             std::cout << "No overlapping proteins found.\n";
-            std::cout << llinebreak << '\n';
             break;
         }
     }

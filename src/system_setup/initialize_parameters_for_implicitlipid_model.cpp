@@ -14,6 +14,7 @@ void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const
         int molTypeIndex = moleculeList[mol].molTypeIndex;
         if (molTemplateList[molTypeIndex].isImplicitLipid == true) {
             membraneObject.implicitLipid = true; // determine membraneObject.implicitLipid according to molTemp.isImplicitLipid
+            membraneObject.lipidLength = molTemplateList[molTypeIndex].radius;
             continue;
         }
         if (molTemplateList[molTypeIndex].D.z > 0)
@@ -29,9 +30,8 @@ void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const
         if (molTemplateList[molTypeIndex].isImplicitLipid == true) {
             moleculeList[mol].isImplicitLipid = true;
             implicitlipidIndex = mol;
-            std::cout << " INDEX OF IMPLICIT LIPID MOLECULE: " << implicitlipidIndex << std::endl;
             membraneObject.implicitlipidIndex = mol;
-            moleculeList[mol].mass = 1; // such a large value that implicit-lipid won't move when proteins bind to it.
+            //moleculeList[mol].mass = 1; // such a large value that implicit-lipid won't move when proteins bind to it.
             systemIL = true; //yes, there are IL's in the system.
         } else {
             moleculeList[mol].isImplicitLipid = false;
@@ -118,22 +118,24 @@ void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const
         for (const auto& oneRxn : forwardRxns) {
             for (const auto& oneMol : oneRxn.reactantListNew) {
                 //for (auto& implicitLipidState : implicitLipidStateList) {
-                //if (implicitLipidState.index == oneMol.absIfaceIndex) {
-                if (moleculeList[implicitlipidIndex].interfaceList[0].index == oneMol.absIfaceIndex) {
-                    membraneObject.RS3Dvect[RS3Dindex] = oneRxn.bindRadius;
-                    membraneObject.RS3Dvect[RS3Dindex + 100] = oneRxn.rateList[0].rate;
-                    membraneObject.RS3Dvect[RS3Dindex + 200] = 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.x + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.x)
-                        + 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.y + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.y)
-                        + 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.z + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.z);
-                    membraneObject.RS3Dvect[RS3Dindex + 300] = membraneObject.RS3Dvect[RS3Dindex] * membraneObject.RS3Dvect[RS3Dindex + 100] * 2.0 / (membraneObject.RS3Dvect[RS3Dindex + 100] * 2.0 + 4 * M_PI * membraneObject.RS3Dvect[RS3Dindex] * membraneObject.RS3Dvect[RS3Dindex + 200]);
-                    if (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].isImplicitLipid == true)
-                        membraneObject.RS3Dvect[RS3Dindex + 400] = oneRxn.reactantListNew[1].molTypeIndex;
-                    else
-                        membraneObject.RS3Dvect[RS3Dindex + 400] = oneRxn.reactantListNew[0].molTypeIndex;
-                    RS3Dindex += 1;
+                if (oneRxn.reactantListNew.size() > 1) {
+                    if (moleculeList[implicitlipidIndex].interfaceList[0].index == oneMol.absIfaceIndex) {
+                        membraneObject.RS3Dvect[RS3Dindex] = oneRxn.bindRadius;
+                        membraneObject.RS3Dvect[RS3Dindex + 100] = oneRxn.rateList[0].rate;
+                        membraneObject.RS3Dvect[RS3Dindex + 200] = 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.x + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.x)
+                            + 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.y + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.y)
+                            + 1.0 / 3.0 * (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].D.z + molTemplateList[oneRxn.reactantListNew[1].molTypeIndex].D.z);
+                        membraneObject.RS3Dvect[RS3Dindex + 300] = membraneObject.RS3Dvect[RS3Dindex] * membraneObject.RS3Dvect[RS3Dindex + 100] * 2.0 / (membraneObject.RS3Dvect[RS3Dindex + 100] * 2.0 + 4 * M_PI * membraneObject.RS3Dvect[RS3Dindex] * membraneObject.RS3Dvect[RS3Dindex + 200]);
+                        if (molTemplateList[oneRxn.reactantListNew[0].molTypeIndex].isImplicitLipid == true)
+                            membraneObject.RS3Dvect[RS3Dindex + 400] = oneRxn.reactantListNew[1].molTypeIndex;
+                        else
+                            membraneObject.RS3Dvect[RS3Dindex + 400] = oneRxn.reactantListNew[0].molTypeIndex;
+                        RS3Dindex += 1;
+                    }
                 }
-                //}
             }
         }
     } //only set up IL model if they exist.
+    // std::cout << "membraneObject.RS3Dvect[300]: " << std::setprecision(20) << membraneObject.RS3Dvect[300] << std::endl;
+    // exit(1);
 }

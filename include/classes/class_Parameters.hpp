@@ -49,6 +49,7 @@ enum class ParamKeyword : int {
     //!< association is canceled
     name = 13, //!< name of the simulation
     checkPoint = 14, //!< interval to write checkpoint
+    scaleMaxDisplace = 15, //!< scalar of average displacement that is acceptable upon association.
 };
 
 /*! \enum MolKeyword
@@ -97,7 +98,8 @@ enum class RxnKeyword : int {
     length3Dto2D = 17, //!< nm, length factor converts 3D to 2D rate
     rxnLabel = 18, //!< label of the reaction, used for coupled
     coupledRxnLabel = 19, //!< lable of the coupled reaction
-	kcat = 20, //!<rate for a Michaelis-Menten reaction.
+    kcat = 20, //!<rate for a Michaelis-Menten reaction.
+    excludeVolumeBound = 21, //!< once two sites bound, still exclude their partners if this is set true
 };
 
 struct Parameters {
@@ -123,16 +125,19 @@ struct Parameters {
     unsigned numTotalUnits { 0 }; //!< number of total molecules + interfaces in the system at start
     double timeStep { 0 }; //!< timestep, in microseconds.  used to be deltat
     double mass { 0 }; //!< total mass of the system (do we need this?)
-    int max2DRxns { 1000 }; //!< maximum number of allowed unique 2D reactions
+    int max2DRxns { 10000 }; //!< maximum number of allowed unique 2D reactions
     int maxUniqueSpecies { 1000 }; //!< maximum number of allowed unique species
+    long long int itrRestartFrom { 0 }; //!< number of timesteps from when the simlation restart
+    double timeRestartFrom { 0.0 }; //!< time from when the simulation restart (unit: s)
 
     int numLipids { 0 }; //!< total number of lipids in the system
 
-    double overlapSepLimit { 1.5 }; //!< in nm. COM-COM distance less than this is cancelled, for checkOverlap molecules
+    double overlapSepLimit { 0.1 }; //!< in nm. COM-COM distance less than this is cancelled, for checkOverlap molecules
     bool implicitLipid { false };
     bool hasUniMolStateChange { false };
     bool hasCreationDestruction { false };
 
+    double scaleMaxDisplace { 100.0 }; //!< in nm. defaults to a large number, which allows most moves even of large magnitude upon association.
     std::string name {}; //!< name of the simulation
     Debug debugParams;
 
@@ -140,19 +145,19 @@ struct Parameters {
     std::string trajFile { "trajectory.xyz" };
     std::string restartFile { "restart.dat" };
 
-    // TODO TEMPORARY
+    // TODO: TEMPORARY
     bool isNonEQ { false };
 
     // set in code itself
     double rMaxLimit { 0 };
     double rMaxRadius { 0 };
 
-    // IO information
+    // IO information. Iterators need to be long long because they can exceed 2^32
     bool fromRestart { false }; //!< is this simulation initialized from a restart file. used to be int restart
-    int timeWrite { 10 }; //!< timestep interval to print timestep. used to be statwrite
-    int trajWrite { 10 }; //!< timestep interval to write coordinates file. used to be configwrite
-    int restartWrite { 10 }; //!< timestep interval to write a restart file
-    int pdbWrite { -1 }; //!< interval to write pdb
+    long long int timeWrite { 10 }; //!< timestep interval to print timestep. used to be statwrite
+    long long int trajWrite { 10 }; //!< timestep interval to write coordinates file. used to be configwrite
+    long long int restartWrite { 10 }; //!< timestep interval to write a restart file
+    long long int pdbWrite { -1 }; //!< interval to write pdb
     long long int checkPoint { -1 }; //!< interval to write checkpoint
 
     void display();

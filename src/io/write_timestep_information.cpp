@@ -3,7 +3,7 @@
 #include <chrono>
 #include <ctime>
 
-void write_timestep_information(int simItr, std::ofstream& outFile, std::ofstream& molecTypesFile,
+void write_timestep_information(long long int simItr, std::ofstream& outFile, std::ofstream& molecTypesFile,
     std::ofstream& textTimeStatFile, const Parameters& params, std::vector<std::vector<int>>& molecTypesList,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList)
 {
@@ -136,7 +136,7 @@ void write_timestep_information(int simItr, std::ofstream& outFile, std::ofstrea
         textTimeStatFile << "\t";
     }
     outFile << '\n';
-    textTimeStatFile << '\n';
+    textTimeStatFile << std::endl;
 
     // De-Allocate memory to prevent memory leak
     for (int i = 0; i < HEIGHT; i++)

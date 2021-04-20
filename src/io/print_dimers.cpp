@@ -120,7 +120,7 @@ void print_dimers(std::vector<Complex>& complexList, std::ofstream& outfile, int
         //	  outfile<<endl;
 
     } // loop over all assemblies in the system
-    outfile << it << '\t' << it * params.timeStep << '\t';
+    outfile << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << '\t';
     for (j = 0; j < nTypes; j++) {
         outfile << monomers[j] << '\t' << dimers[j] << '\t'; // endl;
     }

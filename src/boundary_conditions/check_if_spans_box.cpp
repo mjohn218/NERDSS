@@ -28,7 +28,7 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
     bool canBeOutsideZ { ((reactCom1.radius + reactCom2.radius) > (membraneObject.waterBox.z / 2.0)) };
 
     if (canBeOutsideZ) {
-        std::cout << "CHECK BOX SPAN in Z. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
+        // std::cout << "CHECK BOX SPAN in Z. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
         // The approximate size of the complex in z (max size) puts it as outside, now test interface positions.
         bool outsidePos { false };
         bool outsideNeg { false };
@@ -88,14 +88,14 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
             outsideNeg = true;
         // translation or cancel
         if (outsideNeg && outsidePos) {
-            std::cout << "STICKS OUT BOTH SIZES in Z, CANCEL ASSOCIATION " << '\n';
+            // std::cout << "STICKS OUT BOTH SIZES in Z, CANCEL ASSOCIATION " << '\n';
             cancelAssoc = true;
         }
         /*Also check if it sticks out far enough in one direction, that pushing back in will cause 
 	       it to stick out the other side.
 	     */
         if (posWall + negWall > 0) {
-            std::cout << "WILL STICK OUT BOTH SIZES in Z, CANCEL ASSOCIATION " << '\n';
+            // std::cout << "WILL STICK OUT BOTH SIZES in Z, CANCEL ASSOCIATION " << '\n';
             cancelAssoc = true;
         }
         if (outsideNeg && !outsidePos) {
@@ -137,7 +137,7 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
     }
 
     if (canBeOutsideY) {
-        std::cout << "CHECK BOX SPAN in Y. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
+        // std::cout << "CHECK BOX SPAN in Y. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
         // The approximate size of the complex in y (max size) puts it as outside, now test interface positions.
         bool outsidePos { false };
         bool outsideNeg { false };
@@ -197,14 +197,14 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
             outsideNeg = true;
         // translation or cancel
         if (outsideNeg && outsidePos) {
-            std::cout << "STICKS OUT BOTH SIZES in Y, CANCEL ASSOCIATION " << '\n';
+            // std::cout << "STICKS OUT BOTH SIZES in Y, CANCEL ASSOCIATION " << '\n';
             cancelAssoc = true;
         }
         /*Also check if it sticks out far enough in one direction, that pushing back in will cause 
 	  it to stick out the other side.
 	 */
         if (posWall + negWall > 0) {
-            std::cout << "WILL STICK OUT BOTH SIZES in Y, CANCEL ASSOCIATION " << posWall << ' ' << negWall << '\n';
+            // std::cout << "WILL STICK OUT BOTH SIZES in Y, CANCEL ASSOCIATION " << posWall << ' ' << negWall << '\n';
             cancelAssoc = true;
         }
 
@@ -247,7 +247,7 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
     }
 
     if (canBeOutsideX) {
-        std::cout << "CHECK BOX SPAN in X. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
+        // std::cout << "CHECK BOX SPAN in X. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
         // The approximate size of the complex in x (max size) puts it as outside, now test interface positions.
         bool outsidePos { false };
         bool outsideNeg { false };
@@ -305,14 +305,14 @@ void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& re
             outsideNeg = true;
         // translation or cancel
         if (outsideNeg && outsidePos) {
-            std::cout << "STICKS OUT BOTH SIZES in X, CANCEL ASSOCIATION " << '\n';
+            // std::cout << "STICKS OUT BOTH SIZES in X, CANCEL ASSOCIATION " << '\n';
             cancelAssoc = true;
         }
         /*Also check if it sticks out far enough in one direction, that pushing back in will cause 
 	  it to stick out the other side.
 	 */
         if (posWall + negWall > 0) {
-            std::cout << "WILL STICK OUT BOTH SIZES in X, CANCEL ASSOCIATION " << '\n';
+            // std::cout << "WILL STICK OUT BOTH SIZES in X, CANCEL ASSOCIATION " << '\n';
             cancelAssoc = true;
         }
 

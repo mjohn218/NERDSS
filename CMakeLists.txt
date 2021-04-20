@@ -33,10 +33,12 @@ include_directories(include)
 
 file(GLOB SOURCES "src/*/*.cpp")
 add_executable(nerdss ${SOURCES} EXEs/nerdss.cpp)
+add_executable(nerdss_cluster_sweep ${SOURCES} EXE_CLUSTER/nerdss_cluster_sweep.cpp)
 
 # Set up external libraries
 find_package(GSL REQUIRED)
 target_link_libraries(nerdss GSL::gsl GSL::gslcblas)
+target_link_libraries(nerdss_cluster_sweep GSL::gsl GSL::gslcblas)
 
 # Set up header directories
 include_directories(include $(GSL_INCLUDE_DIR))

@@ -113,6 +113,9 @@ struct Molecule {
         int relIndex { -1 }; //!< this interface's relative index (index in Molecule::interfaceList)
         int molTypeIndex { -1 }; //!< index of this interface's parent Molecule's MolTemplate (makes comparisons easier)
         bool isBound { false }; //!< is this interface bound
+        bool excludeVolume { false }; //!< need check exclude volume?
+        std::vector<int> excludeMolList {}; //!< mol index of the exclude partner
+        std::vector<int> excludeInfList {}; //!< rel interface index of the exclude partner
 
         Interaction interaction;
 
@@ -223,7 +226,7 @@ struct Molecule {
 
     // other reaction member functions
     void create_random_coords(const MolTemplate& molTemplate, const Membrane& membraneObject);
-    void destroy(std::vector<int>& emptyMolList);
+    void destroy();
 
     void display(const MolTemplate& molTemplate) const;
     void display_all() const;
@@ -284,13 +287,13 @@ public:
     void display();
     void display(const std::string& name);
     Complex create(const Molecule& mol, const MolTemplate& molTemp);
-    void destroy(std::vector<Molecule>& moleculeList, std::vector<int>& emptyMolList,
-        std::vector<Complex>& complexList, std::vector<int>& emptyComList);
+    void destroy(std::vector<Molecule>& moleculeList,
+        std::vector<Complex>& complexList);
     void put_back_into_SimulVolume(
-        int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList);
+        int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList);
     void translate(Vector transVec, std::vector<Molecule>& moleculeList);
     // void propagate(std::vector<Molecule>& moleculeList);
-    void propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject);
+    void propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject, const std::vector<MolTemplate>& molTemplateList);
     void update_association_coords_sphere(std::vector<Molecule>& moleculeList, Coord iface, Coord ifacenew);
 
     Complex() = default;

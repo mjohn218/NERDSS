@@ -4,7 +4,7 @@
 #include <ctime>
 #include <iomanip>
 
-void write_traj(int iter, std::ofstream& trajFile, const Parameters& params, const std::vector<Molecule>& moleculeList,
+void write_traj(long long int iter, std::ofstream& trajFile, const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
     // TRACE();

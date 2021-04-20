@@ -21,7 +21,7 @@ void find_which_state_change_reaction(int ifaceIndex, int& rxnIndex, int& rateIn
                 if (matches == 0) {
                     // TODO: either an error or the molecule doesn't match all the requirements. do what?
                 } else if (matches > 1) {
-                    std::cout << "Multiple rates found, using last found rate.\n";
+                    // std::cout << "Multiple rates found, using last found rate.\n";
                     rxnIndex = oneRxn.relRxnIndex;
                 } else {
                     rxnIndex = oneRxn.relRxnIndex;
@@ -38,7 +38,7 @@ void find_which_state_change_reaction(int ifaceIndex, int& rxnIndex, int& rateIn
                 if (matches == 0) {
                     // TODO: either an error or the molecule doesn't match all the requirements. do what?
                 } else if (matches > 1) {
-                    std::cout << "Multiple rates found, using last found rate.\n";
+                    // std::cout << "Multiple rates found, using last found rate.\n";
                     rateIndex = backRxns[oneRxn.conjBackRxnIndex].relRxnIndex;
                     isStateChangeBackRxn = true;
                 } else {

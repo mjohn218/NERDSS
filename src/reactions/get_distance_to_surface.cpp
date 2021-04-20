@@ -16,7 +16,7 @@ bool get_distance_to_surface(int pro1, int pro2, int iface1, int iface2, int rxn
             R1 = std::abs(membraneObject.sphereR - r);
 
         } else {
-            dz = moleculeList[pro1].interfaceList[iface1].coord.z - (-membraneObject.waterBox.z / 2.0);
+            dz = moleculeList[pro1].interfaceList[iface1].coord.z - (-membraneObject.waterBox.z / 2.0) - membraneObject.lipidLength;
             R1 = sqrt((dz * dz));
         }
     }

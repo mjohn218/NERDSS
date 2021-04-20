@@ -1,13 +1,11 @@
-/* \file vector_rd_reweight_NOPBC.cpp
+/* \file nerdss.cpp
  * \brief Main function for simulation.
  *
- * ## TODO
+ * ## TODO:
  *  - Change freelist from unordered list of relative iface indices to ordered list of absolute indices.
  *    really speed up evaluate_binding_pair
  *  - Write species tracker (tracks connectivity)
  *  - Compress reflect_traj_complex_rad_rot, reflect_traj_check_span, reflect_traj_rad_rot_nocheck
- *  - IDEA: move copy numbers from .mol files to .inp file, like in BNGL.
- *
  */
 
 #include "boundary_conditions/reflect_functions.hpp"
@@ -43,13 +41,11 @@ unsigned long totMatches = 0;
 
 int main(int argc, char* argv[])
 {
-    // TRACE(); // this can trace the function calling
     /* SIMULATION SETUP */
     // Get seed for random number generation
     // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
     std::random_device rd {};
     unsigned seed { rd() };
-    //    seed = 305082827;
 
     // get time point for total simulation time
     MDTimer::time_point totalTimeStart = MDTimer::now();
@@ -57,7 +53,6 @@ int main(int argc, char* argv[])
     /* SET UP SIMULATION LISTS */
     // Simulation species lists
     std::vector<MolTemplate> molTemplateList {}; // list of provided molecule templates
-    std::vector<std::vector<int>> molecTypesList {};
 
     // Reaction lists
     std::vector<ForwardRxn> forwardRxns {}; // list of forward reactions
@@ -72,94 +67,28 @@ int main(int argc, char* argv[])
 
     // set up some output files
     // TODO: change these to open and close as needed
-    // std::ofstream timeStatFile("time_molec_number.dat");
-    //     std::ofstream timeStatFileText("time_molec_text.dat");
-    //     std::ofstream molecTypesFile("molectypes.dat");
-    //     std::ofstream complexFile("complex_components.dat");
-
     std::string observablesFileName { "observables_time.dat" };
     std::string trajFileName { "trajectory.xyz" };
     std::string restartFileName { "restart.dat" };
     std::string addFileNameInput {}; // this is for restart with changed params or adding molecules and reactions
     std::string restartFileNameInput; //if you read it in, allow it to have its own name.
-    //std::string speciesFileName { "all_species.dat" };
-    //    std::string speciesFileName { "all_species_rank" };//dat file
-    //char rankChar[10];
-    //sprintf(rankChar, "%d",rank);
-    //speciesFileName+=rankChar;
-    //speciesFileName.append(".dat");
+    params.rank=-1;//for serial jobs, this impacts the name of the restart file.
 
-    // TODO: Write command line flag parser and get this out of here
-    unsigned verbosity { 0 };
-    std::cout << "Command: " << std::string(argv[0]) << std::flush;
-    for (int flagItr { 1 }; flagItr < argc; ++flagItr) {
-        std::string flag { argv[flagItr] };
-        std::cout << ' ' << flag << std::flush;
-        if (flag == "-f") {
-            paramFile = argv[flagItr + 1];
-            std::cout << ' ' << std::string(argv[flagItr + 1]) << std::flush;
-            ++flagItr;
-        } else if (flag == "-s" || flag == "--seed") {
-            std::stringstream iss(argv[flagItr + 1]);
-            unsigned tmpseed;
-            if (iss >> tmpseed)
-                seed = tmpseed;
-            else {
-                std::cerr << "Error reading seed, exiting.\n";
-                exit(1);
-            }
-            ++flagItr;
-            std::cout << '\n';
-        } else if (flag == "--debug-force-dissoc") {
-            params.debugParams.forceDissoc = true;
-        } else if (flag == "--debug-force-assoc") {
-            params.debugParams.forceAssoc = true;
-        } else if (flag == "--print-system-info") {
-            params.debugParams.printSystemInfo = true;
-        } else if (flag == "-r" || flag == "--restart") {
-            restartFileNameInput = std::string(argv[flagItr + 1]);
-            params.fromRestart = true;
-            std::cout << ' ' << std::string(argv[flagItr + 1]) << std::flush;
-            ++flagItr;
-        } else if (flag == "-a" || flag == "--add") {
-            addFileNameInput = std::string(argv[flagItr + 1]);
-            std::cout << ' ' << std::string(argv[flagItr + 1]) << std::flush;
-            ++flagItr;
-        } else if (flag == "-v") {
-            params.debugParams.verbosity = 1;
-        } else if (flag == "-vv") {
-            verbosity = 2;
-            // } else if (std::string{ argv[flag] } == "-o") {
-            //     trajFile = std::ofstream( std::string{ argv[flag+1] } + std::string{".xyz"} );
-            //     ++flag;
-        } else {
-            std::cout << " ignored " << std::endl;
-        }
-    }
+    // command line flag parser
+    parse_command(argc, argv, params, paramFile, restartFileNameInput, addFileNameInput, seed);
 
     auto startTime = MDTimer::to_time_t(totalTimeStart);
     char charTime[24];
-    //std::cout << "\nStart date: " << std::put_time(std::localtime(&startTime), "%F %T") << '\n';
     std::cout << "\nStart date: ";
     if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&startTime)))
         std::cout << charTime << '\n';
-    std::cout << "Seed: " << seed << std::endl;
-    //srand_gsl(seed);
+    std::cout << "RNG Seed: " << seed << std::endl;
 
     //random generator
     const gsl_rng_type* T;
-
-    //gsl_rng_env_setup(); //getting a generator type and seed from environment variables
-
     T = gsl_rng_default;
     r = gsl_rng_alloc(T);
     gsl_rng_set(r, seed);
-
-    // std::cout << "gsl_rng_max(r)+1: " << gsl_rng_max(r) + 1 << std::endl;
-    // std::cout << "gsl_rng_min(r): " << gsl_rng_min(r) << std::endl;
-    // std::cout << "1/(gsl_rng_max(r)+1): " << std::setprecision(20) << 1.0 / (gsl_rng_max(r) + 1.0) << std::endl;
-    // std::cout << "Constants::iRandMax: " << std::setprecision(20) << Constants::iRandMax << std::endl;
-    // exit(1);
 
     /* SET UP SOME IMPORTANT VARIABLES */
     // 2D reaction probability tables
@@ -169,24 +98,18 @@ int main(int argc, char* argv[])
     double* tableIDs = new double[params.max2DRxns * 2]; // TODO: Change this?
 
     /* SET UP SYSTEM */
-    //    std::vector<SpeciesTracker::Observable> observablesList;
     std::map<std::string, int> observablesList;
     SimulVolume simulVolume {};
-    std::vector<Molecule> moleculeList {}; // list of all species in the system
-    std::vector<Complex> complexList {};
-
-    /* EMPTY MOLECULE LISTS FOR NONEQUILIBRIUM SIMULATIONS */
-    std::vector<int> emptyComList {}; // list of elements in complexList which are empty
-    std::vector<int> emptyMolList {}; // list of elements in moleculeList which are empty
-
+    std::vector<Molecule> moleculeList {}; // list of all molecules in the system
+    std::vector<Complex> complexList {}; // list of all complexes in the system
     Membrane membraneObject; //class structure that contains boundary conditions, implicit lipid model.
-
-    // Initialize and write initial copy numbers for all species
     copyCounters counterArrays; // contains arrays tracking bound molecule pairs, and species copy nums.
-
     int implicitlipidIndex { 0 }; // implicit-lipid index, which is also stored in membraneObject.implicitlipidIndex.
 
-    unsigned simItr { 0 };
+    long long int simItr { 0 };
+
+    // some variables used for parsing add.inp
+
     int numMolTemplateBeforeAdd { 0 }; // number of molTemp before add
     int numDoubleBeforeAdd { 0 }; // number of double complex before add
     int numForwardRxnBdeforeAdd { 0 }; //number of Forw React before add
@@ -196,8 +119,11 @@ int main(int argc, char* argv[])
     int tempLastStateIndexAfterAdd { 0 }; // the last state index after add
     int numStateAdd { 0 }; // num of added states
     int totalSpeciesNum { 0 }; //total species num after add
+    init_association_events(counterArrays); //initialize event counters to zero. Restart will update any non-zero values.
 
+    std::cout << "\nParsing Input: " << std::endl;
     if (!params.fromRestart && paramFile != "") {
+        std::cout << "This is a new simulation with input file: " << paramFile << std::endl;
         // Parse the input files
         parse_input(paramFile, params, observablesList, forwardRxns, backRxns, createDestructRxns, molTemplateList, membraneObject);
 
@@ -214,35 +140,32 @@ int main(int argc, char* argv[])
             membraneObject.numberOfProteinEachState.emplace_back(0);
         }
 
-        //verify the implicit lipid is the first
+        // verify the implicit lipid is the first
         for (auto& tempMolTemplate : molTemplateList) {
             if (tempMolTemplate.isImplicitLipid == true && tempMolTemplate.molTypeIndex != 0) {
-                std::cout << "Implicit Lipid must be the first molecule type!" << std::endl;
+                std::cerr << "Error: implicit Lipid must be the first molecule type, exiting.\n";
                 exit(1);
             }
         }
 
-        //determine_shape_molecule(molTemplateList);
-
         MolTemplate::numMolTypes = molTemplateList.size();
-
-        std::cout << " NUMBER OF MOLECULE TYPES: " << params.numMolTypes
-                  << " NUMBER OF INTERFACES PLUS STATES, including PRODUCTS: " << params.numTotalSpecies << std::endl;
-        // set up prior Observables
+        std::cout << "NUMBER OF MOLECULE TYPES: " << params.numMolTypes
+                  << "NUMBER OF INTERFACES PLUS STATES, including PRODUCTS: " << params.numTotalSpecies << std::endl;
 
         // write the Observables file header and initial values
         std::ofstream observablesFile { observablesFileName };
         if (observablesList.size() == 1) {
-            observablesFile << "Itr," << observablesList.begin()->first << '\n';
+            observablesFile << "Time (s)," << observablesList.begin()->first << '\n';
             observablesFile << "0,0\n";
         } else if (observablesList.size() > 1) {
-            observablesFile << "Itr";
+            observablesFile << "Time (s)";
             for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
                 observablesFile << ',' << obsItr->first;
             std::cout << "\n0";
             for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
                 std::cout << ',' << obsItr->second;
-            observablesFile << '\n';
+            observablesFile << '\n'
+                            << std::flush;
         }
 
         observablesFile.close();
@@ -266,14 +189,12 @@ int main(int argc, char* argv[])
         // set up some important parameters for implicit-lipid model;
         initialize_paramters_for_implicitlipid_model(implicitlipidIndex, params, forwardRxns, backRxns,
             moleculeList, molTemplateList, complexList, membraneObject);
-        membraneObject.No_free_lipids = membraneObject.nSites;
 
         // initialize the starting copy number for each state
         initialize_states(moleculeList, molTemplateList, membraneObject);
 
         /* CREATE SIMULATION BOX CELLS */
-        std::cout << llinebreak << bon << "Partitioning simulation box into sub-boxes...\n"
-                  << boff;
+        std::cout << "\nPartitioning simulation box into sub-boxes..." << std::endl;
         set_rMaxLimit(params, molTemplateList, forwardRxns, 0, 0);
         simulVolume.create_simulation_volume(params, membraneObject);
         simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
@@ -283,18 +204,18 @@ int main(int argc, char* argv[])
         std::ofstream trajFile { trajFileName };
         write_traj(0, trajFile, params, moleculeList, molTemplateList, membraneObject);
         trajFile.close();
-        // write_restart.cpp
     } else if (params.fromRestart) { // && paramFile.empty()) {
-        // read from restart
-        //rand_gsl(); // use the RNG once to initialize, otherwise reading in RNG state won't work
+        std::cout << "This is a restart simulation with restart file: " << restartFileNameInput << std::endl;
         read_rng_state(); // read the current RNG state
-        //--randNum; // TODO: TEMPORARY
         std::ifstream restartFileInput { restartFileNameInput };
-        if (!restartFileInput)
-            std::cerr << "Warning, could not find restart file. Using new seed.\n";
+        if (!restartFileInput) {
+            std::cerr << "Error, could not find restart file, exiting...\n";
+            exit(1);
+        }
 
+        std::cout << "Reading restart file..." << std::endl;
         read_restart(simItr, restartFileInput, params, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns,
-            backRxns, createDestructRxns, observablesList, emptyMolList, emptyComList, membraneObject, counterArrays);
+            backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
         restartFileInput.close();
 
         // initialize numberOfProteinEachState
@@ -304,6 +225,7 @@ int main(int argc, char* argv[])
 
         //add moldecules and reactions, modify parms according to add.inp
         if (addFileNameInput != "") {
+            std::cout << "This is a restart simulation with add file: " << addFileNameInput << std::endl;
             numMolTemplateBeforeAdd = molTemplateList.size();
             numForwardRxnBdeforeAdd = static_cast<int>(forwardRxns.size());
             numBackRxnBdeforeAdd = static_cast<int>(backRxns.size());
@@ -329,7 +251,6 @@ int main(int argc, char* argv[])
                     exit(1);
                 }
             }
-            //determine_shape_molecule(molTemplateList);
 
             tempLastStateIndexAfterAdd = molTemplateList.back().interfaceList.back().stateList.back().index;
 
@@ -393,7 +314,7 @@ int main(int argc, char* argv[])
             }
 
             // generate the coordinates, write out coordinate and topology files for added molecules
-            generate_coordinates_for_restart(params, moleculeList, complexList, emptyMolList, emptyComList, molTemplateList, forwardRxns, membraneObject, numMolTemplateBeforeAdd, numForwardRxnBdeforeAdd);
+            generate_coordinates_for_restart(params, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject, numMolTemplateBeforeAdd, numForwardRxnBdeforeAdd);
             for (auto& tmpComplex : complexList) {
                 tmpComplex.numEachMol.clear();
                 tmpComplex.numEachMol.resize(molTemplateList.size());
@@ -404,8 +325,7 @@ int main(int argc, char* argv[])
             write_psf(params, moleculeList, molTemplateList);
         }
 
-        std::cout << " Total number of states (reactant and product)  in the system " << RxnBase::totRxnSpecies
-                  << std::endl;
+        std::cout << " Total number of states (reactant and product)  in the system " << RxnBase::totRxnSpecies << std::endl;
         params.numTotalSpecies = RxnBase::totRxnSpecies;
         std::cout << " Total number of molecules: " << Molecule::numberOfMolecules << " Size of molecule list : " << moleculeList.size() << std::endl;
         std::cout << "Total number of complexes: " << Complex::numberOfComplexes << " size of list: " << complexList.size() << std::endl;
@@ -418,18 +338,16 @@ int main(int argc, char* argv[])
         initialize_states(moleculeList, molTemplateList, membraneObject);
 
         /* CREATE SIMULATION BOX CELLS */
-        std::cout << llinebreak << bon << "Partitioning simulation box into sub-boxes...\n"
-                  << boff;
+        std::cout << "Partitioning simulation box into sub-boxes..." << std::endl;
         set_rMaxLimit(params, molTemplateList, forwardRxns, numDoubleBeforeAdd, numMolTemplateBeforeAdd);
         simulVolume.create_simulation_volume(params, membraneObject);
         simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
         simulVolume.display();
 
         // Check to make sure the trajectory length matches the restart file
-
         std::cout << " params.trajFile: " << params.trajFile << std::endl;
         std::ifstream trajFile { params.trajFile };
-        int trajItr { -1 };
+        long long int trajItr { -1 };
         if (trajFile) {
             std::string line;
             while (getline(trajFile, line)) {
@@ -448,37 +366,12 @@ int main(int argc, char* argv[])
         } else {
             std::cout << "WARNING: No trajectory found, writing new trajectory.\n";
         }
-
-        //        std::ifstream obsFile { observablesFileName };
-        //        if (obsFile) {
-        //            std::string line;
-        //            int obsItr { -1 };
-        //            getline(obsFile, line); // skips the header
-        //            while (getline(obsFile, line)) {
-        //                auto headerItr = line.find(',');
-        //                if (headerItr != std::string::npos) {
-        //                    obsItr = std::stoi(line.substr(0, headerItr)); // + 1 to ignore the colon
-        //                }
-        //            }
-        //            if (obsItr == simItr) {
-        //                std::cout << "Observables file length matches provided restart file. Continuing...\n";
-        //                std::cout << "Current observables:\n";
-        //                for (auto& elem : observablesList)
-        //                    std::cout << '\t' << elem.first << ' ' << elem.second << '\n';
-        //            } else {
-        //                std::cerr << "ERROR: Observables file length doesn't match provided restart file.
-        //                Exiting...\n"; exit(1);
-        //            }
-        //            obsFile.close();
-        //        } else {
-        //            std::cout << "WARNING: No observables file found, writing new observables file.\n";
-        //        }
-
     } else {
         std::cerr << "Please provide a parameter and/or restart file. Parameter file Syntax is : ./rd_executable.exe "
                      "-f parameterfile.inp \n";
         exit(1);
     }
+
     if (membraneObject.implicitLipid == true)
         params.implicitLipid = true; //Created this parameter for convenience.
     for (auto& oneReaction : forwardRxns) {
@@ -489,16 +382,20 @@ int main(int argc, char* argv[])
     }
     if (createDestructRxns.empty() == false) {
         params.hasCreationDestruction = true;
+        params.isNonEQ = true;
+
+        // set molTemp.canDestroy = ture
+        for (auto& oneReaction : createDestructRxns) {
+            if (oneReaction.rxnType == ReactionType::destruction) {
+                molTemplateList[oneReaction.reactantMolList.at(0).molTypeIndex].canDestroy = true;
+            }
+        }
+        for (auto& oneTemp : molTemplateList) {
+            if (oneTemp.canDestroy == false) {
+                oneTemp.monomerList.clear();
+            }
+        }
     }
-
-    /*Print out parameters*/
-    params.display();
-    membraneObject.display();
-
-    /*Determine whether the surface has adsorption properties:
-      Do any molecules bind directly to surface using our continuum model?
-      For each molecule .bindToSurface=0 if NO.
-    */
 
     /* SETUP OUTPUT FILES */
     /*output files reporting bound pairs, and histogram of complex components*/
@@ -511,30 +408,25 @@ int main(int argc, char* argv[])
     std::ofstream assemblyfile(fnameProXYZ);
     sprintf(fnameProXYZ, "mono_dimer_time.dat");
     std::ofstream dimerfile(fnameProXYZ);
-    //sprintf(fnameProXYZ, "MeanComplexSize.dat");
-    //std::ofstream meanfile(fnameProXYZ);
-    //sprintf(fnameProXYZ, "GrowingComplexes.dat");
-    //std::ofstream growComplexFile(fnameProXYZ);
+    sprintf(fnameProXYZ, "event_counters_time.dat");
+    std::ofstream eventFile(fnameProXYZ);
     sprintf(fnameProXYZ, "bound_pair_time.dat");
     std::ofstream pairOutfile(fnameProXYZ);
     sprintf(fnameProXYZ, "copy_numbers_time.dat");
     std::ofstream speciesFile1(fnameProXYZ);
-    //speciesFile1<<" Print to speciesFile1 \n"<<std::endl;
-    // sprintf(fnameProXYZ, "all_species_check.dat");
-    // std::ofstream speciesFile2(fnameProXYZ);
-    // speciesFile2<<" Print to speciesFile2 \n"<<std::endl;
 
     int meanComplexSize { 0 };
 
-    totalSpeciesNum = init_speciesFile(speciesFile1, counterArrays, molTemplateList, forwardRxns);
-    init_counterCopyNums(counterArrays, moleculeList, molTemplateList, membraneObject, totalSpeciesNum); // works for default and restart
+    totalSpeciesNum = init_speciesFile(speciesFile1, counterArrays, molTemplateList, forwardRxns, params);
+    init_counterCopyNums(counterArrays, moleculeList, complexList, molTemplateList, membraneObject, totalSpeciesNum, params); // works for default and restart
 
-    write_all_species(simItr, speciesFile1, counterArrays);
+    write_all_species((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, speciesFile1, counterArrays);
 
     init_print_dimers(dimerfile, params, molTemplateList); // works for default and restart
     init_NboundPairs(counterArrays, pairOutfile, params, molTemplateList, moleculeList); // initializes to zero, re-calculated for a restart!!
     write_NboundPairs(counterArrays, pairOutfile, simItr, params, moleculeList);
     print_dimers(complexList, dimerfile, simItr, params, molTemplateList);
+    print_association_events(counterArrays, eventFile, simItr, params);
     //this will be wrong if there are no implicit lipids.
     const int ILcopyIndex = moleculeList[implicitlipidIndex].interfaceList[0].index;
 
@@ -543,24 +435,50 @@ int main(int argc, char* argv[])
         number_of_lipids += membraneObject.numberOfFreeLipidsEachState[i];
     }
     meanComplexSize = print_complex_hist(complexList, assemblyfile, simItr, params, molTemplateList, number_of_lipids);
-    // TODO: TEMPORARY STUFF
-    // Complex::obs = std::vector<int> { Molecule::numberOfMolecules, 0 };
-
-    /*********************************/
-    /*BEGIN SIMULATION*/
-    /******************************/
-    // TODO TEMP
-    //    if (params.name != "") {
-    //        std::string tmpName { params.name.substr(0, strlen(argv[0])) };
-    //        strcpy(argv[0], tmpName.c_str());
-    //    }
 
     //set some parameters
     if (params.checkPoint == -1) {
         params.checkPoint = params.nItr / 10;
     }
 
+    // set the excludeVolumeBoundList for each molTemplate according to the reaction list
+    for (auto& oneReaction : forwardRxns) {
+        if (oneReaction.excludeVolumeBound == true) {
+            // this reaction declare that excludeVolumeBound, now add the partner's index to the excludeVolumeBoundList
+            int react1MolIndex = oneReaction.reactantListNew[0].molTypeIndex;
+            int react1InfIndex = oneReaction.reactantListNew[0].relIfaceIndex;
+            int react1InfAbsIndex = oneReaction.reactantListNew[0].absIfaceIndex;
+            int react2MolIndex = oneReaction.reactantListNew[1].molTypeIndex;
+            int react2InfIndex = oneReaction.reactantListNew[1].relIfaceIndex;
+            int react2InfAbsIndex = oneReaction.reactantListNew[1].absIfaceIndex;
+            molTemplateList[react1MolIndex].interfaceList[react1InfIndex].excludeVolumeBoundList.push_back(react2MolIndex);
+            molTemplateList[react2MolIndex].interfaceList[react2InfIndex].excludeVolumeBoundList.push_back(react1MolIndex);
+            molTemplateList[react1MolIndex].interfaceList[react1InfIndex].excludeVolumeBoundIfaceList.push_back(react2InfIndex);
+            molTemplateList[react2MolIndex].interfaceList[react2InfIndex].excludeVolumeBoundIfaceList.push_back(react1InfIndex);
+            molTemplateList[react1MolIndex].interfaceList[react1InfIndex].excludeRadiusList.push_back(oneReaction.bindRadius);
+            molTemplateList[react2MolIndex].interfaceList[react2InfIndex].excludeRadiusList.push_back(oneReaction.bindRadius);
+            molTemplateList[react1MolIndex].interfaceList[react1InfIndex].excludeVolumeBoundReactList.push_back(oneReaction.relRxnIndex);
+            molTemplateList[react2MolIndex].interfaceList[react2InfIndex].excludeVolumeBoundReactList.push_back(oneReaction.relRxnIndex);
+            molTemplateList[react1MolIndex].excludeVolumeBound = true;
+            molTemplateList[react2MolIndex].excludeVolumeBound = true;
+        }
+    }
+
+    for (auto& oneComplex : complexList) {
+        oneComplex.update_properties(moleculeList, molTemplateList);
+    }
+
+    /*Print out system information*/
+    std::cout << "\nSimulation Parameters\n";
+    params.display();
+    membraneObject.display();
+    std::cout << "\nMolecule Information\n";
+    display_all_MolTemplates(molTemplateList);
+    std::cout << "\nReactions\n";
+    display_all_reactions(forwardRxns, backRxns, createDestructRxns);
+
     std::cout << "*************** BEGIN SIMULATION **************** " << std::endl;
+
     // begin the timer
     MDTimer::time_point simulTimeStart = MDTimer::now();
     int numSavedDurations { 1000 };
@@ -575,36 +493,54 @@ int main(int argc, char* argv[])
 
     if (params.fromRestart == true) {
         read_rng_state();
-        auto endTime = MDTimer::now();
-        auto endTimeFormat = MDTimer::to_time_t(endTime);
+        // auto endTime = MDTimer::now();
+        // auto endTimeFormat = MDTimer::to_time_t(endTime);
         std::ofstream restartFile { restartFileName, std::ios::out }; // to show different from append
-        std::cout << "Writing restart file at iteration " << simItr;
-        if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
-            std::cout << charTime << '\n';
-        //	<< ", system time: " << std::put_time(std::localtime(&endTimeFormat), "%F %T") << '\n';
+        // std::cout << "Writing restart file at iteration " << simItr << " ";
+        // if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
+        // std::cout << charTime << '\n';
         write_rng_state(); // write the current RNG state
         write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-            forwardRxns, backRxns, createDestructRxns, observablesList, emptyMolList, emptyComList, membraneObject, counterArrays);
+            forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
         restartFile.close();
     }
 
-    //    while (++simItr < params.nItr) {
     for (simItr += 1; simItr < params.nItr; ++simItr) {
+        // std::cout << "simItr: " << simItr << std::endl;
         propCalled = 0;
-
         MDTimer::time_point startStep = MDTimer::now();
 
-        // Zeroth order reactions (creation)
-        check_for_zeroth_order_creation(simItr, params, emptyMolList, emptyComList, simulVolume, forwardRxns,
-            createDestructRxns, moleculeList, complexList, molTemplateList, observablesList, counterArrays, membraneObject);
-
-        // check for unimolecular reactions (including dissociation)
-        check_for_unimolecular_reactions(simItr, params, emptyMolList, emptyComList, moleculeList, complexList,
-            simulVolume, forwardRxns, backRxns, createDestructRxns, molTemplateList, observablesList, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
+        // destruct, unimol create, and dissociation (explicit) based on population
+        check_for_unimolecular_reactions_population(simItr, params, moleculeList, complexList,
+            simulVolume, forwardRxns, backRxns, createDestructRxns, molTemplateList, observablesList, counterArrays,
+            membraneObject);
 
         // Update member lists after creation and destruction
-
         simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
+
+        // Zeroth order reactions (creation)
+        check_for_zeroth_order_creation(simItr, params, simulVolume, forwardRxns,
+            createDestructRxns, moleculeList, complexList, molTemplateList, observablesList, counterArrays, membraneObject);
+
+        // Update member lists after creation and destruction
+        simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
+
+        // check for unimol state change reactions
+        if (params.hasUniMolStateChange == true) {
+            check_for_unimolstatechange_reactions(simItr, params, moleculeList, complexList,
+                simulVolume, forwardRxns, backRxns, createDestructRxns, molTemplateList, observablesList, counterArrays, membraneObject);
+        }
+
+        /*Skip this entire loop if the system has no implicit lipids. */
+        if (params.implicitLipid == true) {
+            // check dissociation (implicit)
+            for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
+                // only do checks if the Molecule exists
+                if (moleculeList[molItr].isEmpty || moleculeList[molItr].isImplicitLipid == true || complexList[moleculeList[molItr].myComIndex].OnSurface == false || params.implicitLipid == false)
+                    continue;
+                check_dissociation_implicitlipid(simItr, params, simulVolume, molTemplateList, observablesList, molItr, moleculeList, complexList, backRxns, forwardRxns, createDestructRxns, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
+            }
+        }
 
         // Measure separations between proteins in neighboring cells to identify all possible reactions.
         for (unsigned cellItr { 0 }; cellItr < simulVolume.subCellList.size(); ++cellItr) {
@@ -612,13 +548,13 @@ int main(int argc, char* argv[])
                 int targMolIndex { simulVolume.subCellList[cellItr].memberMolList[memItr] };
                 if (moleculeList[targMolIndex].isImplicitLipid)
                     continue;
+
                 //Test bimolecular reactions, and binding to implicit-lipids
-                if (moleculeList[targMolIndex].freelist.size() > 0) {
+                if (moleculeList[targMolIndex].freelist.size() > 0 || molTemplateList[moleculeList[targMolIndex].molTypeIndex].excludeVolumeBound == true) {
                     // first, check for implicit-lipid binding
                     int protype = moleculeList[targMolIndex].molTypeIndex;
                     if (molTemplateList[protype].bindToSurface == true) {
-                        check_implicit_reactions(targMolIndex, implicitlipidIndex, simItr, params,
-                            moleculeList, complexList, molTemplateList,
+                        check_implicit_reactions(targMolIndex, implicitlipidIndex, simItr, params, moleculeList, complexList, molTemplateList,
                             forwardRxns, backRxns, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
                     }
                     // secondly, loop over proteins in your same cell.
@@ -631,20 +567,18 @@ int main(int argc, char* argv[])
                     // thirdly, loop over all neighboring cells, and all proteins in those cells.
                     // for PBC, all cells have maxnbor neighbor cells. For reflecting, edge have fewer.
                     for (auto& neighCellItr : simulVolume.subCellList[cellItr].neighborList) {
-                        for (unsigned memItr2 { 0 };
-                             memItr2 < simulVolume.subCellList[neighCellItr].memberMolList.size(); ++memItr2) {
+                        for (unsigned memItr2 { 0 }; memItr2 < simulVolume.subCellList[neighCellItr].memberMolList.size(); ++memItr2) {
                             int partMolIndex { simulVolume.subCellList[neighCellItr].memberMolList[memItr2] };
-                            check_bimolecular_reactions(targMolIndex, partMolIndex, simItr, tableIDs, DDTableIndex,
-                                params, normMatrices, survMatrices, pirMatrices, moleculeList, complexList,
-                                molTemplateList, forwardRxns, backRxns, counterArrays, membraneObject);
+                            check_bimolecular_reactions(targMolIndex, partMolIndex, simItr, tableIDs, DDTableIndex, params,
+                                normMatrices, survMatrices, pirMatrices, moleculeList, complexList, molTemplateList,
+                                forwardRxns, backRxns, counterArrays, membraneObject);
                         } // loop over all proteins in this neighbor cell
                     } // loop over all neighbor cells
                 } // if protein i is free to bind
             } // loop over all proteins in initial cell
         } // End looping over all cells.
-        /*Now that separations and reaction probabilities are calculated,
-          decide whether to perform reactions for each protein.
-        */
+
+        /*Now that separations and reaction probabilities are calculated, decide whether to perform reactions for each protein.*/
         for (int molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
             // only continue if the molecule actually exists, and isn't implicit-lipid
             if (moleculeList[molItr].isEmpty || moleculeList[molItr].isImplicitLipid)
@@ -652,16 +586,15 @@ int main(int argc, char* argv[])
 
             //Skip any proteins that just dissociated during this time step
             if (moleculeList[molItr].crossbase.size() > 0) {
-                /*Evaluate whether to perform a reaction with protein i, and with whom. Flag=1 means
-                reaction is performed. Returns correct ci1 and ci2 for this rxn.
-                Loop over all reactions individually, instead of summing probabilities
-                */
+                /* Evaluate whether to perform a reaction with protein i, and with whom. Flag=1 means
+                 * reaction is performed. Returns correct ci1 and ci2 for this rxn.
+                 * Loop over all reactions individually, instead of summing probabilities
+                 */
                 // these are indices in crossbase/mycrossint/crossrxn of the reaction for molecules 1 and 2,
                 // should it occur
                 int crossIndex1 { 0 };
                 int crossIndex2 { 0 };
-                bool willReact { determine_if_reaction_occurs(crossIndex1, crossIndex2, Constants::iRandMax,
-                    moleculeList[molItr], moleculeList, forwardRxns) };
+                bool willReact { determine_if_reaction_occurs(crossIndex1, crossIndex2, Constants::iRandMax, moleculeList[molItr], moleculeList, forwardRxns) };
                 if (params.debugParams.forceAssoc) {
                     willReact = false; // we chose an association reaction
                     crossIndex1 = 0;
@@ -683,11 +616,10 @@ int main(int argc, char* argv[])
                     }
                 }
                 if (willReact) {
-                    /*This molecule will perform a bimolecular reaction
-                      either physically associate two molecules into a complex (A+B->AB)
-                      or change state of one (or both) reactants (A+B->A+B')
+                    /* This molecule will perform a bimolecular reaction
+                     * either physically associate two molecules into a complex (A+B->AB)
+                     * or change state of one (or both) reactants (A+B->A+B')
                      */
-
                     int molItr2 { moleculeList[molItr].crossbase[crossIndex1] };
                     int ifaceIndex1 { moleculeList[molItr].mycrossint[crossIndex1] };
                     int ifaceIndex2;
@@ -696,84 +628,52 @@ int main(int argc, char* argv[])
                     } else {
                         ifaceIndex2 = 0;
                     }
-                    //int comIndex1 { moleculeList[molItr].myComIndex };
-                    //int comIndex2 { moleculeList[molItr2].myComIndex };
                     std::array<int, 3> rxnIndex = moleculeList[molItr].crossrxn[crossIndex1];
-
-                    // if (moleculeList[molItr].index + moleculeList[molItr2].index == 72 && std::abs(moleculeList[molItr].index - moleculeList[molItr2].index) == 10) {
-                    //     std::cout << "crossIndex1: " << crossIndex1 << std::endl;
-                    //     std::cout << "crossIndex2: " << crossIndex2 << std::endl;
-
-                    //     std::cout << "\trxnIndex: " << rxnIndex[0] << std::endl;
-                    // }
 
                     /*First if statement is to determine if reactants are physically associating*/
                     if (forwardRxns[rxnIndex[0]].rxnType == ReactionType::bimolecular) {
-
                         if (moleculeList[molItr2].isImplicitLipid) {
-                            std::cout << "Performing binding of molecules " << molItr << " to the membrane surface "
-                                      << " ["
-                                      << molTemplateList[moleculeList[molItr].molTypeIndex].molName << "("
-                                      << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[ifaceIndex1].name
-                                      << ")] with [reaction, rate] = [" << rxnIndex[0] << ',' << rxnIndex[1]
-                                      << "] Rate: " << forwardRxns[rxnIndex[0]].rateList[rxnIndex[1]].rate << " at iteration " << simItr << ".\n";
-                            //complexList[comIndex1].display();
-                            std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
-                            std::cout << "Implicit lipid, my Com Index: " << moleculeList[molItr2].myComIndex << " size of memberlist: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << std::endl;
-                            // if (moleculeList[molItr].interfaceList[ifaceIndex1].index
-                            //     == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
+                            // std::cout << "Performing binding of molecules " << molItr << " to the membrane surface "
+                            //           << " ["
+                            //           << molTemplateList[moleculeList[molItr].molTypeIndex].molName << "("
+                            //           << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[ifaceIndex1].name
+                            //           << ")] with [reaction, rate] = [" << rxnIndex[0] << ',' << rxnIndex[1]
+                            //           << "] Rate: " << forwardRxns[rxnIndex[0]].rateList[rxnIndex[1]].rate << " at iteration " << simItr << ".\n";
+                            // std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
+                            // std::cout << "Implicit lipid, my Com Index: " << moleculeList[molItr2].myComIndex << " size of memberlist: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << std::endl;
 
-                            //     associate_binding_to_surface(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
-                            //         complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
-                            //         moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                            //         counterArrays, complexList, membraneObject, forwardRxns, backRxns);
-                            // } else {
-                            //     //IL is listed first as the reactant.
-                            //     associate_binding_to_surface(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
-                            //         complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
-                            //         moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                            //         counterArrays, complexList, membraneObject, forwardRxns, backRxns);
-                            // }
-
-                            if (moleculeList[molItr].interfaceList[ifaceIndex1].index
-                                == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
-
+                            if (moleculeList[molItr].interfaceList[ifaceIndex1].index == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) { //IL is listed second as the reactant.
                                 associate_implicitlipid(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
                                     complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
-                            } else {
-                                //IL is listed first as the reactant.
+                                    moleculeList, molTemplateList, observablesList, counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                            } else { //IL is listed first as the reactant.
                                 associate_implicitlipid(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
                                     complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
-                                    counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+                                    moleculeList, molTemplateList, observablesList, counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                             }
                         }
                         if (moleculeList[molItr2].isImplicitLipid == false) {
-                            std::cout << "Performing association between molecules " << molItr << " and " << molItr2 << " ["
-                                      << molTemplateList[moleculeList[molItr].molTypeIndex].molName << "("
-                                      << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[ifaceIndex1].name
-                                      << ") and " << molTemplateList[moleculeList[molItr2].molTypeIndex].molName << "("
-                                      << molTemplateList[moleculeList[molItr2].molTypeIndex].interfaceList[ifaceIndex2].name
-                                      << ")] with [reaction, rate] = [" << rxnIndex[0] << ',' << rxnIndex[1]
-                                      << "] Rate: " << forwardRxns[rxnIndex[0]].rateList[rxnIndex[1]].rate << " at iteration " << simItr << ".\n";
-                            //complexList[comIndex1].display();
-                            //complexList[comIndex2].display();
-                            std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
-                            std::cout << " Complex 2 size: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << "\n";
+                            // std::cout << "Performing association between molecules " << molItr << " and " << molItr2 << " ["
+                            //           << molTemplateList[moleculeList[molItr].molTypeIndex].molName << "("
+                            //           << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[ifaceIndex1].name
+                            //           << ") and " << molTemplateList[moleculeList[molItr2].molTypeIndex].molName << "("
+                            //           << molTemplateList[moleculeList[molItr2].molTypeIndex].interfaceList[ifaceIndex2].name
+                            //           << ")] with [reaction, rate] = [" << rxnIndex[0] << ',' << rxnIndex[1]
+                            //           << "] Rate: " << forwardRxns[rxnIndex[0]].rateList[rxnIndex[1]].rate << " at iteration " << simItr << ".\n";
+                            // std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
+                            // std::cout << " Complex 2 size: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << "\n";
 
                             // For association, molecules must be read in in the order used to define the reaction parameters.
                             if (moleculeList[molItr].interfaceList[ifaceIndex1].index
                                 == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
                                 associate(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
                                     complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                                    moleculeList, molTemplateList, observablesList,
                                     counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                             } else {
                                 associate(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
                                     complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
-                                    moleculeList, molTemplateList, emptyMolList, emptyComList, observablesList,
+                                    moleculeList, molTemplateList, observablesList,
                                     counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                             }
                         }
@@ -797,9 +697,9 @@ int main(int argc, char* argv[])
                                 stateComIndex = moleculeList[molItr].myComIndex;
                                 stateIfaceIndex = ifaceIndex1;
                             }
-                            std::cout << "Performing bimolecular state change on molecule (IL) " << stateMolIndex
-                                      << " as facilitated by molecule " << facilMolIndex << " at iteration " << simItr
-                                      << '\n';
+                            // std::cout << "Performing bimolecular state change on molecule (IL) " << stateMolIndex
+                            //           << " as facilitated by molecule " << facilMolIndex << " at iteration " << simItr
+                            //           << '\n';
                             perform_implicitlipid_state_change(stateIfaceIndex, facilIfaceIndex, rxnIndex,
                                 moleculeList[stateMolIndex], moleculeList[facilMolIndex], complexList[stateComIndex],
                                 complexList[facilComIndex], counterArrays, params, forwardRxns, backRxns, moleculeList,
@@ -825,9 +725,9 @@ int main(int argc, char* argv[])
                                 stateIfaceIndex = ifaceIndex1;
                             }
 
-                            std::cout << "Performing bimolecular state change on molecule " << stateMolIndex
-                                      << " as facilitated by molecule " << facilMolIndex << " at iteration " << simItr
-                                      << '\n';
+                            // std::cout << "Performing bimolecular state change on molecule " << stateMolIndex
+                            //           << " as facilitated by molecule " << facilMolIndex << " at iteration " << simItr
+                            //           << '\n';
                             perform_bimolecular_state_change(stateIfaceIndex, facilIfaceIndex, rxnIndex,
                                 moleculeList[stateMolIndex], moleculeList[facilMolIndex], complexList[stateComIndex],
                                 complexList[facilComIndex], counterArrays, params, forwardRxns, backRxns, moleculeList,
@@ -840,8 +740,7 @@ int main(int argc, char* argv[])
                 } else {
                     /*No reaction was chosen for this molecule*/
                     if (moleculeList[molItr].trajStatus == TrajStatus::none) {
-                        // Propagate complex with random translational and
-                        // rotational motion
+                        // Propagate complex with random translational and rotational motion
                         create_complex_propagation_vectors(params, complexList[moleculeList[molItr].myComIndex], moleculeList,
                             complexList, molTemplateList, membraneObject);
                         for (auto& memMol : complexList[moleculeList[molItr].myComIndex].memberList)
@@ -860,11 +759,11 @@ int main(int argc, char* argv[])
                 }
 
             } else if (moleculeList[molItr].crossbase.size() == 0) {
-                /*this protein has ncross=0,
-                meaning it neither dissociated nor tried to associate.
-                however, it could have movestat=2 if it is part of a multi-protein
-                complex that already displaced.
-                */
+                /* this protein has ncross=0,
+                 * meaning it neither dissociated nor tried to associate.
+                 * however, it could have movestat=2 if it is part of a multi-protein
+                 * complex that already displaced.
+                 */
                 if (moleculeList[molItr].trajStatus == TrajStatus::none) {
                     create_complex_propagation_vectors(params, complexList[moleculeList[molItr].myComIndex], moleculeList,
                         complexList, molTemplateList, membraneObject);
@@ -873,16 +772,6 @@ int main(int argc, char* argv[])
                 }
             }
         } // done testing all molecules for bimolecular reactions
-        /*
-        // now we carry out propagation
-        for (auto& mol : moleculeList){      	       
-            if (mol.isEmpty || mol.isImplicitLipid || mol.trajStatus == TrajStatus::propagated)
-                continue;
-            create_complex_propagation_vectors(params,complexList[mol.myComIndex],moleculeList,complexList,molTemplateList,
-                                               membraneObject);
-            complexList[mol.myComIndex].propagate(moleculeList);
-        }
-        */
 
         // Now we have to check for overlap!!!
         for (auto& mol : moleculeList) {
@@ -893,7 +782,6 @@ int main(int argc, char* argv[])
 
             // determine RS3Dinput
             double RS3Dinput { 0.0 };
-
             for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
                 if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - mol.molTypeIndex) < 1E-2) {
                     RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
@@ -901,14 +789,12 @@ int main(int argc, char* argv[])
                 }
             }
 
-            //int c1 { mol.myComIndex };
-            // if (ncrosscom[moleculeList[i].mycomplex] > 0) {
             if (complexList[mol.myComIndex].ncross > 0) {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
-                    //For any protein that overlapped and did not react, check whether it overlaps with its partners,
-                    //  do all proteins in the same complex at the same time.
-                    //  Also, if both proteins are stuck to membrane, only do xy displacement, ignore z
-                    //  TODO: Maybe do a boundary sphere overlap check first?
+                    // For any protein that overlapped and did not react, check whether it overlaps with its partners,
+                    // do all proteins in the same complex at the same time.
+                    // Also, if both proteins are stuck to membrane, only do xy displacement, ignore z
+                    // TODO: Maybe do a boundary sphere overlap check first?
 
                     if (std::abs(complexList[mol.myComIndex].D.z) < 1E-10) {
                         sweep_separation_complex_rot_memtest(
@@ -922,37 +808,41 @@ int main(int argc, char* argv[])
                 }
             } else {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
-                    //For proteins with ncross=0, they either moved independently, or their displacements
-                    //were selected based on the complex they were part of, and they may not yet been moved.
+                    // For proteins with ncross=0, they either moved independently, or their displacements
+                    // were selected based on the complex they were part of, and they may not yet been moved.
                     if (membraneObject.isSphere == true) {
-                        create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
-                            complexList, molTemplateList, membraneObject);
-                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
+                        if (mol.trajStatus == TrajStatus::none) {
+                            create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
+                                complexList, molTemplateList, membraneObject);
+                            for (auto& memMol : complexList[mol.myComIndex].memberList)
+                                moleculeList[memMol].trajStatus = TrajStatus::canBeResampled;
+                        }
+                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject, molTemplateList);
                         reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
                     } else {
-                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[mol.myComIndex], membraneObject, RS3Dinput);
-                        create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
-                            complexList, molTemplateList, membraneObject);
-                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject);
-                        //reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                        // reflect_traj_complex_rad_rot(params, moleculeList, complexList[mol.myComIndex], membraneObject, RS3Dinput);
+                        if (mol.trajStatus == TrajStatus::none) {
+                            create_complex_propagation_vectors(params, complexList[mol.myComIndex], moleculeList,
+                                complexList, molTemplateList, membraneObject);
+                            for (auto& memMol : complexList[mol.myComIndex].memberList)
+                                moleculeList[memMol].trajStatus = TrajStatus::canBeResampled;
+                        }
+                        complexList[mol.myComIndex].propagate(moleculeList, membraneObject, molTemplateList);
                     }
                 }
             }
         }
-        /*std::cout <<" DISPLAY AFTER SWEEP iter: "<<simItr<<" molecule 21 "<<std::endl;
- 	moleculeList[21].display(molTemplateList[moleculeList[21].molTypeIndex]);
- 	std::cout <<" DISPLAY AFTER SWEEP iter "<<simItr<<" molecule 27 "<<std::endl;
- 	moleculeList[27].display(molTemplateList[moleculeList[27].molTypeIndex]);
-	*/
+
         if (simItr % params.trajWrite == 0) {
-            std::cout << "Writing trajectory..." << '\n';
+            // std::cout << "Writing trajectory...\n";
             std::ofstream trajFile { trajFileName, std::ios::app }; // for append
             write_traj(simItr, trajFile, params, moleculeList, molTemplateList, membraneObject);
             trajFile.close();
-            // write_complex_components(simItr, complexFile, params, moleculeList, complexList, molTemplateList);
+        }
 
-            if (params.pdbWrite != -1) {
-                std::cout << "Writing PDB file for current frame.\n";
+        if (params.pdbWrite != -1) {
+            if (simItr % params.pdbWrite == 0) {
+                // std::cout << "Writing PDB file for current frame...\n";
                 write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
             }
         }
@@ -1047,6 +937,41 @@ int main(int argc, char* argv[])
                 }
             }
 
+            // update the oneTemp.monomerList if it is necessary
+            MolTemplate& oneTemp { molTemplateList[moleculeList[slotIndex].molTypeIndex] };
+            if (oneTemp.canDestroy == true) {
+                std::vector<int>& oneList { oneTemp.monomerList };
+                std::vector<int>::iterator result { std::find(std::begin(oneList), std::end(oneList), previousIndex) }; //check whether previousIndex in oneTemp.monomerList
+                if (result != std::end(oneList)) {
+                    oneList.erase(result);
+                    oneList.emplace_back(slotIndex);
+                }
+            }
+
+            // update the countArrays.bindPairList
+            // check whether previousIndex in countArrays.bindPairList
+            for (auto& oneSpecie : counterArrays.bindPairList) {
+                for (auto& oneIndex : oneSpecie) {
+                    if (oneIndex == previousIndex) {
+                        oneIndex = slotIndex;
+                    }
+                }
+            }
+            // for (auto& oneSpecie : counterArrays.bindPairListIL2D) {
+            //     for (auto& oneIndex : oneSpecie) {
+            //         if (oneIndex == previousIndex) {
+            //             oneIndex = slotIndex;
+            //         }
+            //     }
+            // }
+            // for (auto& oneSpecie : counterArrays.bindPairListIL3D) {
+            //     for (auto& oneIndex : oneSpecie) {
+            //         if (oneIndex == previousIndex) {
+            //             oneIndex = slotIndex;
+            //         }
+            //     }
+            // }
+
             //update Molecule::emptyMolList
             Molecule::emptyMolList.pop_back();
 
@@ -1066,31 +991,6 @@ int main(int argc, char* argv[])
         }
         //------------------------------------------------------------------------------------
 
-        //write restart
-        if (simItr % params.restartWrite == 0) {
-            auto endTime = MDTimer::now();
-            auto endTimeFormat = MDTimer::to_time_t(endTime);
-            std::ofstream restartFile { restartFileName, std::ios::out }; // to show different from append
-            std::cout << "Writing restart file at iteration " << simItr;
-            //                      << ", system time: " << std::put_time(std::localtime(&endTimeFormat), "%F %T") << '\n';
-            if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
-                std::cout << charTime << '\n';
-            write_rng_state(); // write the current RNG state
-            write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-                forwardRxns, backRxns, createDestructRxns, observablesList, emptyMolList, emptyComList, membraneObject, counterArrays);
-            restartFile.close();
-        }
-
-        //write check point
-        if (simItr % params.checkPoint == 0) {
-            sprintf(fnameProXYZ, "restart%d.dat", simItr);
-            std::ofstream restartFile(fnameProXYZ);
-            write_rng_state_simItr(simItr); // write the current RNG state
-            write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-                forwardRxns, backRxns, createDestructRxns, observablesList, emptyMolList, emptyComList, membraneObject, counterArrays);
-            restartFile.close();
-        }
-
         // Clear lists used for reweighting and encounter tracking
         for (auto& oneMol : moleculeList) {
             if (oneMol.isEmpty || oneMol.isImplicitLipid)
@@ -1109,22 +1009,43 @@ int main(int argc, char* argv[])
             complexList[oneMol.myComIndex].trajStatus = TrajStatus::none;
         }
 
+        //write restart
+        if (simItr % params.restartWrite == 0) {
+            auto endTime = MDTimer::now();
+            auto endTimeFormat = MDTimer::to_time_t(endTime);
+            std::ofstream restartFile { restartFileName, std::ios::out }; // to show different from append
+            // std::cout << "Writing restart file at iteration " << simItr;
+            //                      << ", system time: " << std::put_time(std::localtime(&endTimeFormat), "%F %T") << '\n';
+            // if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
+            // std::cout << charTime << '\n';
+            write_rng_state(); // write the current RNG state
+            write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
+                forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+            restartFile.close();
+        }
+
+        //write check point
+        if (simItr % params.checkPoint == 0) {
+            sprintf(fnameProXYZ, "restart%lld.dat", simItr);
+            std::ofstream restartFile(fnameProXYZ);
+            write_rng_state_simItr(simItr); // write the current RNG state
+            write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
+                forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+            restartFile.close();
+        }
+
         using duration = std::chrono::duration<double>;
         durationList.erase(durationList.begin());
         durationList.emplace_back(MDTimer::now() - startStep);
         if (simItr % params.timeWrite == 0) {
-            double timeSimulated { simItr * params.timeStep };
+            double timeSimulated { (simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom };
             std::cout << linebreak;
             std::cout << "End iteration: " << simItr << ", simulation time: ";
-            if (timeSimulated / 100000 < 1)
-                std::cout << timeSimulated << " microseconds.\n";
-            else
-                std::cout << timeSimulated / 1E6 << " seconds.\n";
+            std::cout << std::scientific << timeSimulated << " seconds.\n";
             // Write out N bound pairs, histogram of complex compositions, and monomer/dimer counts.
             write_NboundPairs(counterArrays, pairOutfile, simItr, params, moleculeList);
-            //////////////////////////////////////////////////////////////
             print_dimers(complexList, dimerfile, simItr, params, molTemplateList);
-            //////////////////////////////////////////////////////////////
+            print_association_events(counterArrays, eventFile, simItr, params);
 
             int number_of_lipids = 0; //sum of all states of IL
             for (int i = 0; i < membraneObject.numberOfFreeLipidsEachState.size(); i++) {
@@ -1134,7 +1055,6 @@ int main(int argc, char* argv[])
             auto endTime = MDTimer::now();
             auto endTimeFormat = MDTimer::to_time_t(endTime);
             std::cout << "System time: ";
-            // << std::put_time(std::localtime(&endTimeFormat), "%F %T") << '\n';
             if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
                 std::cout << charTime << '\n';
             std::cout << "Elapsed time: "
@@ -1152,15 +1072,15 @@ int main(int argc, char* argv[])
             }
             // write observables
             if (!observablesList.empty()) {
-                std::cout << "Writing observables to file...\n";
+                // std::cout << "Writing observables to file...\n";
                 std::ofstream observablesFile { observablesFileName, std::ios::app };
-                write_observables(simItr, observablesFile, observablesList);
+                write_observables((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, observablesFile, observablesList);
                 observablesFile.close();
             }
             // write all species
 
             //std::ofstream speciesFile{ speciesFileName, std::ios::app };
-            write_all_species(simItr, speciesFile1, counterArrays);
+            write_all_species((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, speciesFile1, counterArrays);
             //speciesFile.close();
 
             // Estimate time remaining
@@ -1183,28 +1103,29 @@ int main(int argc, char* argv[])
 
     // Write files at last timestep
     {
-        std::cout << "Writing restart file at final iteration\n.";
+        simItr--;
+        // std::cout << "Writing restart file at final iteration\n.";
         std::ofstream restartFile { restartFileName, std::ios::out }; // to show different from append
         write_rng_state(); // write the current RNG state
         write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns,
-            backRxns, createDestructRxns, observablesList, emptyMolList, emptyComList, membraneObject, counterArrays);
+            backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
         restartFile.close();
 
-        std::cout << "Writing trajectory..." << '\n';
+        // std::cout << "Writing trajectory..." << '\n';
         std::ofstream trajFile { trajFileName, std::ios::app }; // for append
         write_traj(simItr, trajFile, params, moleculeList, molTemplateList, membraneObject);
         trajFile.close();
 
-        std::cout << "Writing final configuration...\n";
+        // std::cout << "Writing final configuration...\n";
         write_xyz("final_coords.xyz", params, moleculeList, molTemplateList);
 
         if (params.pdbWrite != -1) {
-            std::cout << "Writing PDB file for current frame.\n";
+            // std::cout << "Writing PDB file for current frame.\n";
             write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
         }
 
         if (params.debugParams.printSystemInfo) {
-            std::cout << "Printing full system information...\n";
+            // std::cout << "Printing full system information...\n";
             std::ofstream systemInfoFile { "system_information.dat", std::ios::app };
             print_system_information(simItr, systemInfoFile, moleculeList, complexList, molTemplateList);
             systemInfoFile.close();
@@ -1212,19 +1133,18 @@ int main(int argc, char* argv[])
 
         // write observables
         if (!observablesList.empty()) {
-            std::cout << "Writing observables to file...\n";
+            // std::cout << "Writing observables to file...\n";
             std::ofstream observablesFile { observablesFileName, std::ios::app };
-            write_observables(simItr, observablesFile, observablesList);
+            write_observables((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, observablesFile, observablesList);
             observablesFile.close();
         }
 
         // write all species
-        //std::ofstream speciesFile { speciesFileName, std::ios::app };
-        write_all_species(simItr, speciesFile1, counterArrays);
-        //speciesFile.close();
+        write_all_species((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, speciesFile1, counterArrays);
         // Write out N bound pairs, histogram of complex compositions, and monomer/dimer counts.
         write_NboundPairs(counterArrays, pairOutfile, simItr, params, moleculeList);
         print_dimers(complexList, dimerfile, simItr, params, molTemplateList);
+        print_association_events(counterArrays, eventFile, simItr, params);
 
         int number_of_lipids = 0; //sum of all states of IL
         for (int i = 0; i < membraneObject.numberOfFreeLipidsEachState.size(); i++) {
@@ -1232,6 +1152,10 @@ int main(int argc, char* argv[])
         }
         meanComplexSize = print_complex_hist(complexList, assemblyfile, simItr, params, molTemplateList, number_of_lipids);
     }
+
+    /* debug output */
+    // std::cout << "propCalled: " << propCalled << std::endl;
+    /* end of debug output */
 
     /*Write out final result*/
     std::cout << llinebreak << "End simulation\n";
@@ -1243,10 +1167,7 @@ int main(int argc, char* argv[])
         std::cout << charTime << '\n';
     std::chrono::duration<double> wallTime = endTime - totalTimeStart;
     std::cout << "\tWall Time: ";
-    //    if (wallTime.count() / 60 < 1)
     std::cout << wallTime.count() << " seconds\n";
-    //    else
-    //        std::cout << std::chrono::duration_cast<std::chrono::minutes>(wallTime).count() << " minutes\n";
 
     delete[] tableIDs;
     gsl_rng_free(r);

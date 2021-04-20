@@ -3,12 +3,11 @@
 #include <chrono>
 #include <ctime>
 
-void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& params, SimulVolume& simulVolume,
+void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters& params, SimulVolume& simulVolume,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
     std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
-    std::map<std::string, int>& observablesList, std::vector<int>& emptyMolList,
-    std::vector<int>& emptyComList, Membrane& membraneObject, copyCounters& counterArrays)
+    std::map<std::string, int>& observablesList, Membrane& membraneObject, copyCounters& counterArrays)
 {
     // TRACE();
     try {
@@ -24,6 +23,12 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
             restartFile >> simItr;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Restarting simulation from iteration " << simItr << '\n';
+            params.itrRestartFrom = simItr;
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.timeRestartFrom;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Current simulation time (s): " << params.timeRestartFrom << '\n';
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.numMolTypes;
@@ -96,6 +101,10 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.checkPoint;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.scaleMaxDisplace;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         std::cout << "restart write, pdbWrite: " << params.restartWrite << ' ' << params.pdbWrite << std::endl;
@@ -284,6 +293,16 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 }
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
+                // read monomerList
+                unsigned monomerListSize { 0 };
+                restartFile >> monomerListSize;
+                for (unsigned rxnItr { 0 }; rxnItr < monomerListSize; ++rxnItr) {
+                    unsigned elem { 0 };
+                    restartFile >> elem;
+                    oneTemp.monomerList.push_back(elem);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
                 // done reading template, add to template list
                 molTemplateList.emplace_back(oneTemp);
             }
@@ -354,6 +373,8 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
 
                 restartFile >> tmpRxn.norm2.x >> tmpRxn.norm2.y >> tmpRxn.norm2.z;
                 std::cout << " norm 2: " << tmpRxn.norm2.x << ' ' << tmpRxn.norm2.y << ' ' << tmpRxn.norm2.z << '\n';
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                restartFile >> tmpRxn.excludeVolumeBound;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpRxn.isCoupled;
                 std::cout << " reaction is coupled? " << tmpRxn.isCoupled << std::endl;
@@ -480,6 +501,22 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> tmpRxn.conjForwardRxnIndex;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                restartFile >> tmpRxn.isCoupled;
+                std::cout << " reaction is coupled? " << tmpRxn.isCoupled << std::endl;
+                if (tmpRxn.isCoupled) {
+                    rxnType = -1;
+                    std::cout << "did not enter iscoupled loop " << '\n';
+                    restartFile >> tmpRxn.coupledRxn.absRxnIndex >> tmpRxn.coupledRxn.relRxnIndex >> rxnType >> tmpRxn.coupledRxn.label >> tmpRxn.coupledRxn.probCoupled;
+                    if (rxnType != -1) {
+                        tmpRxn.coupledRxn.rxnType = static_cast<ReactionType>(rxnType);
+                    } else {
+                        std::cerr << "ERROR: Cannot parse reaction type for reaction coupled to reaction "
+                                  << tmpRxn.absRxnIndex << ". Exiting.\n";
+                        exit(1);
+                    }
+                }
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 // integer reactants
@@ -877,20 +914,80 @@ void read_restart(unsigned int& simItr, std::ifstream& restartFile, Parameters& 
         } //done reading complexes
         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // read observables
-        int numObs { 0 };
-        restartFile >> numObs;
-        std::cout << "N observables " << numObs << '\t';
-        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        for (unsigned itr { 0 }; itr < numObs; ++itr) {
-            std::string obsName;
-            int obsCount;
-            restartFile >> obsName >> obsCount;
-            observablesList.emplace(obsName, obsCount);
+        {
+            int numObs { 0 };
+            restartFile >> numObs;
+            std::cout << "N observables " << numObs << '\t';
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (unsigned itr { 0 }; itr < numObs; ++itr) {
+                std::string obsName;
+                int obsCount;
+                restartFile >> obsName >> obsCount;
+                observablesList.emplace(obsName, obsCount);
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
         }
         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // read counterArrays
-        restartFile >> counterArrays.nLoops;
+        {
+            restartFile >> counterArrays.nLoops >> counterArrays.nCancelOverlapPartner >> counterArrays.nCancelOverlapSystem >> counterArrays.nCancelDisplace2D >> counterArrays.nCancelDisplace3D >> counterArrays.nCancelDisplace3Dto2D >> counterArrays.nCancelSpanBox >> counterArrays.nAssocSuccess >> counterArrays.eventArraySize;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            //read events3D, 3Dto2D, and 2D
+            for (int i = 0; i < counterArrays.eventArraySize; i++)
+                restartFile >> counterArrays.events3D[i];
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (int i = 0; i < counterArrays.eventArraySize; i++)
+                restartFile >> counterArrays.events3Dto2D[i];
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (int i = 0; i < counterArrays.eventArraySize; i++)
+                restartFile >> counterArrays.events2D[i];
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            int numSpecies { 0 };
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            restartFile >> numSpecies;
+            std::cout << "N species " << numSpecies << '\t';
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (unsigned itr { 0 }; itr < numSpecies; ++itr) {
+                unsigned long listSize { 0 };
+                restartFile >> listSize;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                counterArrays.bindPairList.emplace_back();
+                std::cout << "Specie " << itr << " N bindPairs " << listSize << '\t';
+                for (unsigned itr2 { 0 }; itr2 < listSize; ++itr2) {
+                    int index { 0 };
+                    restartFile >> index;
+                    counterArrays.bindPairList[itr].push_back(index);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+            // for (unsigned itr { 0 }; itr < numSpecies; ++itr) {
+            //     unsigned long listSize { 0 };
+            //     restartFile >> listSize;
+            //     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            //     counterArrays.bindPairListIL2D.emplace_back();
+            //     std::cout << "Specie " << itr << " N bindPairs " << listSize << '\t';
+            //     for (unsigned itr2 { 0 }; itr2 < listSize; ++itr2) {
+            //         int index { 0 };
+            //         restartFile >> index;
+            //         counterArrays.bindPairListIL2D[itr].push_back(index);
+            //     }
+            //     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            // }
+            // for (unsigned itr { 0 }; itr < numSpecies; ++itr) {
+            //     unsigned long listSize { 0 };
+            //     restartFile >> listSize;
+            //     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            //     counterArrays.bindPairListIL3D.emplace_back();
+            //     std::cout << "Specie " << itr << " N bindPairs " << listSize << '\t';
+            //     for (unsigned itr2 { 0 }; itr2 < listSize; ++itr2) {
+            //         int index { 0 };
+            //         restartFile >> index;
+            //         counterArrays.bindPairListIL3D[itr].push_back(index);
+            //     }
+            //     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            // }
+        }
     } catch (const std::string& msg) {
         std::cerr << msg << '\n';
         exit(1);

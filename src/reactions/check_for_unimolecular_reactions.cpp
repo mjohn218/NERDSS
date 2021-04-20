@@ -6,10 +6,9 @@
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
 #include "tracing.hpp"
 
-void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::vector<int>& emptyMolList,
-    std::vector<int>& emptyComList, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     SimulVolume& simulVolume, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
-    const std::vector<CreateDestructRxn>& createDestructRxns, const std::vector<MolTemplate>& molTemplateList,
+    const std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
 {
     // TRACE();
@@ -46,16 +45,24 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                         double rate { (!isStateChangeBackRxn) ? forwardRxns[rxnIndex].rateList[rateIndex].rate
                                                                               : backRxns[rxnIndex].rateList[rateIndex].rate };
                                         double prob { 1 - exp(-rate * params.timeStep * Constants::usToSeconds) };
-                                        // double rnum { 1.0 * rand_gsl() };
+
+                                        // make sure that the time step is resonable according to the prob of reaction
+                                        if (prob > 1.000001) {
+                                            std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                                            exit(1);
+                                        }
+                                        if (prob > 0.5) {
+                                            // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                                        }
 
                                         if (prob > rand_gsl()) {
                                             // to get higher resolution random numbers
                                             // double rnum2 { rnum + rand_gsl() * Constants::iRandMax };
 
                                             // if (prob > rnum2) {
-                                            std::cout << "State change at iteration " << simItr << ". Molecule "
-                                                      << moleculeList[molItr].index << " changing state from " << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[0].stateList[tmpImplicitLipidStateIndex].iden
-                                                      << '\n';
+                                            // std::cout << "State change at iteration " << simItr << ". Molecule "
+                                            //           << moleculeList[molItr].index << " changing state from " << molTemplateList[moleculeList[molItr].molTypeIndex].interfaceList[0].stateList[tmpImplicitLipidStateIndex].iden
+                                            //           << '\n';
 
                                             const auto& newState = (!isStateChangeBackRxn) ? forwardRxns[rxnIndex].productListNew[0]
                                                                                            : backRxns[rxnIndex].productListNew[0];
@@ -80,7 +87,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                             if (isObserved) {
                                                 auto observeItr = observablesList.find(observeLabel);
                                                 if (observeItr == observablesList.end()) {
-                                                    std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
+                                                    // std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
                                                 } else {
                                                     ++observeItr->second;
                                                 }
@@ -122,16 +129,24 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                     double rate { (!isStateChangeBackRxn) ? forwardRxns[rxnIndex].rateList[rateIndex].rate
                                                                           : backRxns[rxnIndex].rateList[rateIndex].rate };
                                     double prob { 1 - exp(-rate * params.timeStep * Constants::usToSeconds) };
-                                    // double rnum { 1.0 * rand_gsl() };
+
+                                    // make sure that the time step is resonable according to the prob of reaction
+                                    if (prob > 1.000001) {
+                                        std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                                        exit(1);
+                                    }
+                                    if (prob > 0.5) {
+                                        // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                                    }
 
                                     if (prob > rand_gsl()) {
                                         // to get higher resolution random numbers
                                         // double rnum2 { rnum + rand_gsl() * Constants::iRandMax };
 
                                         // if (prob > rnum2) {
-                                        std::cout << "State change at iteration " << simItr << ". Molecule "
-                                                  << moleculeList[molItr].index << " changing state from " << stateItr->iden
-                                                  << '\n';
+                                        // std::cout << "State change at iteration " << simItr << ". Molecule "
+                                        //           << moleculeList[molItr].index << " changing state from " << stateItr->iden
+                                        //           << '\n';
 
                                         const auto& newState = (!isStateChangeBackRxn) ? forwardRxns[rxnIndex].productListNew[0]
                                                                                        : backRxns[rxnIndex].productListNew[0];
@@ -156,7 +171,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                         if (isObserved) {
                                             auto observeItr = observablesList.find(observeLabel);
                                             if (observeItr == observablesList.end()) {
-                                                std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
+                                                // std::cerr << "WARNING: Observable " << observeLabel << " not defined.\n";
                                             } else {
                                                 ++observeItr->second;
                                             }
@@ -198,13 +213,22 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
 
                             for (int tmpItr = 0; tmpItr < tmpOneStateLipid; tmpItr++) {
                                 double prob { 1 - exp(-oneRxn.rateList[0].rate * params.timeStep * Constants::usToSeconds) };
-                                // double rNum { 1.0 * rand_gsl() };
+
+                                // make sure that the time step is resonable according to the prob of reaction
+                                if (prob > 1.000001) {
+                                    std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                                    exit(1);
+                                }
+                                if (prob > 0.5) {
+                                    // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                                }
+
                                 if (prob > rand_gsl()) {
                                     // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
                                     // if (prob > rNum2) {
-                                    std::cout << "Destroying molecule of type IL"
-                                              << " with reaction "
-                                              << oneRxn.absRxnIndex << " at iteration " << simItr << '\n';
+                                    // std::cout << "Destroying molecule of type IL"
+                                    //           << " with reaction "
+                                    //           << oneRxn.absRxnIndex << " at iteration " << simItr << '\n';
 
                                     --counterArrays.copyNumSpecies[tmpImplicitLipidStateIndex];
                                     --membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex];
@@ -212,7 +236,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                     if (oneRxn.isObserved) {
                                         auto observeItr = observablesList.find(oneRxn.observeLabel);
                                         if (observeItr == observablesList.end()) {
-                                            std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
+                                            // std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
                                         } else {
                                             --observeItr->second;
                                         }
@@ -231,9 +255,19 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                 // double rNum { 1.0 * rand_gsl() };
                                 long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds };
                                 long double prob { 1 - exp(-lambda) };
+
+                                // make sure that the time step is resonable according to the prob of reaction
+                                if (prob > 1.000001) {
+                                    std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                                    exit(1);
+                                }
+                                if (prob > 0.5) {
+                                    // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                                }
+
                                 if (prob > rand_gsl()) {
-                                    std::cout << "Creating molecule of type IL"
-                                              << " from reaction " << oneRxn.absRxnIndex << '\n';
+                                    // std::cout << "Creating molecule of type IL"
+                                    //           << " from reaction " << oneRxn.absRxnIndex << '\n';
 
                                     ++counterArrays.copyNumSpecies[tmpImplicitLipidStateIndex];
                                     ++membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex];
@@ -241,7 +275,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                                     if (oneRxn.isObserved) {
                                         auto observeItr = observablesList.find(oneRxn.observeLabel);
                                         if (observeItr == observablesList.end()) {
-                                            std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
+                                            // std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
                                         } else {
                                             ++observeItr->second;
                                         }
@@ -261,17 +295,22 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                 if (oneRxn.rxnType == ReactionType::destruction && moleculeList[molItr].trajStatus == TrajStatus::none
                     && isReactant(moleculeList[molItr], complexList[moleculeList[molItr].myComIndex], oneRxn, moleculeList)) {
                     double prob { 1 - exp(-oneRxn.rateList[0].rate * params.timeStep * Constants::usToSeconds) };
-                    // double rNum { 1.0 * rand_gsl() };
 
-                    // std::cout << "destroy prob: " << std::setprecision(20) << prob << std::endl;
-                    // exit(1);
+                    // make sure that the time step is resonable according to the prob of reaction
+                    if (prob > 1.000001) {
+                        std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                        exit(1);
+                    }
+                    if (prob > 0.5) {
+                        // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                    }
 
                     if (prob > rand_gsl()) {
                         // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
                         // if (prob > rNum2) {
-                        std::cout << "Destroying molecule of type "
-                                  << molTemplateList[moleculeList[molItr].molTypeIndex].molName << " with reaction "
-                                  << oneRxn.absRxnIndex << " at iteration " << simItr << '\n';
+                        // std::cout << "Destroying molecule of type "
+                        //           << molTemplateList[moleculeList[molItr].molTypeIndex].molName << " with reaction "
+                        //           << oneRxn.absRxnIndex << " at iteration " << simItr << '\n';
 
                         // decrement the copy number array for everything in complex
                         for (auto& memMol : complexList[moleculeList[molItr].myComIndex].memberList) {
@@ -280,7 +319,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                             }
                         }
 
-                        complexList[moleculeList[molItr].myComIndex].destroy(moleculeList, emptyMolList, complexList, emptyComList);
+                        complexList[moleculeList[molItr].myComIndex].destroy(moleculeList, complexList);
                         // remove the molecule from the SimulVolume subsCellList
                         // have this here to avoid circular header calls with SimulVolume and Molecule_Complex
                         for (auto itr
@@ -297,7 +336,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                         if (oneRxn.isObserved) {
                             auto observeItr = observablesList.find(oneRxn.observeLabel);
                             if (observeItr == observablesList.end()) {
-                                std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
+                                // std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
                             } else {
                                 --observeItr->second;
                             }
@@ -311,14 +350,24 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                     // double rNum { 1.0 * rand_gsl() };
                     long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds };
                     long double prob { 1 - exp(-lambda) };
+
+                    // make sure that the time step is resonable according to the prob of reaction
+                    if (prob > 1.000001) {
+                        std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
+                        exit(1);
+                    }
+                    if (prob > 0.5) {
+                        // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+                    }
+
                     if (prob > rand_gsl()) {
                         int newMolIndex { 0 };
                         int newComIndex { 0 };
-                        std::cout << "Creating molecule of type " << oneRxn.productMolList.back().molName
-                                  << " from reaction " << oneRxn.absRxnIndex << '\n';
+                        // std::cout << "Creating molecule of type " << oneRxn.productMolList.back().molName
+                        //           << " from reaction " << oneRxn.absRxnIndex << '\n';
 
                         create_molecule_and_complex_from_rxn(molItr, newMolIndex, newComIndex, true,
-                            molTemplateList[oneRxn.productMolList.back().molTypeIndex], params, emptyMolList, emptyComList,
+                            molTemplateList[oneRxn.productMolList.back().molTypeIndex], params,
                             oneRxn, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
                         moleculeList[molItr].trajStatus = TrajStatus::propagated;
                         complexList[moleculeList[molItr].myComIndex].trajStatus = TrajStatus::propagated;
@@ -330,7 +379,7 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
                         if (oneRxn.isObserved) {
                             auto observeItr = observablesList.find(oneRxn.observeLabel);
                             if (observeItr == observablesList.end()) {
-                                std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
+                                // std::cerr << "WARNING: Observable " << oneRxn.observeLabel << " not defined.\n";
                             } else {
                                 ++observeItr->second;
                             }
@@ -348,11 +397,9 @@ void check_for_unimolecular_reactions(unsigned simItr, Parameters& params, std::
             continue;
 
         // now check for dissociation
-        check_dissociation(simItr, params, simulVolume, molTemplateList, observablesList, molItr, emptyMolList,
-            emptyComList, moleculeList, complexList, backRxns, forwardRxns, createDestructRxns, counterArrays, membraneObject);
+        check_dissociation(simItr, params, simulVolume, molTemplateList, observablesList, molItr, moleculeList, complexList, backRxns, forwardRxns, createDestructRxns, counterArrays, membraneObject);
 
         if (complexList[moleculeList[molItr].myComIndex].OnSurface == true && params.implicitLipid == true)
-            check_dissociation_implicitlipid(simItr, params, simulVolume, molTemplateList, observablesList, molItr, emptyMolList,
-                emptyComList, moleculeList, complexList, backRxns, forwardRxns, createDestructRxns, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
+            check_dissociation_implicitlipid(simItr, params, simulVolume, molTemplateList, observablesList, molItr, moleculeList, complexList, backRxns, forwardRxns, createDestructRxns, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
     }
 }

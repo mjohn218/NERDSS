@@ -122,6 +122,7 @@ public:
     std::string rxnLabel { "nonspecified" }; //!< label of the reaction, used for coupled; default value is nonspecified
     std::string coupledRxnLabel { "none" }; //!< lable of the coupled reaction, default value is none
     CoupledRxn coupledRxn;
+    bool excludeVolumeBound { false }; //!< once two sites bound, still exclude their partners if this is set true
 
     std::vector<int> intProductList {}; //!< list of absolute interface state indices of the product(s)
     std::vector<int> intReactantList {}; //!< list of absolute interface state indices of the reactant(s)

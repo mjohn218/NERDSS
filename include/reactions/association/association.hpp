@@ -40,28 +40,28 @@ extern unsigned numAssoc;
  */
 void associate(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 void associate_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 void associate_sphere(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 void associate_implicitlipid(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 void associate_implicitlipid_sphere(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList, std::vector<int>& emptyComList,
+    std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns);
 
 /* BOOLEANS */
@@ -359,6 +359,18 @@ void measure_complex_displacement(bool& flag, Complex& reactCom1, Complex& react
     const std::vector<MolTemplate>& molTemplateList, const std::vector<Complex>& complexList);
 
 /*! \ingroup Associate
+ * \brief  Routine to calculate how far a vector has rotated (in radians) from its position store in original coordinates to its position store in tmpCoords. Used during associate to evaluate the extent to which rotation into the proper orientation has caused re-alignment of the interface-COM vectors of associating interfaces.
+ *  */
+void calc_angular_displacement(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList);
+
+/*! \ingroup Associate
+ * \brief  Routine to calculate how far a vector has rotated (in radians) from its position store in original coordinates to its position store in tmpCoords. Returns angle of rotation in radians.
+ *  */
+
+double calc_one_angular_displacement(int ifaceIndex1, Molecule& reactMol1, Complex& reactCom1);
+
+
+/*! \ingroup Associate
  * \brief measures separation between interfaces of two proteins, one that is associating (use tmpCoords) one that is in the system 
  *(use full coords).  does not test whether they are capable of binding with each other--all interface pairs evaluated.
  *is called within check_for_structure_overlap_system for two proteins that checkOverlap. 
@@ -393,3 +405,14 @@ void com_of_two_tmp_complexes(Complex& reactCom1, Complex& reactCom2, Coord& vec
 void update_complex_tmp_com_crds(Complex& reactCom, std::vector<Molecule>& moleculeList);
 
 double get_geodesic_distance(Coord intFace1, Coord intFace2);
+
+/*! \ingroup Associate
+ * \brief keep track of any association event, based on the size of the smaller complex being added to the larger complex. If it is 1+1, specifically denotes dimerizaiton.
+ *
+ */
+
+void track_association_events(Complex& reactCom1, Complex& reactCom2, bool transitionToSurface, bool isOnMembrane, copyCounters& counterArrays);
+
+void print_association_events( copyCounters& counterArrays, std::ofstream & outfile, int it, Parameters params);
+void init_association_events( copyCounters& counterArrays);
+

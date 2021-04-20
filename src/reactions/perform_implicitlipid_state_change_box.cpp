@@ -148,7 +148,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
     // orientation corrections for membrane bound components
     if (facilitatorCom.D.z < 1E-15 && stateChangeCom.D.z < 1E-15) {
         isOnMembrane = true;
-        std::cout << " IMPLICIT LIPID 2D ! Value of isOnMembrane: " << isOnMembrane << std::endl;
+        // std::cout << " IMPLICIT LIPID 2D ! Value of isOnMembrane: " << isOnMembrane << std::endl;
     }
     bool transitionToSurface = false;
     if (isOnMembrane == false) {
@@ -166,8 +166,8 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
         double sigmaMag = sigma.magnitude;
         Vector transVec1 = Vector(-(sigmaMag - currRxn.bindRadius) / sigmaMag * sigma);
         Vector transVec2 { 0.0, 0.0, 0.0 };
-        std::cout << " translation1 to sigma: " << transVec1.x << ' ' << transVec1.y
-                  << ' ' << transVec1.z << std::endl;
+        // std::cout << " translation1 to sigma: " << transVec1.x << ' ' << transVec1.y
+        //           << ' ' << transVec1.z << std::endl;
 
         // update the temporary coordinates
         for (auto& mp : facilitatorCom.memberList)
@@ -181,21 +181,21 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
     // TODO: do something else if only one is a point
     if (molTemplateList[facilitatorMol.molTypeIndex].isPoint) {
         /*If both molecules are points, no orientations to specify*/
-        std::cout << " Move two point particles to contact along current separation vector, NO ORIENTATION \n";
+        // std::cout << " Move two point particles to contact along current separation vector, NO ORIENTATION \n";
     } else {
 
         /* THETA */
-        std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
-                  << "THETA 1" << std::endl
-                  << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
+        //           << "THETA 1" << std::endl
+        //           << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
         theta_rotation(reactIface1, reactIface2, facilitatorMol, stateChangeMol, assocAngles.theta1, facilitatorCom,
             stateChangeCom, moleculeList);
 
         //        write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
-        std::cout << "THETA 2" << std::endl
-                  << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << "THETA 2" << std::endl
+        //           << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
         theta_rotation(reactIface2, reactIface1, stateChangeMol, facilitatorMol, assocAngles.theta2, stateChangeCom,
             facilitatorCom, moleculeList);
 
@@ -203,23 +203,23 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
 
         /* OMEGA */
         // if protein has theta M_PI, uses protein norm instead of com_iface vector
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "OMEGA" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "OMEGA" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
         if (!std::isnan(currRxn.assocAngles.omega)) {
             omega_rotation(reactIface1, reactIface2, stateChangeIface, facilitatorMol, stateChangeMol, facilitatorCom,
                 stateChangeCom, assocAngles.omega, currRxn, moleculeList, molTemplateList);
 
             //            write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P1 or P2 is a rod-type protein, no dihedral for associated complex." << std::endl;
+        } //else
+        // std::cout << "P1 or P2 is a rod-type protein, no dihedral for associated complex." << std::endl;
 
         /* PHI */
         // PHI 1
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "PHI 1" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "PHI 1" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
         if (!std::isnan(assocAngles.phi1)) {
             phi_rotation(reactIface1, reactIface2, stateChangeIface, facilitatorMol, stateChangeMol, facilitatorCom,
@@ -227,13 +227,13 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
 
             //            write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P1 has no valid phi angle." << std::endl;
+        } //else
+        // std::cout << "P1 has no valid phi angle." << std::endl;
 
         // PHI 2
-        std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                  << "PHI 2" << std::endl
-                  << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+        // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+        //           << "PHI 2" << std::endl
+        //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
         if (!std::isnan(assocAngles.phi2)) {
             phi_rotation(reactIface2, reactIface1, facilitatorIface, stateChangeMol, facilitatorMol, stateChangeCom,
@@ -241,8 +241,8 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
 
             //           write_xyz_assoc_cout( stateChangeCom, facilitatorCom, moleculeList);
 
-        } else
-            std::cout << "P2 has no valid phi angle." << std::endl;
+        } //else
+        // std::cout << "P2 has no valid phi angle." << std::endl;
     } //only rotate if they are not both points.
 
     /*FINISHED ROTATING, NO CONSTRAINTS APPLIED TO SURFACE REACTIONS*/
@@ -252,7 +252,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
     {
 
         /*return orientation of normal back to starting position*/
-        std::cout << " IS ON MEMBRANE, CORRECT ORIENTATION ! " << std::endl;
+        // std::cout << " IS ON MEMBRANE, CORRECT ORIENTATION ! " << std::endl;
         Quat memRot;
         Coord pivot;
 
@@ -293,7 +293,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
 
     if (transitionToSurface == true)
         dtrans.z = 0.0; //don't move in z, now they are both on membrane
-    std::cout << "TRANSLATE COMPLEX PAIR TO ORIG COM BY SHIFTING: " << dtrans.x << ' ' << dtrans.y << ' ' << dtrans.z << std::endl; // update the temporary coordinates for both complexes
+    // std::cout << "TRANSLATE COMPLEX PAIR TO ORIG COM BY SHIFTING: " << dtrans.x << ' ' << dtrans.y << ' ' << dtrans.z << std::endl; // update the temporary coordinates for both complexes
     for (auto& mp : facilitatorCom.memberList)
         moleculeList[mp].update_association_coords(dtrans);
     for (auto& mp : stateChangeCom.memberList)
@@ -318,7 +318,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
                     double ztmp = (-membraneObject.waterBox.z / 2.0)
                         - moleculeList[mp].tmpComCoord.z; // lipid COM is ABOVE box bottom
 
-                    std::cout << "WARNING, during state-change associate, LIPID IS ABOVE MEMBRANE BY " << -ztmp << '\n';
+                    // std::cout << "WARNING, during state-change associate, LIPID IS ABOVE MEMBRANE BY " << -ztmp << '\n';
                 }
             }
         }
@@ -334,7 +334,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
                     double ztmp = (-membraneObject.waterBox.z / 2.0)
                         - moleculeList[mp].tmpComCoord.z; // lipid COM is ABOVE box bottom
 
-                    std::cout << "WARNING, during state-change associate, LIPID IS ABOVE MEMBRANE BY " << -ztmp << '\n';
+                    // std::cout << "WARNING, during state-change associate, LIPID IS ABOVE MEMBRANE BY " << -ztmp << '\n';
                 }
             }
         }
@@ -348,9 +348,9 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
 
     } //is onMembrane
 
-    std::cout << " FINAL COORDS PRIOR TO OVERLAP CHECK " << std::endl;
-    //write_xyz_assoc("final.xyz", facilitatorCom, stateChangeCom, moleculeList);
-    write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
+    // std::cout << " FINAL COORDS PRIOR TO OVERLAP CHECK " << std::endl;
+    // //write_xyz_assoc("final.xyz", facilitatorCom, stateChangeCom, moleculeList);
+    // write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
 
     /*Reflect off the box.*/
     //Vector traj {};
@@ -376,8 +376,8 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
         for (auto& mp : stateChangeCom.memberList)
             moleculeList[mp].update_association_coords(vtraj);
 
-        std::cout << "CRDS after reflecting off of the BOX by " << traj[0] << ' ' << traj[1] << ' ' << traj[2] << std::endl;
-        write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
+        // std::cout << "CRDS after reflecting off of the BOX by " << traj[0] << ' ' << traj[1] << ' ' << traj[2] << std::endl;
+        // write_xyz_assoc_cout(facilitatorCom, stateChangeCom, moleculeList);
     }
     /* CHECKS */
     bool cancelAssoc { false };
@@ -389,7 +389,7 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
         check_for_structure_overlap_system(cancelAssoc, facilitatorCom, stateChangeCom, moleculeList, params, molTemplateList, complexList, forwardRxns, backRxns);
 
     if (cancelAssoc) {
-        std::cout << "Canceling association, returning complexes to original state.\n";
+        // std::cout << "Canceling association, returning complexes to original state.\n";
         for (auto memMol : facilitatorCom.memberList)
             moleculeList[memMol].clear_tmp_association_coords();
         for (auto memMol : stateChangeCom.memberList)
@@ -489,14 +489,14 @@ void perform_implicitlipid_state_change_box(int stateChangeIface, int facilitato
     if (!isStateChangeBackRxn && forwardRxns[rxnIndex].isObserved) {
         auto observeItr = observablesList.find(forwardRxns[rxnIndex].observeLabel);
         if (observeItr == observablesList.end()) {
-            std::cerr << "WARNING: Observable " << forwardRxns[rxnIndex].observeLabel << " not defined.\n";
+            // std::cerr << "WARNING: Observable " << forwardRxns[rxnIndex].observeLabel << " not defined.\n";
         } else {
             ++observeItr->second;
         }
     } else if (isStateChangeBackRxn && backRxns[rxnIndex].isObserved) {
         auto observeItr = observablesList.find(backRxns[rxnIndex].observeLabel);
         if (observeItr == observablesList.end()) {
-            std::cerr << "WARNING: Observable " << backRxns[rxnIndex].observeLabel << " not defined.\n";
+            // std::cerr << "WARNING: Observable " << backRxns[rxnIndex].observeLabel << " not defined.\n";
         } else {
             --observeItr->second;
         }

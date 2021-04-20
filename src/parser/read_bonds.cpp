@@ -34,6 +34,8 @@ void read_bonds(int numBonds, std::ifstream& molFile, MolTemplate& molTemplate)
         } else {
             std::sort(tmpBond.begin(), tmpBond.end());
             molTemplate.bondList.emplace_back(tmpBond);
+            std::cout << atom1 << "-" << atom2 << ", ";
         }
     }
+    std::cout << std::endl;
 }

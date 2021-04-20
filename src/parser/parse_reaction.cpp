@@ -15,7 +15,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         { "observelabel", RxnKeyword::observeLabel }, { "bindradsamecom", RxnKeyword::bindRadSameCom },
         { "irrevringclosure", RxnKeyword::irrevRingClosure },
         { "creationradius", RxnKeyword::creationRadius }, { "loopcoopfactor", RxnKeyword::loopCoopFactor },
-							    { "length3dto2d", RxnKeyword::length3Dto2D }, { "rxnlabel", RxnKeyword::rxnLabel }, { "coupledrxnlabel", RxnKeyword::coupledRxnLabel }, {"kcat",RxnKeyword::kcat} };
+        { "length3dto2d", RxnKeyword::length3Dto2D }, { "rxnlabel", RxnKeyword::rxnLabel }, { "coupledrxnlabel", RxnKeyword::coupledRxnLabel }, { "kcat", RxnKeyword::kcat }, { "excludevolumebound", RxnKeyword::excludeVolumeBound } };
 
     // Parse reaction
     ParsedRxn parsedRxn;
@@ -24,7 +24,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
     std::string reaction;
     getline(reactionFile, reaction);
     remove_comment(reaction);
-    std::cout << llinebreak << "Parsing new reaction with form:\n"
+    std::cout << "Parsing new reaction with form:\n"
               << reaction << '\n';
 
     // temporary storage containers
@@ -91,12 +91,13 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         std::transform(tmpRSide.begin(), tmpRSide.end(), tmpRSide.begin(), ::tolower);
         bool lside { tmpLSide == "0" || tmpLSide == "null" };
         bool rside { tmpRSide == "0" || tmpRSide == "null" };
-        if (!lside && !rside)
+        if (!lside && !rside) {
             parsedRxn.rxnType = ReactionType::uniMolStateChange;
-        else if (lside && !rside) {
+            std::cout << "UniMolStateChange reaction detected\n";
+        } else if (lside && !rside) {
             // Creation reaction
             parsedRxn.rxnType = ReactionType::zerothOrderCreation;
-            std::cout << "Creation reaction detected\n";
+            std::cout << "ZerothOrderCreation reaction detected\n";
         } else if (rside && !lside) {
             // Destruction reaction
             parsedRxn.rxnType = ReactionType::destruction;
@@ -107,9 +108,11 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         }
     } else if ((reactantSpecies.size()) == 1 && (productSpecies.size() == 2)) {
         parsedRxn.rxnType = ReactionType::uniMolCreation;
-        std::cout << "Creation reaction detected.\n";
-    } else
+        std::cout << "UniMolCreation reaction detected.\n";
+    } else {
         parsedRxn.rxnType = ReactionType::bimolecular;
+        std::cout << "Bimolecular reaction detected.\n";
+    }
 
     // the following two large blocks of text parsing can't be split off into one subroutine, because of the use of
     // the local structs ParsedMol and ParsedRxn
@@ -233,8 +236,6 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         }
     } else if (parsedRxn.rxnType == ReactionType::uniMolStateChange) {
         parsedRxn.determine_reactants();
-        // if any reactants are bound, might need to create a new absolute interface index
-        //        parsedRxn.check_previous_bound_states(totSpecies, forwardRxns);
     } else if (parsedRxn.rxnType == ReactionType::zerothOrderCreation) {
         parsedRxn.determine_creation_products(molTemplateList);
     } else if (parsedRxn.rxnType == ReactionType::uniMolCreation) {
@@ -409,19 +410,19 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
             }
         }
     }
-    if(parsedRxn.isCoupled == true){
-	//create a probability for this reaction to be Michaelis Menten, if kcat exists and kb exists. Otherwise prob=1. 
-	if(std::isnan(parsedRxn.kcat)==false){
-	    
-	    double kcat=parsedRxn.kcat;// kcat is not used after this function in the code, only probCoupled is. 
-	    if(std::isnan(parsedRxn.offRatekb)==true) parsedRxn.offRatekb = 0;//set this to zero, so dissociation occurs with rate kcat, and coupled Rxn always occurs.
-	    parsedRxn.coupledRxn.probCoupled=kcat/(kcat+parsedRxn.offRatekb);
-	    parsedRxn.offRatekb +=kcat;// the rate that the bound complex undergoes reaction is due to both catalysis and unbinding. Will then choose which one to perform based on probCoupled.
-	    std::cout <<"Allow Michaelis-Menten for this reaction. Probability of catalysis: kcat/(kcat+offRatekb): "<<parsedRxn.coupledRxn.probCoupled<<" total rate: "<<parsedRxn.offRatekb<<std::endl;
-	}else{
-	    std::cout <<" No kcat rate specified, will NOT perform coupled reaction! Must specify rate using kcat " <<std::endl;
-	}
-	
+    if (parsedRxn.isCoupled == true) {
+        //create a probability for this reaction to be Michaelis Menten, if kcat exists and kb exists. Otherwise prob=1.
+        if (std::isnan(parsedRxn.kcat) == false) {
+
+            double kcat = parsedRxn.kcat; // kcat is not used after this function in the code, only probCoupled is.
+            if (std::isnan(parsedRxn.offRatekb) == true)
+                parsedRxn.offRatekb = 0; //set this to zero, so dissociation occurs with rate kcat, and coupled Rxn always occurs.
+            parsedRxn.coupledRxn.probCoupled = kcat / (kcat + parsedRxn.offRatekb);
+            parsedRxn.offRatekb += kcat; // the rate that the bound complex undergoes reaction is due to both catalysis and unbinding. Will then choose which one to perform based on probCoupled.
+            std::cout << "Allow Michaelis-Menten for this reaction. Probability of catalysis: kcat/(kcat+offRatekb): " << parsedRxn.coupledRxn.probCoupled << " total rate: " << parsedRxn.offRatekb << std::endl;
+        } else {
+            std::cout << " No kcat rate specified, will NOT perform coupled reaction! Must specify rate using kcat " << std::endl;
+        }
     }
     // Done parsing, set up the reaction(s) and place into their correct vectors
     if (parsedRxn.willBeMultipleRxns) {
@@ -468,5 +469,5 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         reactTemp1.rxnPartners.push_back(reactTemp2.molTypeIndex);
         reactTemp2.rxnPartners.push_back(reactTemp1.molTypeIndex);
     }
-
+    std::cout << std::endl;
 }

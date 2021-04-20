@@ -4,7 +4,7 @@
 #include <numeric>
 
 Molecule initialize_molecule_after_zeroth_reaction(
-    int index, Parameters& params, const MolTemplate& molTemplate, const CreateDestructRxn& currRxn, const Membrane& membraneObject)
+    int index, Parameters& params, MolTemplate& molTemplate, const CreateDestructRxn& currRxn, const Membrane& membraneObject)
 {
     // TRACE();
     /*!
@@ -59,9 +59,9 @@ Molecule initialize_molecule_after_zeroth_reaction(
 }
 
 Molecule initialize_molecule_after_uni_reaction(int index, const Molecule& parentMol, Parameters& params,
-    const MolTemplate& molTemplate, const CreateDestructRxn& currRxn)
+    MolTemplate& molTemplate, const CreateDestructRxn& currRxn)
 {
-    TRACE();
+    // TRACE();
     Molecule tmp {};
     // TODO: Need to finish this, state should be set to reaction's product's state
     tmp.molTypeIndex = molTemplate.molTypeIndex;

@@ -18,8 +18,8 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
 
     if (std::abs(currRxn.assocAngles.theta1 - sigma.dot_theta(v1)) < 1E-6) {
         //        && roundv(currRxn.assocAngles.theta1) != roundv((2 * M_PI) - sigma.dot_theta(v1))) {
-        std::cerr << "Error: Angle theta1 is " << sigma.dot_theta(v1) << " but should be "
-                  << roundv(currRxn.assocAngles.theta1) << std::endl;
+        // std::cerr << "Error: Angle theta1 is " << sigma.dot_theta(v1) << " but should be "
+        //           << roundv(currRxn.assocAngles.theta1) << std::endl;
         cancelAssoc = true;
         return;
     }
@@ -28,8 +28,8 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
     tmpSigma.calc_magnitude();
     if (roundv(currRxn.assocAngles.theta2) != roundv(tmpSigma.dot_theta(v2))
         && roundv(currRxn.assocAngles.theta2) != roundv((2 * M_PI) - tmpSigma.dot_theta(v2))) {
-        std::cerr << "Error: Angle theta_2 is " << tmpSigma.dot_theta(v2) << " but should be "
-                  << currRxn.assocAngles.theta2 << std::endl;
+        // std::cerr << "Error: Angle theta_2 is " << tmpSigma.dot_theta(v2) << " but should be "
+        //           << currRxn.assocAngles.theta2 << std::endl;
         cancelAssoc = true;
         return;
     }
@@ -42,8 +42,8 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
             phi = std::abs(phi);
 
         if (roundv(currRxn.assocAngles.phi1) != roundv(phi)) {
-            std::cerr << "Error: Reactant 1 dihedral is " << phi << " but should be " << currRxn.assocAngles.phi1
-                      << std::endl;
+            // std::cerr << "Error: Reactant 1 dihedral is " << phi << " but should be " << currRxn.assocAngles.phi1
+            //           << std::endl;
             cancelAssoc = true;
             return;
         }
@@ -57,8 +57,8 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
             phi = std::abs(phi);
 
         if (roundv(currRxn.assocAngles.phi2) != roundv(phi)) {
-            std::cerr << "Error: Reactant 2 dihedral is " << phi << " but should be " << currRxn.assocAngles.phi2
-                      << std::endl;
+            // std::cerr << "Error: Reactant 2 dihedral is " << phi << " but should be " << currRxn.assocAngles.phi2
+            //           << std::endl;
             cancelAssoc = true;
             return;
         }
@@ -79,8 +79,8 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
             omega = std::abs(omega);
 
         if (roundv(currRxn.assocAngles.omega) != roundv(omega)) {
-            std::cerr << "Error: Complex dihedral is " << omega << " but should be " << currRxn.assocAngles.omega
-                      << std::endl;
+            // std::cerr << "Error: Complex dihedral is " << omega << " but should be " << currRxn.assocAngles.omega
+            //           << std::endl;
             cancelAssoc = true;
             return;
         }
@@ -106,6 +106,6 @@ void check_bases(bool& cancelAssoc, const Coord& reactIface1, const Coord& react
         return;
     }
 
-    std::cout << "Angles and vector magnitudes are correct, association successful." << std::endl;
-    std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
+    // std::cout << "Angles and vector magnitudes are correct, association successful." << std::endl;
+    // std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
 }

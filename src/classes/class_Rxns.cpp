@@ -92,6 +92,9 @@ ForwardRxn::ForwardRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& mol
     norm1 = parsedRxn.norm1;
     norm2 = parsedRxn.norm2;
 
+    // set excludeVolumeBound
+    excludeVolumeBound = parsedRxn.excludeVolumeBound;
+
     // create reactant and product lists
     rateList.emplace_back();
     rateList.back().rate = parsedRxn.onRate3Dka;
@@ -203,7 +206,7 @@ void ForwardRxn::display() const
         std::cout << "length3Dto2D " << length3Dto2D << std::endl;
         std::cout << "isCoupled? " << isCoupled << std::endl;
         if (isCoupled)
-            std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << " prob to perform coupled: "<<coupledRxn.probCoupled<<std::endl;
+            std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << " prob to perform coupled: " << coupledRxn.probCoupled << std::endl;
     }
 }
 

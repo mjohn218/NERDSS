@@ -15,7 +15,7 @@ void init_NboundPairs(
     bool bindSurface = false;
     int index;
     int p1, p2;
-    outfile << "TIME(us)" << '\t';
+    outfile << "TIME(s)" << '\t';
     for (p1 = 0; p1 < molTemplateList.size(); p1++) {
         for (j = 0; j < molTemplateList[p1].rxnPartners.size(); j++) {
 
@@ -45,7 +45,7 @@ void init_NboundPairs(
         //          << " index: " << index << ' ' << molTemplateList[p1].molName << '\n';
         // }
     }
-    outfile << "Nloops" << endl;
+    outfile << "Nloops" << '\t' << "nOverlapPartner" << '\t' << "nOverlapSystem" << '\t' << "nOverlapSpanBox" << '\t' << "nDisplace2D" << '\t' << "nDisplace3D" << '\t' << "nDisplace3Dto2D" << '\t' << "nAssocSuccess" << endl;
 
     /*Initialize copy numbers of bound pairs to zero*/
 

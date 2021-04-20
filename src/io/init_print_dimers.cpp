@@ -13,8 +13,7 @@ void init_print_dimers(std::ofstream& outfile, Parameters params, std::vector<Mo
     int size;
     int p1;
 
-    outfile << " ITER: "
-            << "TIME (us) " << '\t';
+    outfile << "TIME (s) " << '\t';
     for (j = 0; j < molTemplateList.size(); j++) {
         if (molTemplateList[j].isImplicitLipid)
             continue;

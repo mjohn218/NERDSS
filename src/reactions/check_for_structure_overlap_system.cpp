@@ -74,12 +74,12 @@ void check_for_structure_overlap_system(bool& flag, const Complex& reactCom1, co
                                     // i = sAll;//break i loop
                                     // j = s1;//break j loop
                                     // c=plist.ntotalcomplex;//break full loop
-                                    std::cout << " WARNING: Cancel association, overlap with other proteins COM in SYSTEM! "
-                                              << mp << ' ' << pp << " SEPARATION: " << sqrt(r2) << std::endl;
-                                    std::cout << " complex moved size: " << s1 << '\n';
-                                    moleculeList[mp].display_assoc_icoords("moved_protein");
-                                    std::cout << "Complex in system, size:" << sAll << '\n';
-                                    moleculeList[pp].display_my_coords("pro_in_system");
+                                    // std::cout << " WARNING: Cancel association, overlap with other proteins COM in SYSTEM! "
+                                    //           << mp << ' ' << pp << " SEPARATION: " << sqrt(r2) << std::endl;
+                                    // std::cout << " complex moved size: " << s1 << '\n';
+                                    // moleculeList[mp].display_assoc_icoords("moved_protein");
+                                    // std::cout << "Complex in system, size:" << sAll << '\n';
+                                    // moleculeList[pp].display_my_coords("pro_in_system");
                                     return;
                                 }
 
@@ -93,12 +93,12 @@ void check_for_structure_overlap_system(bool& flag, const Complex& reactCom1, co
                                     //measure_overlap_free_protein_interfaces(moleculeList[pp], moleculeList[mp], flag, molTemplateList, forwardRxns, backRxns);
                                     measure_overlap_protein_interfaces(moleculeList[pp], moleculeList[mp], flag); // first one is actual coords, second one is tempCoords.
                                     if (flag == true) {
-                                        std::cout << " WARNING, CANCEL ASSOC: Protein iface in association overlaps protein in SYSTEM! " << mp
-                                                  << ' ' << pp << std::endl;
-                                        std::cout << " complex moved size: " << s1 << '\n';
-                                        moleculeList[mp].display_assoc_icoords("moved_protein");
-                                        std::cout << "Complex in system, size:" << sAll << '\n';
-                                        moleculeList[pp].display_my_coords("pro_in_system");
+                                        // std::cout << " WARNING, CANCEL ASSOC: Protein iface in association overlaps protein in SYSTEM! " << mp
+                                        //           << ' ' << pp << std::endl;
+                                        // std::cout << " complex moved size: " << s1 << '\n';
+                                        // moleculeList[mp].display_assoc_icoords("moved_protein");
+                                        // std::cout << "Complex in system, size:" << sAll << '\n';
+                                        // moleculeList[pp].display_my_coords("pro_in_system");
 
                                         return;
                                     }
@@ -125,12 +125,12 @@ void check_for_structure_overlap_system(bool& flag, const Complex& reactCom1, co
                                     // i = sAll;//break i loop
                                     // j = s1;//break j loop
                                     // c=plist.ntotalcomplex;//break full loop
-                                    std::cout << " WARNING: Cancel association, overlap with other proteins COM in SYSTEM! "
-                                              << mp << ' ' << pp << " SEPARATION: " << sqrt(r2) << std::endl;
-                                    std::cout << " complex moved size: " << s2 << '\n';
-                                    moleculeList[mp].display_assoc_icoords("moved_protein");
-                                    std::cout << "Complex in system, size:" << sAll << '\n';
-                                    moleculeList[pp].display_my_coords("pro_in_system");
+                                    // std::cout << " WARNING: Cancel association, overlap with other proteins COM in SYSTEM! "
+                                    //           << mp << ' ' << pp << " SEPARATION: " << sqrt(r2) << std::endl;
+                                    // std::cout << " complex moved size: " << s2 << '\n';
+                                    // moleculeList[mp].display_assoc_icoords("moved_protein");
+                                    // std::cout << "Complex in system, size:" << sAll << '\n';
+                                    // moleculeList[pp].display_my_coords("pro_in_system");
 
                                     return;
                                 }
@@ -145,12 +145,12 @@ void check_for_structure_overlap_system(bool& flag, const Complex& reactCom1, co
                                     measure_overlap_free_protein_interfaces(moleculeList[pp], moleculeList[mp], flag, molTemplateList, forwardRxns, backRxns);
                                     //measure_overlap_protein_interfaces(moleculeList[pp], moleculeList[mp],flag); // first one is actual coords, second one is tempCoords.
                                     if (flag == true) {
-                                        std::cout << " WARNING, CANCEL ASSOC: Protein iface in association overlaps protein in SYSTEM! " << mp
-                                                  << ' ' << pp << std::endl;
-                                        std::cout << " complex moved size: " << s2 << '\n';
-                                        moleculeList[mp].display_assoc_icoords("moved_protein");
-                                        std::cout << "Complex in system, size:" << sAll << '\n';
-                                        moleculeList[pp].display_my_coords("pro_in_system");
+                                        // std::cout << " WARNING, CANCEL ASSOC: Protein iface in association overlaps protein in SYSTEM! " << mp
+                                        //           << ' ' << pp << std::endl;
+                                        // std::cout << " complex moved size: " << s2 << '\n';
+                                        // moleculeList[mp].display_assoc_icoords("moved_protein");
+                                        // std::cout << "Complex in system, size:" << sAll << '\n';
+                                        // moleculeList[pp].display_my_coords("pro_in_system");
 
                                         return;
                                     }

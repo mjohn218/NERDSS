@@ -7,10 +7,9 @@
 void write_psf(const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList)
 {
-    // TRACE();
     // TODO: Not currently working properly
 
-    std::cout << "Writing system PSF to system.psf...\n";
+    // std::cout << "Writing system PSF to system.psf...\n";
     std::ofstream outFile("system.psf");
     // Write PSF Header
     outFile << "PSF CMAP CHEQ\n\n";
@@ -106,7 +105,7 @@ void write_psf(const Parameters& params, const std::vector<Molecule>& moleculeLi
             outFile << std::setw(8) << tmp << std::setw(8) << tmp2;
             ++colNum;
             if (colNum % 4 == 0)
-                outFile << '\n';
+                outFile << std::endl;
         }
 
         numWritten += molTemp.interfaceList.size();

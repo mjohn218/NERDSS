@@ -28,11 +28,11 @@ void write_NboundPairs(copyCounters& counterArrays, ofstream& outfile, int it, c
     int i, j;
 
     int index;
-    outfile << it * params.timeStep << '\t';
+    outfile << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << '\t';
     for (i = 0; i < counterArrays.proPairlist.size(); i++) {
         index = counterArrays.proPairlist[i];
         // outfile<<" i in loop: "<<i<<" index: "<<index<<'\t';
         outfile << counterArrays.nBoundPairs[index] << '\t';
     }
-    outfile << counterArrays.nLoops << endl;
+    outfile << counterArrays.nLoops << '\t' << counterArrays.nCancelOverlapPartner << '\t' << counterArrays.nCancelOverlapSystem << '\t' << counterArrays.nCancelSpanBox << '\t' << counterArrays.nCancelDisplace2D << '\t' << counterArrays.nCancelDisplace3D << '\t' << counterArrays.nCancelDisplace3Dto2D << '\t' << counterArrays.nAssocSuccess << endl;
 }

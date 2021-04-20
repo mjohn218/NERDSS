@@ -7,11 +7,11 @@
 #include "io/io.hpp"
 #include "tracing.hpp"
 
-void write_all_species(unsigned simItr, std::ofstream& speciesFile, const copyCounters& counterArray)
+void write_all_species(double simTime, std::ofstream& speciesFile, const copyCounters& counterArray)
 {
     // TRACE();
-    speciesFile << simItr;
+    speciesFile << simTime;
     for (auto elem : counterArray.copyNumSpecies)
         speciesFile << ',' << elem;
-    speciesFile << '\n';
+    speciesFile << std::endl;
 }

@@ -16,7 +16,7 @@
 
 void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput)
 {
-    TRACE();
+    // TRACE();
     bool needsRecheck { true };
     int maxItr { 50 };
     int checkItr { 0 };
@@ -120,19 +120,19 @@ void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, 
         } // end of while-loop
     }
 
-    std::cout << "ITERATIONS TO CONVERGE POSITION WITHIN SPHERE: " << checkItr
-              << " flag at end: true=success: " << !needsRecheck << '\n';
+    //    std::cout << "ITERATIONS TO CONVERGE POSITION WITHIN SPHERE: " << checkItr
+    //        << " flag at end: true=success: " << !needsRecheck << '\n';
     if (needsRecheck) {
-        std::cout << "WARNING: DID NOT CONVERGE POSITION, NEW POS: " << '\n';
+        // std::cout << "WARNING: DID NOT CONVERGE POSITION, NEW POS: " << '\n';
         for (auto memMol : targCom.memberList) {
             Vector comVec { moleculeList[memMol].comCoord - targCom.comCoord };
             Vector rotComVec { matrix_rotate(comVec, M) };
 
             // first would make xcom=targCom.comCoord.x+vr, then would also add dx
-            std::cout << "i: " << checkItr << " P: " << memMol
-                      << " com:" << targCom.comCoord.x + targCom.trajTrans.x + rotComVec.x << ' '
-                      << targCom.comCoord.y + targCom.trajTrans.y + rotComVec.y << ' '
-                      << targCom.comCoord.z + targCom.trajTrans.z + rotComVec.z << '\n';
+            // std::cout << "i: " << checkItr << " P: " << memMol
+            //           << " com:" << targCom.comCoord.x + targCom.trajTrans.x + rotComVec.x << ' '
+            //           << targCom.comCoord.y + targCom.trajTrans.y + rotComVec.y << ' '
+            //           << targCom.comCoord.z + targCom.trajTrans.z + rotComVec.z << '\n';
 
             // update interface coords
             for (const auto& iface : moleculeList[memMol].interfaceList) {
@@ -140,9 +140,9 @@ void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, 
                 Vector rotIfaceVec { matrix_rotate(ifaceVec, M) };
 
                 /*first would make xcom=targCom.comCoord.x+vr, then would also add dx */
-                std::cout << targCom.comCoord.x + targCom.trajTrans.x + rotIfaceVec.x << ' '
-                          << targCom.comCoord.y + targCom.trajTrans.y + rotIfaceVec.y << ' '
-                          << targCom.comCoord.z + targCom.trajTrans.z + rotIfaceVec.z << '\n';
+                // std::cout << targCom.comCoord.x + targCom.trajTrans.x + rotIfaceVec.x << ' '
+                //           << targCom.comCoord.y + targCom.trajTrans.y + rotIfaceVec.y << ' '
+                //           << targCom.comCoord.z + targCom.trajTrans.z + rotIfaceVec.z << '\n';
             }
         }
     } // DID NOT CONVERGE

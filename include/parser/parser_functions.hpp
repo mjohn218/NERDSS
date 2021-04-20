@@ -89,11 +89,21 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
     std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);
 
-//parse input for restart with add.inp
+/*!\ingroup Parser
+ * \brief This function parses input for restart with add.inp.
+ *
+ * TODO: 
+ */
 void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
     std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd);
-/*************************/
+
+/*!\ingroup Parser
+ * \brief This function parses command line flag.
+ *
+ * TODO: 
+ */
+void parse_command(int argc, char* argv[], Parameters& params, std::string& paramFileName, std::string& restartFileName, std::string& addFileName, unsigned int& seed);
 
 /* INDEX DETERMINATION FUNCTIONS */
 

@@ -26,7 +26,7 @@ std::map<const std::string, ParamKeyword> parmKeywords = {
     { "mass", ParamKeyword::mass }, { "restartwrite", ParamKeyword::restartWrite },
     { "pdbwrite", ParamKeyword::pdbWrite },
     { "overlapseplimit", ParamKeyword::overlapSepLimit }, { "name", ParamKeyword::name },
-    { "checkpoint", ParamKeyword::checkPoint }
+    { "checkpoint", ParamKeyword::checkPoint }, { "scalemaxdisplace", ParamKeyword::scaleMaxDisplace }
 };
 
 void Parameters::set_value(std::string value, ParamKeyword keywords)
@@ -36,58 +36,71 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
      * @param value value of the parameter as a string
      * @param keywords the keyword parsed from the input file to match to the enumeration Keywords
      */
-  double nit, checkit;
+    double nit, checkit;
     try {
         auto key = static_cast<std::underlying_type<ParamKeyword>::type>(keywords);
         switch (key) {
         case 0:
             this->numMolTypes = std::stoi(value);
+            std::cout << "Read in numMolTypes: " << this->numMolTypes << std::endl;
             break;
         case 1:
             this->numTotalSpecies = std::stoi(value);
+            std::cout << "Read in numTotalSpecies: " << this->numTotalSpecies << std::endl;
             break;
         case 2:
-	   nit=std::stod(value);
-	  this->nItr = (long long)(nit);//std::stoi(value);
+            nit = std::stod(value);
+            this->nItr = (long long)(nit); //std::stoi(value);
+            std::cout << "Read in nItr: " << this->nItr << " timeSteps" << std::endl;
             break;
         case 3:
             this->fromRestart = read_boolean(value);
+            std::cout << "Read in fromRestart: " << std::boolalpha << this->fromRestart << std::endl;
             break;
         case 4:
             this->timeWrite = std::stoi(value);
-	    std::cout <<"Read in timeWrite: "<<value<<std::endl;
+            std::cout << "Read in timeWrite: " << this->timeWrite << " timeSteps" << std::endl;
             break;
         case 5:
             this->trajWrite = std::stoi(value);
-	    std::cout <<"Read in trajWrite: "<<value<<std::endl;
+            std::cout << "Read in trajWrite: " << this->trajWrite << " timeSteps" << std::endl;
             break;
         case 6:
             this->timeStep = std::stod(value);
+            std::cout << "Read in timeStep: " << this->timeStep << " us" << std::endl;
             break;
         case 7:
             this->numTotalComplex = std::stoi(value);
+            std::cout << "Read in numTotalComplex: " << this->numTotalComplex << std::endl;
             break;
         case 8:
             this->mass = std::stod(value);
+            std::cout << "Read in mass: " << this->mass << std::endl;
             break;
-            //        case 9:
-            //this->waterBox = WaterBox(parse_input_array(value));
-            //break;
         case 10:
             this->restartWrite = std::stoi(value);
+            std::cout << "Read in restartWrite: " << this->restartWrite << " timeSteps" << std::endl;
             break;
         case 11:
             this->pdbWrite = std::stoi(value);
+            std::cout << "Read in pdbWrite: " << this->pdbWrite << " timeSteps" << std::endl;
             break;
         case 12:
             this->overlapSepLimit = std::stod(value);
+            std::cout << "Read in overlapSepLimit: " << this->overlapSepLimit << " nm" << std::endl;
             break;
         case 13:
             this->name = value;
+            std::cout << "Read in name: " << value << std::endl;
             break;
         case 14:
-	    checkit=std::stod(value);
-	  this->checkPoint = (long long)(checkit);//std::stoi(value);
+            checkit = std::stod(value);
+            this->checkPoint = (long long)(checkit);
+            std::cout << "Read in checkPoint: " << this->checkPoint << " timeSteps" << std::endl;
+            break;
+        case 15:
+	    this->scaleMaxDisplace = std::stod(value);
+	    std::cout << "Read in scaleMaxDisplace: " << this->scaleMaxDisplace << std::endl;
             break;
         default:
             throw std::invalid_argument("Not a valid keyword.");
@@ -137,7 +150,7 @@ void Parameters::parse_paramFile(std::ifstream& paramFile)
 
                 // find the value type from the keyword and then set that parameter
                 if (keyFind != parmKeywords.end()) {
-                    std::cout << "Keyword found: " << keyFind->first << '\n';
+                    // std::cout << "Keyword found: " << keyFind->first << '\n';
                     this->set_value(line, keyFind->second);
                     gotValue = true;
                     break;
@@ -152,17 +165,16 @@ void Parameters::parse_paramFile(std::ifstream& paramFile)
 
 void Parameters::display()
 {
-    std::cout << "Number of iterations: " << nItr << '\n';
-    std::cout << "Timestep: " << timeStep << '\n';
+    std::cout << "Number of iterations: " << nItr << " timesteps\n";
+    std::cout << "Timestep: " << timeStep << " us\n";
     std::cout << "Timestep log interval (timeWrite): " << timeWrite << " timesteps\n";
     std::cout << "Restart file write interval: " << restartWrite << " timesteps\n";
     std::cout << "Coordinate write interval (trajWrite): " << trajWrite << " timesteps\n";
     std::cout << "PDB Coordinate write interval: " << pdbWrite << " timesteps\n";
-    std::cout << "overlapSepLimit: " << overlapSepLimit << "\n";
+    std::cout << "Checkpoint write interval: " << checkPoint << " timesteps\n";
+    std::cout << "overlapSepLimit: " << overlapSepLimit << " nm\n";
 
-    //std::cout << "Water box dimensions: [" << waterBox.x << ", " << waterBox.y << ", " << waterBox.z << "]\n";
-
-    std::cout << linebreak << "Molecule specific parameters:\n";
+    std::cout << "Molecule specific parameters:\n";
     std::cout << "Number of unique molecule types: " << numMolTypes << '\n';
     std::cout << "Total number of unique interfaces and states, including product states: " << numTotalSpecies << '\n';
     std::cout << "Total number of complexes in system at start: " << numTotalComplex << '\n';

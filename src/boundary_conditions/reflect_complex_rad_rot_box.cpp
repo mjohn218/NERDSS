@@ -17,7 +17,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
     // TRACE();
     // only works for the complex after association or diffusion, box system.
     double RS3D;
-    if (targCom.D.z < 1E-8) { // one surface
+    if (targCom.D.z < 1E-8) { // on surface
         RS3D = 0.0;
     } else { // in solution
         RS3D = RS3Dinput;
@@ -95,7 +95,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -negdx << "BUT will EXTEND again in POSITIVE side of X" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of X: put back in the box, x: " << -negdx << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of X: put back in the box, x: " << -negdx << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.x -= 2.0 * negdx;
                 for (auto memMol : targCom.memberList) {
@@ -110,7 +110,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -posdx << "BUT will EXTEND again in NEGATIVE side of X" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of X: put back in the box, x: " << -posdx << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of X: put back in the box, x: " << -posdx << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.x -= 2.0 * posdx;
                 for (auto memMol : targCom.memberList) {
@@ -170,7 +170,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -negdy << "BUT will EXTEND again in POSITIVE side of Y" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of Y: put back in the box, y: " << -negdy << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of Y: put back in the box, y: " << -negdy << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.y -= 2.0 * negdy;
                 for (auto memMol : targCom.memberList) {
@@ -185,7 +185,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -posdy << "BUT will EXTEND again in NEGATIVE side of Y" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of Y: put back in the box, y: " << -posdy << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of Y: put back in the box, y: " << -posdy << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.y -= 2.0 * posdy;
                 for (auto memMol : targCom.memberList) {
@@ -245,7 +245,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -negdz << "BUT will EXTEND again in POSITIVE side of Z" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of Z: put back in the box, z: " << -negdz << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in NEGATIVE direction of Z: put back in the box, z: " << -negdz << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.z -= 2.0 * negdz;
                 for (auto memMol : targCom.memberList) {
@@ -260,7 +260,7 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
                               << -posdz << "BUT will EXTEND again in NEGATIVE side of Z" << '\n';
                     exit(1);
                 }
-                std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of Z: put back in the box, z: " << -posdz << '\n';
+                // std::cout << "IN REFLECT COMPLEX RAD ROT, EXTEND in POSITIVE direction of Z: put back in the box, z: " << -posdz << '\n';
                 // just update positions.Put back inside the box
                 targCom.comCoord.z -= 2.0 * posdz;
                 for (auto memMol : targCom.memberList) {

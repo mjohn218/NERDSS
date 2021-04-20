@@ -64,23 +64,23 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             double ratio { forwardRxns[rxnIndex].bindRadius / R1 };
             if (sep < 0) {
                 if (biMolData.com1Index != biMolData.com2Index) {
-                    std::cout << "*****************************************************\n"
-                              << " WARNING AT ITERATION " << simItr << "\n";
-                    std::cout << "SEPARATION BETWEEN INTERFACE " << biMolData.relIface1 << " ON MOLECULE "
-                              << biMolData.pro1Index << " AND INTERFACE " << biMolData.relIface2 << " ON MOLECULE "
-                              << biMolData.pro2Index << " IS LESS THAN 0\n";
-                    std::cout << "separation: " << sep << " r1: " << R1 << " p1: " << biMolData.pro1Index
-                              << " p2: " << biMolData.pro2Index << " it " << simItr << " i1: " << biMolData.absIface1
-                              << " i2: " << biMolData.absIface2 << '\n';
-                    std::cout << "MOL1 COM: " << moleculeList[biMolData.pro1Index].comCoord
-                              << " freelist.size(): " << moleculeList[biMolData.pro1Index].freelist.size() << '\n';
-                    std::cout << "IFACE1: "
-                              << moleculeList[biMolData.pro1Index].interfaceList[biMolData.relIface1].coord << '\n';
-                    std::cout << "MOL2 COM: " << moleculeList[biMolData.pro2Index].comCoord
-                              << " freelist.size(): " << moleculeList[biMolData.pro2Index].freelist.size() << '\n';
-                    std::cout << "IFACE2: "
-                              << moleculeList[biMolData.pro2Index].interfaceList[biMolData.relIface2].coord << '\n';
-                    std::cout << "*****************************************************\n";
+                    // std::cout << "*****************************************************\n"
+                    //           << " WARNING AT ITERATION " << simItr << "\n";
+                    // std::cout << "SEPARATION BETWEEN INTERFACE " << biMolData.relIface1 << " ON MOLECULE "
+                    //           << biMolData.pro1Index << " AND INTERFACE " << biMolData.relIface2 << " ON MOLECULE "
+                    //           << biMolData.pro2Index << " IS LESS THAN 0\n";
+                    // std::cout << "separation: " << sep << " r1: " << R1 << " p1: " << biMolData.pro1Index
+                    //           << " p2: " << biMolData.pro2Index << " it " << simItr << " i1: " << biMolData.absIface1
+                    //           << " i2: " << biMolData.absIface2 << '\n';
+                    // std::cout << "MOL1 COM: " << moleculeList[biMolData.pro1Index].comCoord
+                    //           << " freelist.size(): " << moleculeList[biMolData.pro1Index].freelist.size() << '\n';
+                    // std::cout << "IFACE1: "
+                    //           << moleculeList[biMolData.pro1Index].interfaceList[biMolData.relIface1].coord << '\n';
+                    // std::cout << "MOL2 COM: " << moleculeList[biMolData.pro2Index].comCoord
+                    //           << " freelist.size(): " << moleculeList[biMolData.pro2Index].freelist.size() << '\n';
+                    // std::cout << "IFACE2: "
+                    //           << moleculeList[biMolData.pro2Index].interfaceList[biMolData.relIface2].coord << '\n';
+                    // std::cout << "*****************************************************\n";
                 }
 
                 sep = 0;
@@ -151,6 +151,13 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
                 */
                 if (sep < forwardRxns[rxnIndex].bindRadius)
                     rxnProb = 1.0;
+            }
+            if (rxnProb > 1.000001) {
+                // std::cerr << "WARNING: prob of reaction is: " << rxnProb << " > 1. Avoid this using a smaller time step." << std::endl;
+                //exit(1);
+            }
+            if (rxnProb > 0.5) {
+                // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
             }
 
             moleculeList[biMolData.pro1Index].probvec.back() = rxnProb * currnorm;

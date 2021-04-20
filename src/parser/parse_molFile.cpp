@@ -36,6 +36,7 @@ MolTemplate parse_molFile(std::string& mol)
             // if the line starts with com, it's the beginning of the coordinates block
             if (std::isdigit(*lineItr) && molKeywords.find(buffer)->second == MolKeyword::com) {
                 molFile.seekg(initialPos);
+                std::cout << "Coordinates: " << std::endl;
                 read_internal_coordinates(molFile, tmpTemplate);
                 break;
             }
@@ -53,10 +54,12 @@ MolTemplate parse_molFile(std::string& mol)
 
                 // find the value type from the keyword and then set that parameter
                 if (keyFind->second == MolKeyword::state) {
+                    std::cout << "States: " << std::endl;
                     parse_states(line, tmpTemplate);
                     break;
                 } else if (keyFind->second == MolKeyword::bonds) {
-                    std::cout << "Found bonds for molecule " << tmpTemplate.molName << ".\n";
+                    // std::cout << "Found bonds for molecule " << tmpTemplate.molName << ".\n";
+                    std::cout << "Bonds: " << std::endl;
                     int numBonds = std::stoi(line);
                     read_bonds(numBonds, molFile, tmpTemplate);
                     break;
@@ -102,8 +105,13 @@ MolTemplate parse_molFile(std::string& mol)
         if (tmpVec.magnitude > tmpTemplate.radius)
             tmpTemplate.radius = tmpVec.magnitude;
     }
+    std::cout << "radius calculated from the ifacesCoord: " << tmpTemplate.radius << " nm" << std::endl;
     // set mass to radius
-    tmpTemplate.mass = tmpTemplate.radius;
+    if (tmpTemplate.mass < 0) {
+        tmpTemplate.mass = tmpTemplate.radius;
+        std::cout << "mass auto calculated from the radius: " << tmpTemplate.mass << std::endl;
+    }
 
+    std::cout << std::endl;
     return tmpTemplate;
 }

@@ -12,11 +12,11 @@ void write_debug_info(int pro1Index, int pro2Index, int iface1Index, int iface2I
 {
     // TRACE();
     // just writes debug info to cout, function call is easier to comment out
-    std::cout << " WITHIN COMPLEX: Proteins are R1=: " << R1 << " < bindRadSameCom: " << oneRxn.bindRadSameCom
-              << " Proteins: " << pro1Index << ' ' << pro2Index << " interfaces: " << iface1Index << ' ' << iface2Index
-              << " set probvec: " << probvec1 << " pdiss: " << pdiss << " Keq/V: " << Keq / Volume
-              << " copy A: " << counterArrays.copyNumSpecies[iface2Index] << " copy C: " << Nc << " self: " << self
-              << '\n';
+    // std::cout << " WITHIN COMPLEX: Proteins are R1=: " << R1 << " < bindRadSameCom: " << oneRxn.bindRadSameCom
+    //           << " Proteins: " << pro1Index << ' ' << pro2Index << " interfaces: " << iface1Index << ' ' << iface2Index
+    //           << " set probvec: " << probvec1 << " pdiss: " << pdiss << " Keq/V: " << Keq / Volume
+    //           << " copy A: " << counterArrays.copyNumSpecies[iface2Index] << " copy C: " << Nc << " self: " << self
+    //           << '\n';
 }
 
 void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Index, int iface2Index, int rxnIndex,
@@ -93,8 +93,8 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
                 // units of us!!!!!
                 double probvec1 = 1 - exp(-params.timeStep * rateClose);
                 if (oneRxn.irrevRingClosure) {
-                    std::cout << "Ring closure reaction probability for species " << pro1Index << " and " << pro2Index
-                              << " in complex " << moleculeList[pro1Index].myComIndex << " is set to 1.0.\n";
+                    // std::cout << "Ring closure reaction probability for species " << pro1Index << " and " << pro2Index
+                    //           << " in complex " << moleculeList[pro1Index].myComIndex << " is set to 1.0.\n";
                     probvec1 = 1.0;
                 }
                 // pdiss * Keq * counterArrays.copyNumSpecies[iface2Index] / Nc / Volume;

@@ -13,8 +13,8 @@ bool conservedRigid(const Complex& targCom, const std::vector<Molecule>& molecul
             v2_0.calc_magnitude();
             v2_1.calc_magnitude();
             if (roundv(v1_0.dot_theta(v2_0)) != roundv(v1_1.dot_theta(v2_1))) {
-                std::cerr << "IFACE-COM vector " << i << " in protein " << memMol << " of complex " << targCom.index
-                          << " did not conserve its angle to icoord[0]-COM. Exiting..." << std::endl;
+                // std::cerr << "IFACE-COM vector " << i << " in protein " << memMol << " of complex " << targCom.index
+                //           << " did not conserve its angle to icoord[0]-COM. Exiting..." << std::endl;
                 return false;
             }
         }

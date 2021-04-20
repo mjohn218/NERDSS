@@ -13,7 +13,7 @@ void check_for_structure_overlap(bool& cancelAssoc, const Complex& reactCom1, co
     double overlapTolerance { params.overlapSepLimit * params.overlapSepLimit };
     for (int memMol : reactCom1.memberList) {
         if (molTemplateList[moleculeList[memMol].molTypeIndex].checkOverlap) {
-            // center for clathrin is COM.
+
             for (int memMol2 : reactCom2.memberList) {
                 if (molTemplateList[moleculeList[memMol2].molTypeIndex].checkOverlap) {
                     double dx = moleculeList[memMol].tmpComCoord.x - moleculeList[memMol2].tmpComCoord.x;
@@ -21,7 +21,7 @@ void check_for_structure_overlap(bool& cancelAssoc, const Complex& reactCom1, co
                     double dz = moleculeList[memMol].tmpComCoord.z - moleculeList[memMol2].tmpComCoord.z;
                     double r2 = dx * dx + dy * dy + dz * dz;
                     if (r2 < (overlapTolerance)) {
-                        std::cout << "WARNING: Canceling association, complexes overlap.\n";
+                        //   std::cout << "WARNING: Canceling association, complexes overlap. Distance COM-COM: " <<sqrt(r2)<<" mol1: "<<memMol<<" mol2 "<<memMol2<<"\n";
                         cancelAssoc = true;
                         return;
                     }

@@ -4,15 +4,15 @@
 #include <ctime>
 
 void write_observables(
-    unsigned simItr, std::ofstream& observablesFile, const std::map<std::string, int>& observablesList)
+    double simTime, std::ofstream& observablesFile, const std::map<std::string, int>& observablesList)
 {
     // TRACE();
     if (observablesList.size() == 1)
-        observablesFile << simItr << ',' << observablesList.begin()->second << '\n';
+        observablesFile << simTime << ',' << observablesList.begin()->second << '\n';
     else {
-        observablesFile << simItr;
+        observablesFile << simTime;
         for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
             observablesFile << ',' << obsItr->second;
-        observablesFile << '\n';
+        observablesFile << std::endl;
     }
 }

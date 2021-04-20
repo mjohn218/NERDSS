@@ -82,7 +82,10 @@ struct Interface {
     Coord iCoord { 0, 0, 0 }; //!< coordinate of this interface
     std::string name; //!< the name of the interface, as provided in the mol file and Parameter file
     std::vector<State> stateList; //!< list of the states an interface can have
-
+    std::vector<int> excludeVolumeBoundList {}; //!< list of mol type index that this molecule interface exclude volume with when it is bound
+    std::vector<int> excludeVolumeBoundIfaceList {}; //!< list of interface rel index that this molecule interface exclude volume with when it is bound
+    std::vector<int> excludeVolumeBoundReactList {}; //!< list of reaction index that this molecule interface exclude volume with when it is bound
+    std::vector<double> excludeRadiusList {}; //!< list of the exclude bindRaius for each interface
     void set_ifaceAndStateNames(); //!< sets the full name for each state (i.e. ifaceName~state). used only in parameter
     //!< file parsing.
 
@@ -118,7 +121,7 @@ struct MolTemplate {
     /*HOW IS COPIES DIFFERENT THAN NumEachMolType?*/
     int copies { 0 }; //!< initial copy numbers of this molecule
     int molTypeIndex { 0 }; //!< the index of this MolTemplate (the same as the molTemplateList index of this object)
-    double mass { 1.0 }; //!< the mass of the Molecules of this template
+    double mass { -1.0 }; //!< the mass of the Molecules of this template
     double radius { 0.0001 }; //!< 'radius' of the protein (i.e. the length of the longest COM-iface vector). in nm. MUST BE NONZERO FOR DIFFUSION COF UPDATES.
 
     Coord D { 0, 0, 0 }; //!< the molecule's xyz translational diffusion constants
@@ -130,6 +133,9 @@ struct MolTemplate {
     std::vector<std::array<int, 2>> bondList {}; //!< bonds between interfaces/COM, optionally given by the user
     std::vector<int> ifacesWithStates {}; //!< list of interface indicies that have states
     ParsedMolNumState startingNumState {}; //!< record the starting numbers of each state
+    bool canDestroy { false }; //!< set this true when there is destruction reaction for this mol type
+    bool excludeVolumeBound { false }; //!< set this true when we need exclude volume for bound interface of this mol type
+    std::vector<int> monomerList {}; //!< list of the molecule index that is a monomer with trajStatus::none, used for the destruction; only update when canDestroy is true
 
     // Molecule types, for checking to perform certain actions
     bool isRod { false }; //!< is the molecule a rod (is it strictly one dimensional)

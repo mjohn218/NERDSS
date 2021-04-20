@@ -27,5 +27,10 @@ void parse_states(std::string& line, MolTemplate& molTemplate)
         // TODO: replace the placeholder integer
         for (auto& oneState : states)
             ifaceNameItr->stateList.emplace_back(static_cast<char>(std::toupper(oneState[0])), -1);
+
+        std::cout << ifaceName << " has " << states.size() << " state(s): ";
+        for (auto oneState : states)
+            std::cout << oneState << "\t";
+        std::cout << std::endl;
     }
 }

@@ -11,7 +11,7 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     // TRACE();
     /*3D reaction*/
     double Dr1 {};
-    if (complexList[biMolData.com1Index].D.z == 0) {
+    if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-15) {
         double cf = cos(sqrt(2.0 * complexList[biMolData.com1Index].Dr.z * params.timeStep));
         Dr1 = 2.0 * biMolData.magMol1 * (1.0 - cf);
         biMolData.Dtot += Dr1 / (4.0 * params.timeStep);
@@ -22,7 +22,7 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     }
 
     double Dr2;
-    if (complexList[biMolData.com2Index].D.z == 0) {
+    if (std::abs(complexList[biMolData.com2Index].D.z - 0) < 1E-15) {
         double cf = cos(sqrt(2.0 * complexList[biMolData.com2Index].Dr.z * params.timeStep));
         Dr2 = 2.0 * biMolData.magMol2 * (1.0 - cf);
         biMolData.Dtot += Dr2 / (4.0 * params.timeStep);
@@ -33,6 +33,8 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     }
 
     double Rmax { 3.0 * sqrt(6.0 * biMolData.Dtot * params.timeStep) + forwardRxns[rxnIndex].bindRadius };
+    // std::cout << "Rmax: " << std::setprecision(20) << Rmax << std::endl;
+    // exit(1);
 
     double sep {};
     double R1 {};
@@ -55,17 +57,17 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
 
             // Evaluate probability of reaction, implicit-lipid method doesn't need reweighting
             if (sep < 0) {
-                std::cout << "*****************************************************\n"
-                          << " WARNING AT ITERATION " << simItr << "\n";
-                std::cout << "SEPARATION BETWEEN INTERFACE " << biMolData.relIface1 << " ON MOLECULE "
-                          << biMolData.pro1Index << " AND THE MEMBRANE SURFACE IS LESS THAN 0\n";
-                std::cout << "separation: " << sep << " r1: " << R1 << " p1: " << biMolData.pro1Index
-                          << " it " << simItr << " i1: " << biMolData.absIface1 << '\n';
-                std::cout << "MOL1 COM: " << moleculeList[biMolData.pro1Index].comCoord
-                          << " freelist.size(): " << moleculeList[biMolData.pro1Index].freelist.size() << '\n';
-                std::cout << "IFACE1: "
-                          << moleculeList[biMolData.pro1Index].interfaceList[biMolData.relIface1].coord << '\n';
-                std::cout << "*****************************************************\n";
+                // std::cout << "*****************************************************\n"
+                //           << " WARNING AT ITERATION " << simItr << "\n";
+                // std::cout << "SEPARATION BETWEEN INTERFACE " << biMolData.relIface1 << " ON MOLECULE "
+                //           << biMolData.pro1Index << " AND THE MEMBRANE SURFACE IS LESS THAN 0\n";
+                // std::cout << "separation: " << sep << " r1: " << R1 << " p1: " << biMolData.pro1Index
+                //           << " it " << simItr << " i1: " << biMolData.absIface1 << '\n';
+                // std::cout << "MOL1 COM: " << moleculeList[biMolData.pro1Index].comCoord
+                //           << " freelist.size(): " << moleculeList[biMolData.pro1Index].freelist.size() << '\n';
+                // std::cout << "IFACE1: "
+                //           << moleculeList[biMolData.pro1Index].interfaceList[biMolData.relIface1].coord << '\n';
+                // std::cout << "*****************************************************\n";
                 sep = 0;
                 R1 = forwardRxns[rxnIndex].bindRadius;
             }
@@ -88,6 +90,13 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
             double rho = 1.0 * membraneObject.numberOfFreeLipidsEachState[relStateIndex] / params3D.area;
             double z = R1;
             rxnProb = rho * pimplicitlipid_3D(z, params3D);
+            if (rxnProb > 1.000001) {
+                std::cerr << "Error: prob of reaction is: " << rxnProb << " > 1. Avoid this using a smaller time step." << std::endl;
+                exit(1);
+            }
+            if (rxnProb > 0.5) {
+                // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
+            }
             if (sep < 0)
                 rxnProb = 1.0;
 
@@ -99,6 +108,16 @@ void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
             moleculeList[proA].currpface.push_back(ifaceB);
             moleculeList[proA].currprevnorm.push_back(currnorm);
             moleculeList[proA].currps_prev.push_back(1.0 - rxnProb * currnorm);
+
+            // std::cout << "bind prob: " << std::setprecision(20) << rxnProb << std::endl;
+            // std::cout << "rho: " << std::setprecision(20) << rho << std::endl;
+            // std::cout << "z: " << std::setprecision(20) << z << std::endl;
+            // std::cout << "params3D.sigma: " << std::setprecision(20) << params3D.sigma << std::endl;
+            // std::cout << "params3D.Dtot: " << std::setprecision(20) << params3D.Dtot << std::endl;
+            // std::cout << "params3D.ka: " << std::setprecision(20) << params3D.ka << std::endl;
+            // std::cout << "params3D.area: " << std::setprecision(20) << params3D.area << std::endl;
+            // std::cout << "params3D.dt: " << std::setprecision(20) << params3D.dt << std::endl;
+            // exit(1);
         } // Within reaction zone
     }
 }

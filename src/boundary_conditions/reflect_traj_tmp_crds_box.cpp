@@ -107,8 +107,8 @@ void reflect_traj_tmp_crds_box(
             // Put back inside the box, extended out
             if (outsideNeg && outsidePos) {
                 // For a large complex, test if it could be pushed back out the other side
-                std::cout << " extends in both directions of X. negwall " << negWall
-                          << " poswall: " << posWall << '\n';
+                // std::cout << " extends in both directions of X. negwall " << negWall
+                //           << " poswall: " << posWall << '\n';
                 recheck = true;
             }
             if (outsideNeg && !outsidePos) {
@@ -116,16 +116,16 @@ void reflect_traj_tmp_crds_box(
                 traj[0] -= 2.0 * (negWall - negX);
                 if (posWall - 2.0 * (negWall - negX) > posX) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << "traj[0]: " << traj[0] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << "traj[0]: " << traj[0] << '\n';
                 }
             }
             if (outsidePos && !outsideNeg) {
                 traj[0] -= 2.0 * (posWall - posX);
                 if (negWall - 2.0 * (posWall - posX) < negX) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << "traj[0]: " << traj[0] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << "traj[0]: " << traj[0] << '\n';
                 }
             }
         }
@@ -187,8 +187,8 @@ void reflect_traj_tmp_crds_box(
             // Put back inside the box
             if (outsideNeg && outsidePos) {
                 /*For a large complex, test if it could be pushed back out the other side*/
-                std::cout << " extends in both directions of Y. negWall " << negWall
-                          << " posWall: " << posWall << '\n';
+                // std::cout << " extends in both directions of Y. negWall " << negWall
+                //           << " posWall: " << posWall << '\n';
                 recheck = true;
             }
             if (outsideNeg && !outsidePos) {
@@ -196,16 +196,16 @@ void reflect_traj_tmp_crds_box(
                 // Also need to check that update will not push you out the other side
                 if (posWall - 2.0 * (negWall - negY) > posY) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << " traj[1]: " << traj[1] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << " traj[1]: " << traj[1] << '\n';
                 }
             }
             if (outsidePos && !outsideNeg) {
                 traj[1] -= 2.0 * (posWall - posY);
                 if (negWall - 2.0 * (posWall - posY) < negY) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << " traj[1]: " << traj[1] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << " traj[1]: " << traj[1] << '\n';
                 }
             }
         }
@@ -270,8 +270,8 @@ void reflect_traj_tmp_crds_box(
             */
             if (outsideNeg && outsidePos) {
                 /*For a large complex, test if it could be pushed back out the other side*/
-                std::cout << "extends in both directions of Z. negwall " << negWall
-                          << " poswall: " << posWall << '\n';
+                // std::cout << "extends in both directions of Z. negwall " << negWall
+                //           << " poswall: " << posWall << '\n';
                 recheck = true;
             }
             if (outsideNeg && !outsidePos) {
@@ -279,16 +279,16 @@ void reflect_traj_tmp_crds_box(
                 traj[2] -= 2.0 * (negWall - negZ);
                 if (posWall - 2.0 * (negWall - negZ) > posZ) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << " traj[2]: " << traj[2] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << " traj[2]: " << traj[2] << '\n';
                 }
             }
             if (outsidePos && !outsideNeg) {
                 traj[2] -= 2.0 * (posWall - posZ);
                 if (negWall - 2.0 * (posWall - posZ) < negZ) {
                     recheck = true;
-                    std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
-                              << " traj[2]: " << traj[2] << '\n';
+                    // std::cout << " Will push out the other side. negwall " << negWall << " poswall: " << posWall
+                    //           << " traj[2]: " << traj[2] << '\n';
                 }
             }
         } // updating traj to reflect

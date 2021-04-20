@@ -66,16 +66,20 @@ void SimulVolume::Dimensions::check_dimensions(const Parameters& params, const M
     }
     tot = x * y * z;
 
-    // Now make sure There aren't too many pairs of cells
+    // Now make sure There aren't too many pairs of cells.
+    //At the same time, if the numberOfMolecules changes throughout the simulation,
+    //do not want the subvolumes to be too large.
     //based on total molecules
     int totMol = Molecule::numberOfMolecules;
-    double maxPairs { 0.5 * totMol * totMol };
+    double maxPairsMols { 0.5 * totMol * totMol };
+    double setLowerMax = 4000; //allow this many subvolumes, even if it is larger than maxPairsMols.
+    double maxPairs = std::max(setLowerMax, maxPairsMols);
     int minCells { 64 };
     double scale { 2.0 };
 
-    // TODO this if statement is temporary. noneq reactions starting with few reactants will always use minimum
+    // TODO: this if statement is temporary. noneq reactions starting with few reactants will always use minimum
     // number of cells, which can get VERY slow
-    if (tot > maxPairs && !params.isNonEQ) {
+    if (tot > maxPairs) { //&& !params.isNonEQ) {
         while (tot > maxPairs && tot > minCells) {
             std::cout << "CELL PAIR MAX EXCEEDED\n"
                       << "\tCurrent number of cells: " << tot << "\n\tMax number of cells: " << maxPairs << '\n';
@@ -212,7 +216,6 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
     int itr { 0 };
     if (simItr % itrCheck != 0) {
         /*just assign bins, don't check bin limits/errors*/
-
         for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
             Molecule& mol = moleculeList[molItr]; // just for legibility
 
@@ -226,14 +229,34 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
             if (membraneObject.waterBox.z > 0)
                 zItr = int(-(mol.comCoord.z + 1E-6 - membraneObject.waterBox.z / 2.0) / subCellSize.z);
             else
-                zItr = 1;
+                zItr = 0;
+
+            // allow the modecule a bit out of the box
+            if (xItr == -1)
+                xItr = 0;
+            if (xItr == numSubCells.x)
+                xItr = numSubCells.x - 1;
+            if (yItr == -1)
+                yItr = 0;
+            if (yItr == numSubCells.y)
+                yItr = numSubCells.y - 1;
+            if (zItr == -1)
+                zItr = 0;
+            if (zItr == numSubCells.z)
+                zItr = numSubCells.z - 1;
+
             int currBin = xItr + (yItr * numSubCells.x) + (zItr * numSubCells.x * numSubCells.y);
 
             mol.mySubVolIndex = currBin;
+            if (currBin >= numSubCells.tot) {
+                std::cerr << "Molecule " << mol.index
+                          << " seems outside simulation volume, with center of mass coordinates ["
+                          << mol.comCoord << "].\n";
+                exit(1);
+            }
             subCellList[currBin].memberMolList.push_back(mol.index);
         }
     } else {
-
         /*make sure proteins are within bin limits, lipids are on membrane*/
         for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
             Molecule& mol = moleculeList[molItr]; // just for legibility
@@ -244,7 +267,24 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
             // get which box the Molecule belongs to
             int xItr { int((mol.comCoord.x + membraneObject.waterBox.x / 2) / subCellSize.x) };
             int yItr { int((mol.comCoord.y + membraneObject.waterBox.y / 2) / subCellSize.y) };
-            int zItr { int(-(mol.comCoord.z + 1E-6 - membraneObject.waterBox.z / 2.0) / subCellSize.z) };
+            int zItr;
+            if (membraneObject.waterBox.z > 0)
+                zItr = int(-(mol.comCoord.z + 1E-6 - membraneObject.waterBox.z / 2.0) / subCellSize.z);
+            else
+                zItr = 0;
+
+            if (xItr == -1)
+                xItr = 0;
+            if (xItr == numSubCells.x)
+                xItr = numSubCells.x - 1;
+            if (yItr == -1)
+                yItr = 0;
+            if (yItr == numSubCells.y)
+                yItr = numSubCells.y - 1;
+            if (zItr == -1)
+                zItr = 0;
+            if (zItr == numSubCells.z)
+                zItr = numSubCells.z - 1;
             int currBin = xItr + (yItr * numSubCells.x) + (zItr * numSubCells.x * numSubCells.y);
 
             // Make sure the Molecule is still on the membrane if its supposed to be
@@ -275,7 +315,7 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
                 std::cout << "Molecule " << mol.index
                           << " is outside simulation volume in the z-dimension, with center of mass coordinates ["
                           << mol.comCoord << "]. Attempting to fit back into box.\n";
-                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList);
+                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList, molTemplateList);
                 // reset member search
                 molItr = 0;
                 for (auto& subBox : subCellList)
@@ -284,7 +324,7 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
                 std::cout << "Molecule " << mol.index
                           << " is outside simulation volume in the y-dimension, with center of mass coordinates ["
                           << mol.comCoord << "]. Attempting to fit back into box.\n";
-                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList);
+                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList, molTemplateList);
                 // reset member search
                 molItr = 0;
                 for (auto& subBox : subCellList)
@@ -293,7 +333,7 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
                 std::cout << "Molecule " << mol.index
                           << " is outside simulation volume in the x-dimension, with center of mass coordinates ["
                           << mol.comCoord << "]. Attempting to fit back into box.\n";
-                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList);
+                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList, molTemplateList);
                 // reset member search
                 molItr = 0;
                 for (auto& subBox : subCellList)
@@ -301,7 +341,7 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
             } else if (currBin > (numSubCells.tot) || currBin < 0) {
                 std::cout << "Molecule " << mol.index << " is outside simulation volume with center of mass coordinates ["
                           << mol.comCoord << "]. Attempting to fit back into box.\n";
-                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList);
+                complexList[mol.myComIndex].put_back_into_SimulVolume(itr, mol, membraneObject, moleculeList, molTemplateList);
                 // reset member search
                 molItr = 0;
                 for (auto& subBox : subCellList)

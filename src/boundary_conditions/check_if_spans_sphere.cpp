@@ -54,12 +54,12 @@ void check_if_spans_sphere(bool& cancelAssoc, const Parameters& params, Complex&
     }
 
     if (newRadius > sphereR) {
-        std::cout << "STICKS OUT THE SPHERE, CANCEL ASSOCIATION " << '\n';
+        // std::cout << "STICKS OUT THE SPHERE, CANCEL ASSOCIATION " << '\n';
         cancelAssoc = true;
         return;
     }
 
-    std::cout << "CHECK SPHERE SPAN. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
+    // std::cout << "CHECK SPHERE SPAN. Complex 1 Radius, Complex 2 radius " << reactCom1.radius << ' ' << reactCom2.radius << '\n';
     // The approximate size of the complex (max size) puts it as outside, now test interface positions.
     bool outside { false };
 

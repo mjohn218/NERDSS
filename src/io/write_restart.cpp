@@ -4,19 +4,20 @@
 #include <ctime>
 #include <iomanip>
 
-void write_restart(int simItr, std::ofstream& restartFile, const Parameters& params, const SimulVolume& simulVolume,
+void write_restart(long long int simItr, std::ofstream& restartFile, const Parameters& params, const SimulVolume& simulVolume,
     const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
-    const std::map<std::string, int>& observablesList, const std::vector<int>& emptyMolList,
-    const std::vector<int>& emptyComList, const Membrane& membraneObject, const copyCounters& counterArrays)
+    const std::map<std::string, int>& observablesList, const Membrane& membraneObject, const copyCounters& counterArrays)
 {
     // TRACE();
     // Write parameters
+    restartFile.precision(20);
     {
         restartFile << "#Parameters--update these for restart \n";
         restartFile << "numItr = " << params.nItr << '\n';
         restartFile << "currItr = " << simItr << '\n';
+        restartFile << "currSimTime (s) = " << std::scientific << (simItr - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << '\n';
         restartFile << "numMolTypes = " << params.numMolTypes << '\n';
         restartFile << "numTotalSpecies = " << params.numTotalSpecies << '\n';
         restartFile << "numComplexs = " << params.numTotalComplex << '\n';
@@ -37,12 +38,13 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
         restartFile << '\n';
         restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereR << '\n';
         restartFile << "ifaceOverlapSepLimit = " << params.overlapSepLimit << '\n';
-        restartFile << "rMaxLimit = " << std::fixed << params.rMaxLimit << '\n';
+        restartFile << "rMaxLimit = " << params.rMaxLimit << '\n';
         restartFile << "timeWrite = " << params.timeWrite << '\n';
         restartFile << "trajWrite = " << params.trajWrite << '\n';
         restartFile << "restartWrite = " << params.restartWrite << '\n';
         restartFile << "pdbWrite = " << params.pdbWrite << '\n';
         restartFile << "checkPoint = " << params.checkPoint << '\n';
+        restartFile << "scaleMaxDisplace = " << params.scaleMaxDisplace << '\n';
     }
     /*
     // write Simulation Volume
@@ -84,10 +86,10 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << oneTemp.copies << ' ' << oneTemp.mass << ' ' << oneTemp.radius << '\n';
             restartFile << oneTemp.isLipid << ' ' << oneTemp.isImplicitLipid << ' ' << oneTemp.isRod << ' ' << oneTemp.isPoint << ' '
                         << oneTemp.checkOverlap << '\n';
-            restartFile << std::fixed << oneTemp.comCoord.x << ' ' << oneTemp.comCoord.y << ' ' << oneTemp.comCoord.z
+            restartFile << oneTemp.comCoord.x << ' ' << oneTemp.comCoord.y << ' ' << oneTemp.comCoord.z
                         << '\n';
-            restartFile << std::fixed << oneTemp.D.x << ' ' << oneTemp.D.y << ' ' << oneTemp.D.z << '\n';
-            restartFile << std::fixed << oneTemp.Dr.x << ' ' << oneTemp.Dr.y << ' ' << oneTemp.Dr.z << '\n';
+            restartFile << oneTemp.D.x << ' ' << oneTemp.D.y << ' ' << oneTemp.D.z << '\n';
+            restartFile << oneTemp.Dr.x << ' ' << oneTemp.Dr.y << ' ' << oneTemp.Dr.z << '\n';
 
             // reaction partners
             restartFile << oneTemp.rxnPartners.size();
@@ -138,6 +140,13 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
                 restartFile << ' ' << elem;
             }
             restartFile << '\n';
+
+            //write monomerList
+            restartFile << oneTemp.monomerList.size();
+            for (auto elem : oneTemp.monomerList) {
+                restartFile << ' ' << elem;
+            }
+            restartFile << '\n';
         }
     }
 
@@ -156,14 +165,15 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
             restartFile << oneRxn.isReversible << ' ' << oneRxn.conjBackRxnIndex << ' ' << oneRxn.irrevRingClosure << ' ' << oneRxn.bindRadSameCom << ' '
                         << oneRxn.loopCoopFactor << '\n'
                         << oneRxn.length3Dto2D << '\n';
-            restartFile << std::setprecision(12) << oneRxn.bindRadius << ' ' << oneRxn.assocAngles.theta1 << ' ' << oneRxn.assocAngles.theta2
+            restartFile << std::setprecision(20) << oneRxn.bindRadius << ' ' << oneRxn.assocAngles.theta1 << ' ' << oneRxn.assocAngles.theta2
                         << ' ' << oneRxn.assocAngles.phi1 << ' ' << oneRxn.assocAngles.phi2 << ' '
                         << oneRxn.assocAngles.omega << '\n';
             restartFile << oneRxn.norm1.x << ' ' << oneRxn.norm1.y << ' ' << oneRxn.norm1.z << '\n';
             restartFile << oneRxn.norm2.x << ' ' << oneRxn.norm2.y << ' ' << oneRxn.norm2.z << '\n';
+            restartFile << oneRxn.excludeVolumeBound << '\n';
             restartFile << oneRxn.isCoupled;
             if (oneRxn.isCoupled)
-                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << oneRxn.coupledRxn.rxnType << ' ' << oneRxn.coupledRxn.label << ' ' << std::setprecision(20) << oneRxn.coupledRxn.probCoupled;
+                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << static_cast<std::underlying_type<ReactionType>::type>(oneRxn.coupledRxn.rxnType) << ' ' << oneRxn.coupledRxn.label << ' ' << std::setprecision(20) << oneRxn.coupledRxn.probCoupled;
             restartFile << '\n';
 
             // integer reactants
@@ -219,6 +229,10 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
                         << oneRxn.isSymmetric << ' ' << oneRxn.isOnMem << ' ' << oneRxn.hasStateChange << '\n';
             restartFile << oneRxn.isObserved << ' ' << oneRxn.observeLabel << '\n';
             restartFile << oneRxn.conjForwardRxnIndex << '\n';
+            restartFile << oneRxn.isCoupled;
+            if (oneRxn.isCoupled)
+                restartFile << ' ' << oneRxn.coupledRxn.absRxnIndex << ' ' << oneRxn.coupledRxn.relRxnIndex << ' ' << static_cast<std::underlying_type<ReactionType>::type>(oneRxn.coupledRxn.rxnType) << ' ' << oneRxn.coupledRxn.label << ' ' << std::setprecision(20) << oneRxn.coupledRxn.probCoupled;
+            restartFile << '\n';
 
             // integer reactants
             restartFile << oneRxn.intReactantList.size();
@@ -441,12 +455,47 @@ void write_restart(int simItr, std::ofstream& restartFile, const Parameters& par
     }
 
     // Write observables
-    restartFile << "#Observables \n";
-    restartFile << observablesList.size() << '\n';
-    for (auto& observable : observablesList)
-        restartFile << observable.first << ' ' << observable.second << '\n';
+    {
+        restartFile << "#Observables \n";
+        restartFile << observablesList.size() << '\n';
+        for (auto& observable : observablesList)
+            restartFile << observable.first << ' ' << observable.second << '\n';
+    }
 
     // Write counterArrays
-    restartFile << "#counterArrays.NLoops \n";
-    restartFile << counterArrays.nLoops << '\n';
+    {
+        restartFile << "#counterArrays.NLoops .nCancels\n";
+        restartFile << counterArrays.nLoops << ' ' << counterArrays.nCancelOverlapPartner << ' ' << counterArrays.nCancelOverlapSystem << ' ' << counterArrays.nCancelDisplace2D << ' ' << counterArrays.nCancelDisplace3D << ' ' << counterArrays.nCancelDisplace3Dto2D << ' ' << counterArrays.nCancelSpanBox << ' ' << counterArrays.nAssocSuccess << ' ' << counterArrays.eventArraySize << '\n';
+        //write events3D, 3Dto2D, and 2D
+        for (auto& event : counterArrays.events3D)
+            restartFile << event << ' ';
+        restartFile << '\n';
+        for (auto& event : counterArrays.events3Dto2D)
+            restartFile << event << ' ';
+        restartFile << '\n';
+        for (auto& event : counterArrays.events2D)
+            restartFile << event << ' ';
+        restartFile << '\n';
+        // Write bindPairList
+        restartFile << "#counterArrays.bindPairList \n";
+        restartFile << counterArrays.bindPairList.size() << '\n';
+        for (auto& bindPair : counterArrays.bindPairList) {
+            restartFile << bindPair.size() << '\n';
+            for (auto& oneElem : bindPair)
+                restartFile << ' ' << oneElem;
+            restartFile << '\n';
+        }
+        // for (auto& bindPair : counterArrays.bindPairListIL2D) {
+        //     restartFile << bindPair.size() << '\n';
+        //     for (auto& oneElem : bindPair)
+        //         restartFile << ' ' << oneElem;
+        //     restartFile << '\n';
+        // }
+        // for (auto& bindPair : counterArrays.bindPairListIL3D) {
+        //     restartFile << bindPair.size() << '\n';
+        //     for (auto& oneElem : bindPair)
+        //         restartFile << ' ' << oneElem;
+        //     restartFile << '\n';
+        // }
+    }
 }

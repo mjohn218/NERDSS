@@ -6,23 +6,35 @@
 using namespace std;
 
 // write the header for file tracking all species
-int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns)
+int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays, std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns, Parameters& params)
 {
     // TRACE();
     int nSpecies = 0;
-    speciesFile << "Itr";
+    speciesFile << "Time (s)";
     for (const auto& oneTemp : molTemplateList) {
         for (auto& iface : oneTemp.interfaceList) {
             if (iface.stateList.size() == 1) {
                 speciesFile << ',' << oneTemp.molName << '(' << iface.name << ')';
                 counterArrays.singleDouble.push_back(1);
                 counterArrays.implicitDouble.push_back(false);
+                counterArrays.canDissociate.push_back(false);
+                if (params.fromRestart == false) {
+                    counterArrays.bindPairList.emplace_back();
+                    // counterArrays.bindPairListIL2D.emplace_back();
+                    // counterArrays.bindPairListIL3D.emplace_back();
+                }
                 nSpecies++;
             } else {
                 for (auto& state : iface.stateList) {
                     speciesFile << ',' << oneTemp.molName << '(' << iface.name << '~' << state.iden << ')';
                     counterArrays.singleDouble.push_back(1);
                     counterArrays.implicitDouble.push_back(false);
+                    counterArrays.canDissociate.push_back(false);
+                    if (params.fromRestart == false) {
+                        counterArrays.bindPairList.emplace_back();
+                        // counterArrays.bindPairListIL2D.emplace_back();
+                        // counterArrays.bindPairListIL3D.emplace_back();
+                    }
                     nSpecies++;
                 }
             }
@@ -36,6 +48,16 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays, std::ve
                 counterArrays.implicitDouble.push_back(true);
             } else {
                 counterArrays.implicitDouble.push_back(false);
+            }
+            if (oneRxn.isReversible == true) {
+                counterArrays.canDissociate.push_back(true);
+            } else {
+                counterArrays.canDissociate.push_back(false);
+            }
+            if (params.fromRestart == false) {
+                counterArrays.bindPairList.emplace_back();
+                // counterArrays.bindPairListIL2D.emplace_back();
+                // counterArrays.bindPairListIL3D.emplace_back();
             }
             nSpecies++;
         }

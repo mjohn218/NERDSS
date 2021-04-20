@@ -65,6 +65,7 @@ struct Membrane {
     double Dry;
     double Drz;
     double offset;
+    double lipidLength { 0.0 };
     bool implicitLipid = false;
     bool TwoD = false;
     bool isBox = false;

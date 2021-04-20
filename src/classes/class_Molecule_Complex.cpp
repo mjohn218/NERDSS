@@ -221,7 +221,7 @@ void Molecule::clear_tmp_association_coords()
     tmpICoords.erase(tmpICoords.begin(), tmpICoords.end());
 }
 
-void Molecule::destroy(std::vector<int>& emptyMolList)
+void Molecule::destroy()
 {
     /*! \ingroup Reactions
      * \brief Destroys the parent Molecule.
@@ -423,9 +423,9 @@ bool Molecule::operator!=(const Molecule& rhs) const
 
 void Molecule::Interaction::clear()
 {
-    partnerIfaceIndex = 0;
-    partnerIndex = 0;
-    conjBackRxn = 0;
+    partnerIfaceIndex = -1;
+    partnerIndex = -1;
+    conjBackRxn = -1;
 }
 
 void Molecule::update_association_coords(const Vector& vec)
@@ -645,7 +645,7 @@ void Complex::display(const std::string& name)
 }
 
 void Complex::destroy(
-    std::vector<Molecule>& moleculeList, std::vector<int>& emptyMolList, std::vector<Complex>& complexList, std::vector<int>& emptyComList)
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList)
 {
     /*! \ingroup Reactions
      * \brief This function destroys its parent Complex.
@@ -653,8 +653,6 @@ void Complex::destroy(
      * Invoked when a destruction reaction involving a member Molecule occurs. Destroys molecule but leaves shell behind
      * for later use if a new complex forms.
      *
-     * \param [in] emptyMolList list of indices of empty Molecules in moleculeList
-     * \param [in] emptyComList list of indices of empty Complexes in complexList
      */
 
     // add to the empty complex list
@@ -666,7 +664,7 @@ void Complex::destroy(
     Dr.zero_crds();
 
     for (auto& memMol : memberList)
-        moleculeList[memMol].destroy(emptyMolList);
+        moleculeList[memMol].destroy();
 
     memberList.clear();
     numEachMol.clear();
@@ -675,29 +673,10 @@ void Complex::destroy(
     // iterate down the number of complexes in the system.
     trajStatus = TrajStatus::empty;
     --Complex::numberOfComplexes;
-    /*
-    // put the last non-empty complex in the list to the non-last empty slot
-    int slotIndex { Complex::emptyComList.back() };
-    int previousIndex { complexList.back().index };
-    // if the empty one is the last, just pop it
-    if (slotIndex == previousIndex) {
-        complexList.pop_back();
-        Complex::emptyComList.pop_back();
-    } else {
-        complexList[slotIndex] = complexList.back();
-        complexList[slotIndex].index = slotIndex;
-        complexList.pop_back();
-        Complex::emptyComList.pop_back();
-
-        // change the mol.myComIndex with previousIndex to slotIndex
-        for (auto& mp : complexList[slotIndex].memberList) {
-            moleculeList[mp].myComIndex = slotIndex;
-        }
-    }*/
 }
 
 void Complex::put_back_into_SimulVolume(
-    int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList)
+    int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList)
 {
     std::cout << "Attempting to put complex " << index << " back into simulation volume...\n";
     display();
@@ -726,13 +705,14 @@ void Complex::put_back_into_SimulVolume(
         transVec.z = -(zDiff + membraneObject.waterBox.z) + 1E-6;
 
     // TRANSLATE //
-    comCoord += transVec;
+    //comCoord += transVec;
 
     for (auto& memMol : memberList) {
         moleculeList.at(memMol).comCoord += transVec;
         for (auto& iface : moleculeList.at(memMol).interfaceList)
             iface.coord += transVec;
     }
+    this->update_properties(moleculeList, molTemplateList);
 
     ++itr;
     if (itr == 1000) {
@@ -788,9 +768,17 @@ void Complex::put_back_into_SimulVolume(
 //     trajRot.zero_crds();
 // }
 
-void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject)
+void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject, const std::vector<MolTemplate>& molTemplateList)
 {
     ++propCalled;
+
+    /*debug*/
+    //std::cout << "propCalled: " << propCalled << std::endl;
+    //std::cout << "startComCoord: " << std::fixed << std::setprecision(20) << comCoord.x << " " << comCoord.y << " " << comCoord.z << std::endl;
+    // std::cout << "trajTrans: " << std::setprecision(20) << trajTrans.x << " " << trajTrans.y << " " << trajTrans.z << std::endl;
+    // std::cout << "trajRot: " << std::setprecision(20) << trajRot.x << " " << trajRot.y << " " << trajRot.z << " " << std::endl;
+    /*end debug*/
+
     // for the complex on the sphere surface, propagation is special
     if (membraneObject.isSphere && this->D.z < 1E-14) {
         Coord COM = comCoord;
@@ -798,7 +786,7 @@ void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane memb
         std::array<double, 9> Crdset = inner_coord_set(COM, COMnew);
         std::array<double, 9> Crdsetnew = inner_coord_set_new(COM, COMnew);
         // propagate the com of the complex
-        comCoord += trajTrans;
+        //comCoord += trajTrans;
         // get the rotation angle: dangle
         double Rotangle = trajRot.x; // we select the rotation angle x as the angle that the complex rotate on the sphere
         // update the member proteins
@@ -814,6 +802,7 @@ void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane memb
                 iface.coord = rotate_on_sphere(targiface, COMnew, Crdsetnew, Rotangle);
             }
         }
+        this->update_properties(moleculeList, molTemplateList);
     } else { // for the complex in solution or on box surface
         // Create the quaternion
         double cosZ { cos(trajRot.z * 0.5) };
@@ -848,7 +837,10 @@ void Complex::propagate(std::vector<Molecule>& moleculeList, const Membrane memb
         }
 
         // propagate the complex's center of mass
-        comCoord += trajTrans;
+        //std::cout << "comCoord: " << std::fixed << std::setprecision(20) << comCoord.x << " " << comCoord.y << " " << comCoord.z << std::endl;
+        //comCoord += trajTrans;
+        this->update_properties(moleculeList, molTemplateList);
+        // std::cout << "comCoord: " << std::setprecision(20) << comCoord.x << " " << comCoord.y << " " << comCoord.z << std::endl;
     }
     // zero the propagation values
     trajTrans.zero_crds();
@@ -912,7 +904,7 @@ void Molecule::create_position_implicit_lipid(Molecule& reactMol1, int ifaceInde
         double shift = 0.1; //do not put right underneath, so that sigma starts at non-zero.
         comCoord.x = reactMol1.comCoord.x + shift;
         comCoord.y = reactMol1.comCoord.y - shift;
-        comCoord.z = -membraneObject.waterBox.z / 2.0 - displace.get_magnitude() - 1.0; // + membraneObject.RS3D;
+        comCoord.z = -membraneObject.waterBox.z / 2.0; // + membraneObject.RS3D;
         Coord direction { 0.0, 0.0, 1.0 };
         interfaceList[ifaceIndex2].coord = comCoord + displace.get_magnitude() * direction;
     }

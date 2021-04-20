@@ -72,7 +72,7 @@ double pirr_pfree_ratio_psF(
     }
 
     if (std::isnan(ratio) || std::isinf(ratio)) {
-        std::cout << ratio << '\n';
+        // std::cout << ratio << '\n';
     }
 
     return ratio;

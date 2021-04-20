@@ -16,33 +16,33 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
 
     if (molTemplateList[createdMol.molTypeIndex].D.z == 0
         && std::abs(createdMol.comCoord.z) - std::abs((membraneObject.waterBox.z / 2)) > 1E-6) {
-        std::cerr << "Molecule " << createdMol.index << " of type " << molTemplateList[createdMol.molTypeIndex].molName
-                  << " is off the membrane. Writing coordinates and exiting.\n";
+        // std::cerr << "Molecule " << createdMol.index << " of type " << molTemplateList[createdMol.molTypeIndex].molName
+        //           << " is off the membrane. Writing coordinates and exiting.\n";
         return true;
     }
 
     // Now make sure the Molecule is still inside the box in all dimensions
     if (createdMol.comCoord.z > (membraneObject.waterBox.z / 2) || createdMol.comCoord.z + 1E-6 < -(membraneObject.waterBox.z / 2)) {
-        std::cout << "Molecule " << createdMol.index
-                  << " is outside simulation volume in the z-dimension, with center of mass coordinates ["
-                  << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        // std::cout << "Molecule " << createdMol.index
+        //           << " is outside simulation volume in the z-dimension, with center of mass coordinates ["
+        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (createdMol.comCoord.y > (membraneObject.waterBox.y / 2)
         || createdMol.comCoord.y + 1E-6 < -(membraneObject.waterBox.y / 2)) {
-        std::cout << "Molecule " << createdMol.index
-                  << " is outside simulation volume in the y-dimension, with center of mass coordinates ["
-                  << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        // std::cout << "Molecule " << createdMol.index
+        //           << " is outside simulation volume in the y-dimension, with center of mass coordinates ["
+        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (createdMol.comCoord.x > (membraneObject.waterBox.x / 2)
         || createdMol.comCoord.x + 1E-6 < -(membraneObject.waterBox.x / 2)) {
-        std::cout << "Molecule " << createdMol.index
-                  << " is outside simulation volume in the x-dimension, with center of mass coordinates ["
-                  << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        // std::cout << "Molecule " << createdMol.index
+        //           << " is outside simulation volume in the x-dimension, with center of mass coordinates ["
+        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (currBin > (simulVolume.numSubCells.tot) || currBin < 0) {
-        std::cout << "Molecule " << createdMol.index
-                  << " is outside simulation volume with center of mass coordinates [" << createdMol.comCoord
-                  << "]. Attempting to fit back into box.\n";
+        // std::cout << "Molecule " << createdMol.index
+        //           << " is outside simulation volume with center of mass coordinates [" << createdMol.comCoord
+        //           << "]. Attempting to fit back into box.\n";
         return true;
     } else {
         // if it's inside the box, check if it overlaps with any molecule
@@ -101,10 +101,9 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
 }
 
 void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, int& newComIndex, bool createInVicinity,
-    const MolTemplate& createdMolTemp, Parameters& params, std::vector<int>& emptyMolLis,
-    std::vector<int>& emptyComLis, const CreateDestructRxn& currRxn, SimulVolume& simulVolume,
+    MolTemplate& createdMolTemp, Parameters& params, const CreateDestructRxn& currRxn, SimulVolume& simulVolume,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
-    const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
+    std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject)
 {
     newMolIndex = 0;
     newComIndex = 0;
@@ -170,4 +169,13 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
     complexList[newComIndex] = Complex { newComIndex, moleculeList.at(newMolIndex), createdMolTemp };
     complexList[newComIndex].trajStatus = TrajStatus::propagated;
     ++Complex::numberOfComplexes;
+
+    // add to monomerList if canDestroy = true
+    {
+        Molecule& oneMol { moleculeList[newMolIndex] };
+        MolTemplate& oneTemp { molTemplateList[oneMol.molTypeIndex] };
+        if (oneTemp.canDestroy) {
+            oneTemp.monomerList.emplace_back(oneMol.index);
+        }
+    }
 }

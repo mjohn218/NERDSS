@@ -17,7 +17,7 @@ bool determine_parent_complex(int pro1Index, int pro2Index, int newComIndex, std
         std::vector<int> tmppartvec = moleculeList[mp].bndpartner;
         if (std::find(tmppartvec.begin(), tmppartvec.end(), pro1Index) != tmppartvec.end()
             && std::find(tmppartvec.begin(), tmppartvec.end(), pro2Index) != tmppartvec.end()) {
-            std::cout << "Molecule " << mp << " is bound to both dissociating molecules. Keeping as one complex.\n";
+            // std::cout << "Molecule " << mp << " is bound to both dissociating molecules. Keeping as one complex.\n";
             boundTwice = true;
             break;
         }
@@ -31,8 +31,8 @@ bool determine_parent_complex(int pro1Index, int pro2Index, int newComIndex, std
             }
         }
 
-        if (boundTwice)
-            std::cout << "Molecule " << mp << " is doubly bound!" << std::endl;
+        // if (boundTwice)
+        //     std::cout << "Molecule " << mp << " is doubly bound!" << std::endl;
     }
 
     if (boundTwice) {
@@ -161,7 +161,7 @@ bool determine_parent_complex(int pro1Index, int pro2Index, int newComIndex, std
 
             for (auto& ppart : moleculeList[mp].bndpartner) {
                 if (find(tmpc2.begin(), tmpc2.end(), ppart) != tmpc2.end()) {
-                    std::cout << "Complex is a closed loop.\n";
+                    // std::cout << "Complex is a closed loop.\n";
                     moleculeList[pro1Index].myComIndex = c1;
                     moleculeList[pro2Index].myComIndex = c1;
                     return true;

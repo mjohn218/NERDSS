@@ -4,7 +4,7 @@
 #include <ctime>
 #include <iomanip>
 
-void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
+void write_pdb(long long int simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject)
 {
     // TRACE();
@@ -42,9 +42,11 @@ void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, con
             const MolTemplate& oneTemp = molTemplateList[mol.molTypeIndex];
             pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' ' << std::setw(4) << " COM" << ' '
                     << std::setw(3) << oneTemp.molName.substr(0, 3) << ' ' << std::right << std::setw(4) << molCounter << "     "
-                    << std::setw(8) << (mol.comCoord.x + membraneObject.waterBox.x / 2) << std::setw(8)
+                    << std::setw(8) << std::fixed << std::setprecision(3) << (mol.comCoord.x + membraneObject.waterBox.x / 2) << std::setw(8)
                     << (mol.comCoord.y + membraneObject.waterBox.y / 2) << std::setw(8)
-                    << (mol.comCoord.z + membraneObject.waterBox.z / 2) << std::setw(6) << 0.00 << std::setw(6) << 0.00
+                    << (mol.comCoord.z + membraneObject.waterBox.z / 2);
+            pdbFile.unsetf(std::ios_base::fixed);
+            pdbFile << std::setw(6) << 0.00 << std::setw(6) << 0.00
                     << std::left << std::setw(2) << "CL" << std::endl;
             ++i;
 
@@ -52,9 +54,11 @@ void write_pdb(unsigned simItr, unsigned frameNum, const Parameters& params, con
                 pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' ' << std::setw(4) // << ' '
                         << oneTemp.interfaceList[j].name.substr(0, 3) << ' ' << std::setw(3)
                         << oneTemp.molName.substr(0, 3) << ' ' << std::right << std::setw(4) << molCounter << "     "
-                        << std::setw(8) << (mol.interfaceList[j].coord.x + membraneObject.waterBox.x / 2) << std::setw(8)
+                        << std::setw(8) << std::fixed << std::setprecision(3) << (mol.interfaceList[j].coord.x + membraneObject.waterBox.x / 2) << std::setw(8)
                         << (mol.interfaceList[j].coord.y + membraneObject.waterBox.y / 2) << std::setw(8)
-                        << (mol.interfaceList[j].coord.z + membraneObject.waterBox.z / 2) << std::setw(6) << 0.00
+                        << (mol.interfaceList[j].coord.z + membraneObject.waterBox.z / 2);
+                pdbFile.unsetf(std::ios_base::fixed);
+                pdbFile << std::setw(6) << 0.00
                         << std::setw(6) << 0.00 << std::left << std::setw(2) << "CL" << std::endl;
                 ++i;
             }

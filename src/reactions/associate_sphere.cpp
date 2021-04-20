@@ -12,8 +12,7 @@ void associate_sphere(
     int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
     Complex& reactCom1, Complex& reactCom2, const Parameters& params,
     ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList,
-    std::vector<int>& emptyComList, std::map<std::string, int>& observablesList,
+    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList,
     copyCounters& counterArrays, std::vector<Complex>& complexList,
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns)
@@ -21,7 +20,7 @@ void associate_sphere(
     // TRACE();
     if (reactCom1.index == reactCom2.index) {
         // skip to protein interation updates
-        std::cout << "Closing a loop, no rotations performed.\n";
+        // std::cout << "Closing a loop, no rotations performed.\n";
         counterArrays.nLoops++;
         // update the Molecule's TrajStatus (this is done in the else, when
         // Molecules are rotated but not otherwise)
@@ -81,7 +80,7 @@ void associate_sphere(
                 /*At least one protein is in 3D*/
                 if (reactCom1.D.z < tol || reactCom2.D.z < tol) {
                     transitionToSurface = true; // both can't be less than tol, or would not be in this loop.
-                    std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
+                    // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
                 }
             }
 
@@ -118,88 +117,88 @@ void associate_sphere(
                     moleculeList[mp].update_association_coords(transVec1);
                 for (auto& mp : reactCom2.memberList)
                     moleculeList[mp].update_association_coords(transVec2);
-                std::cout << "Position after pushed to sigma: " << std::endl;
-                reactMol1.display_assoc_icoords("mol1");
-                reactMol2.display_assoc_icoords("mol2");
+                // std::cout << "Position after pushed to sigma: " << std::endl;
+                // reactMol1.display_assoc_icoords("mol1");
+                // reactMol2.display_assoc_icoords("mol2");
             }
         } // Move protein to sigma
 
         // now rotate both complexes
         if (molTemplateList[reactMol1.molTypeIndex].isPoint && molTemplateList[reactMol2.molTypeIndex].isPoint) {
             /*If both molecules are points, no orientations to specify*/
-            std::cout << " Move two point particles to contact along current "
-                         "separation vector, NO ORIENTATION \n";
+            // std::cout << " Move two point particles to contact along current "
+            //              "separation vector, NO ORIENTATION \n";
         } else { // both are not points
             /* THETA */
-            std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
-                      << "THETA 1" << std::endl
-                      << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
+            // std::cout << std::setw(8) << std::setfill('-') << ' ' << std::endl
+            //           << "THETA 1" << std::endl
+            //           << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
             theta_rotation(reactIface1, reactIface2, reactMol1, reactMol2,
                 currRxn.assocAngles.theta1, reactCom1, reactCom2,
                 moleculeList);
-            std::cout << std::setw(30) << std::setfill('-') << ' '
-                      << std::setfill(' ') << std::endl;
-            std::cout << "THETA 2" << std::endl
-                      << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ')
-                      << std::endl;
+            // std::cout << std::setw(30) << std::setfill('-') << ' '
+            //           << std::setfill(' ') << std::endl;
+            // std::cout << "THETA 2" << std::endl
+            //           << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ')
+            //           << std::endl;
             theta_rotation(reactIface2, reactIface1, reactMol2, reactMol1,
                 currRxn.assocAngles.theta2, reactCom2, reactCom1,
                 moleculeList);
 
             /* OMEGA */
             // if protein has theta M_PI, uses protein norm instead of com_iface vector
-            std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                      << "OMEGA" << std::endl
-                      << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+            // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+            //           << "OMEGA" << std::endl
+            //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
             if (!std::isnan(currRxn.assocAngles.omega)) {
                 omega_rotation(reactIface1, reactIface2, ifaceIndex2, reactMol1,
                     reactMol2, reactCom1, reactCom2,
                     currRxn.assocAngles.omega, currRxn, moleculeList,
                     molTemplateList);
-            } else
-                std::cout << "P1 or P2 is a rod-type protein, no dihedral for "
-                             "associated complex."
-                          << std::endl;
+            } //else
+            // std::cout << "P1 or P2 is a rod-type protein, no dihedral for "
+            //              "associated complex."
+            //           << std::endl;
 
             /* PHI */
             // PHI 1
-            std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                      << "PHI 1" << std::endl
-                      << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+            // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+            //           << "PHI 1" << std::endl
+            //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
             if (!std::isnan(currRxn.assocAngles.phi1)) {
                 phi_rotation(reactIface1, reactIface2, ifaceIndex2, reactMol1,
                     reactMol2, reactCom1, reactCom2, currRxn.norm1,
                     currRxn.assocAngles.phi1, currRxn, moleculeList,
                     molTemplateList);
-            } else
-                std::cout << "P1 has no valid phi angle." << std::endl;
+            } //else
+            // std::cout << "P1 has no valid phi angle." << std::endl;
 
             // PHI 2
-            std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
-                      << "PHI 2" << std::endl
-                      << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
+            // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
+            //           << "PHI 2" << std::endl
+            //           << std::setw(6) << ' ' << std::setfill(' ') << std::endl;
 
             if (!std::isnan(currRxn.assocAngles.phi2)) {
                 phi_rotation(reactIface2, reactIface1, ifaceIndex1, reactMol2,
                     reactMol1, reactCom2, reactCom1, currRxn.norm2,
                     currRxn.assocAngles.phi2, currRxn, moleculeList,
                     molTemplateList);
-            } else
-                std::cout << "P2 has no valid phi angle." << std::endl;
+            } //else
+            // std::cout << "P2 has no valid phi angle." << std::endl;
         } // end of if points.
 
         /*FINISHED ROTATING, NO CONSTRAINTS APPLIED TO SURFACE REACTIONS*/
         Coord finalCOM;
         com_of_two_tmp_complexes(reactCom1, reactCom2, finalCOM, moleculeList); // com of c1+c2 (final (tmp) coordinates).
-        std::cout << "Pre-MEMBRANE ROT: COMPLEX PAIR COM: " << finalCOM.x << ' '
-                  << finalCOM.y << ' ' << finalCOM.z << std::endl;
-        reactMol1.display_assoc_icoords("mol1");
-        reactMol2.display_assoc_icoords("mol2");
+        // std::cout << "Pre-MEMBRANE ROT: COMPLEX PAIR COM: " << finalCOM.x << ' '
+        //           << finalCOM.y << ' ' << finalCOM.z << std::endl;
+        // reactMol1.display_assoc_icoords("mol1");
+        // reactMol2.display_assoc_icoords("mol2");
 
         if (isOnMembrane == true || transitionToSurface == true) {
             //return orientation of normal back to starting position
-            std::cout << " IS ON MEMBRANE, CORRECT ORIENTATION ! " << std::endl;
+            // std::cout << " IS ON MEMBRANE, CORRECT ORIENTATION ! " << std::endl;
             Molecule memProtein;
             Molecule Lipid;
             if (reactCom1.D.z < reactCom2.D.z) {
@@ -285,15 +284,16 @@ void associate_sphere(
                 }
             }
 
-            std::cout << " Lipid is off spherical membrane, shift up by: " << dtrans.x << " " << dtrans.y << " " << dtrans.z
-                      << std::endl;
+            // std::cout << " Lipid is off spherical membrane, shift up by: " << dtrans.x << " " << dtrans.y << " " << dtrans.z
+            //           << std::endl;
             // update the temporary coordinates for both complexes
             for (auto& mp : reactCom1.memberList)
                 moleculeList[mp].update_association_coords(dtrans);
             for (auto& mp : reactCom2.memberList)
                 moleculeList[mp].update_association_coords(dtrans);
         } else {
-            Vector dtrans;
+            /*
+	    Vector dtrans;
             dtrans.x = startCOM.x - finalCOM.x;
             dtrans.y = startCOM.y - finalCOM.y;
             dtrans.z = startCOM.z - finalCOM.z;
@@ -304,12 +304,13 @@ void associate_sphere(
                 moleculeList[mp].update_association_coords(dtrans);
             for (auto& mp : reactCom2.memberList)
                 moleculeList[mp].update_association_coords(dtrans);
+	  */
         }
 
-        std::cout << " FINAL COORDS PRIOR TO OVERLAP CHECK  AND REFLECT OFF SPHERE: "
-                  << std::endl;
-        reactMol1.display_assoc_icoords("mol1");
-        reactMol2.display_assoc_icoords("mol2");
+        // std::cout << " FINAL COORDS PRIOR TO OVERLAP CHECK  AND REFLECT OFF SPHERE: "
+        //           << std::endl;
+        // reactMol1.display_assoc_icoords("mol1");
+        // reactMol2.display_assoc_icoords("mol2");
 
         /*Reflect off the sphere.*/
         std::array<double, 3> traj;
@@ -334,11 +335,13 @@ void associate_sphere(
             for (auto& mp : reactCom2.memberList)
                 moleculeList[mp].update_association_coords(vtraj);
 
-            std::cout << "CRDS after reflecting off of the SPHERE by " << traj[0] << ' '
-                      << traj[1] << ' ' << traj[2] << std::endl;
-            reactMol1.display_assoc_icoords("mol1");
-            reactMol2.display_assoc_icoords("mol2");
+            // std::cout << "CRDS after reflecting off of the SPHERE by " << traj[0] << ' '
+            //           << traj[1] << ' ' << traj[2] << std::endl;
+            // reactMol1.display_assoc_icoords("mol1");
+            // reactMol2.display_assoc_icoords("mol2");
         }
+        /*Calculate the angles swept out by the interface to COM vectors as a result of the displacement*/
+        calc_angular_displacement(ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, moleculeList);
 
         /* CHECKS AFTER ASSOCIATION FOR STERIC COLLISIONS, FOR EXPANDING BEYOND THE
        BOX SIZE OR FOR MOVING PROTEINS A LARGE DISTANCE DUE TO SNAPPING INTO
@@ -347,20 +350,35 @@ void associate_sphere(
         bool cancelAssoc { false };
         check_for_structure_overlap(cancelAssoc, reactCom1, reactCom2, moleculeList, params, molTemplateList);
 
-        if (cancelAssoc == false)
+        if (cancelAssoc == false) {
             check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
+            if (cancelAssoc == true)
+                counterArrays.nCancelSpanBox++;
+        } else
+            counterArrays.nCancelOverlapPartner++; //true for structure overlap check.
 
-        if (cancelAssoc == false)
+        if (cancelAssoc == false) {
             check_for_structure_overlap_system(cancelAssoc, reactCom1, reactCom2,
                 moleculeList, params, molTemplateList,
                 complexList, forwardRxns, backRxns);
-        if (cancelAssoc == false)
+            if (cancelAssoc == true)
+                counterArrays.nCancelOverlapSystem++;
+        }
+        if (cancelAssoc == false) {
             measure_complex_displacement(cancelAssoc, reactCom1, reactCom2,
                 moleculeList, params, molTemplateList,
                 complexList);
-
+            if (cancelAssoc == true) {
+                if (isOnMembrane)
+                    counterArrays.nCancelDisplace2D++;
+                else if (transitionToSurface)
+                    counterArrays.nCancelDisplace3Dto2D++;
+                else
+                    counterArrays.nCancelDisplace3D++;
+            }
+        }
         if (cancelAssoc) {
-            std::cout << "Canceling association, returning complexes to original state.\n";
+            // std::cout << "Canceling association, returning complexes to original state.\n";
             for (auto memMol : reactCom1.memberList)
                 moleculeList[memMol].clear_tmp_association_coords();
             for (auto memMol : reactCom2.memberList)
@@ -368,6 +386,10 @@ void associate_sphere(
             // end routine here!
             return;
         }
+        counterArrays.nAssocSuccess++; //keep track of total number of successful association moves.
+
+        /*Keep track of the sizes of complexes that associated*/
+        track_association_events(reactCom1, reactCom2, transitionToSurface, isOnMembrane, counterArrays);
 
         // temporary coordinates
         for (auto memMol : reactCom1.memberList) {
@@ -393,14 +415,46 @@ void associate_sphere(
 
         // update complexes
         reactCom2.memberList.clear(); // clear the member list so the molecules don't get destroyed
-        reactCom2.destroy(moleculeList, emptyMolList, complexList, emptyComList); // destroy the complex
+        reactCom2.destroy(moleculeList, complexList); // destroy the complex
         reactCom1.update_properties(moleculeList, molTemplateList); // recalculate the properties of the first complex
 
         // Enforce boundary conditions
         reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, 0.0);
 
     } // end of if these molecules are closing a loop or not.
-
+    //------------------------START UPDATE MONOMERLIST-------------------------
+    // update oneTemp.monomerList when oneTemp.canDestroy is true and mol is monomer
+    // reactMol1
+    {
+        Molecule& oneMol { reactMol1 };
+        MolTemplate& oneTemp { molTemplateList[oneMol.molTypeIndex] };
+        bool isMonomer { oneMol.bndpartner.empty() };
+        bool canDestroy { oneTemp.canDestroy };
+        if (isMonomer && canDestroy) {
+            //remove from monomerList
+            std::vector<int>& oneList { oneTemp.monomerList };
+            std::vector<int>::iterator result { std::find(std::begin(oneList), std::end(oneList), oneMol.index) };
+            if (result != std::end(oneList)) {
+                oneList.erase(result);
+            }
+        }
+    }
+    // reactMol2
+    {
+        Molecule& oneMol { reactMol2 };
+        MolTemplate& oneTemp { molTemplateList[oneMol.molTypeIndex] };
+        bool isMonomer { oneMol.bndpartner.empty() };
+        bool canDestroy { oneTemp.canDestroy };
+        if (isMonomer && canDestroy) {
+            //remove from monomerList
+            std::vector<int>& oneList { oneTemp.monomerList };
+            std::vector<int>::iterator result { std::find(std::begin(oneList), std::end(oneList), oneMol.index) };
+            if (result != std::end(oneList)) {
+                oneList.erase(result);
+            }
+        }
+    }
+    //------------------------END UPDATE MONOMERLIST---------------------------
     // update Molecule interface statuses
     reactMol1.interfaceList[ifaceIndex1].interaction.partnerIndex = reactMol2.index;
     reactMol2.interfaceList[ifaceIndex2].interaction.partnerIndex = reactMol1.index;
@@ -473,12 +527,28 @@ void associate_sphere(
     counterArrays.copyNumSpecies[currRxn.reactantListNew[1].absIfaceIndex]--; // decrement ifaceIndex2
     counterArrays.copyNumSpecies[currRxn.productListNew[0].absIfaceIndex]++; // increment product state
 
-    std::cout << " After ASSOCIATE, CHANGE COPY NUMBERS, interfaces: "
-              << ifaceIndex1 << ' ' << ifaceIndex2
-              << " add to product: " << currRxn.productListNew[0].absIfaceIndex
-              << " sub from reactants: "
-              << currRxn.reactantListNew[0].absIfaceIndex << " "
-              << currRxn.reactantListNew[1].absIfaceIndex << std::endl;
+    //-------------------------UPDATE BINDPAIRLIST----------------------------
+    if (counterArrays.canDissociate[currRxn.productListNew[0].absIfaceIndex]) {
+        // int molIndex { reactMol1.index };
+        // if (reactMol1.index > reactMol2.index)
+        //     molIndex = reactMol2.index;
+        int molIndex { -1 };
+        if (ifaceIndex1 == currRxn.reactantListNew[0].relIfaceIndex) {
+            molIndex = reactMol1.index;
+        } else {
+            molIndex = reactMol2.index;
+        }
+
+        counterArrays.bindPairList[currRxn.productListNew[0].absIfaceIndex].emplace_back(molIndex);
+    }
+    //-----------------------END UPDATE BINDPAIRLIST--------------------------
+
+    // std::cout << " After ASSOCIATE, CHANGE COPY NUMBERS, interfaces: "
+    //           << ifaceIndex1 << ' ' << ifaceIndex2
+    //           << " add to product: " << currRxn.productListNew[0].absIfaceIndex
+    //           << " sub from reactants: "
+    //           << currRxn.reactantListNew[0].absIfaceIndex << " "
+    //           << currRxn.reactantListNew[1].absIfaceIndex << std::endl;
 
     // TODO: Insert species tracking here
     if (currRxn.isObserved) {

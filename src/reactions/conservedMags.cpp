@@ -9,12 +9,12 @@ bool conservedMags(const Complex& targCom, const std::vector<Molecule>& molecule
             tmpVec1.calc_magnitude();
             tmpVec2.calc_magnitude();
             if (roundv(tmpVec2.magnitude) != roundv(tmpVec1.magnitude)) {
-                std::cerr << "IFACE-COM vector " << i << " in protein " << memMol << " of complex " << targCom.index
-                          << " did not conserve its magnitude. Exiting..." << std::endl;
-                std::cerr << "Mag tempVec2: " << roundv(tmpVec2.magnitude)
-                          << " Mag tempVec1: " << roundv(tmpVec1.magnitude) << std::endl;
-                std::cout << "Before association: " << tmpVec1 << '\n';
-                std::cout << "After association: " << tmpVec2 << '\n';
+                // std::cerr << "IFACE-COM vector " << i << " in protein " << memMol << " of complex " << targCom.index
+                //           << " did not conserve its magnitude. Exiting..." << std::endl;
+                // std::cerr << "Mag tempVec2: " << roundv(tmpVec2.magnitude)
+                //           << " Mag tempVec1: " << roundv(tmpVec1.magnitude) << std::endl;
+                // std::cout << "Before association: " << tmpVec1 << '\n';
+                // std::cout << "After association: " << tmpVec2 << '\n';
                 return false;
             }
         }

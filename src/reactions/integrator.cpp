@@ -35,17 +35,17 @@ double integrator(gsl_function F, IntegrandParams params, gsl_integration_worksp
         while (std::abs((*f)(umax, &params)) > 1e-10)
             umax = umax * 1.2;
 
-        std::cout << linebreak;
-        std::cout << std::setprecision(12);
-        std::cout << funcID << " qagiu failed with status: " << status << '\n';
-        std::cout << "No solution found with rel/abs error smaller than: " << publicationcrit << '\n';
-        std::cout << "   umax: " << umax << '\n';
-        std::cout << "   @time: " << deltat << '\n';
-        std::cout << "   ka: " << kr << '\n';
-        std::cout << "   D: " << Dtot << '\n';
-        std::cout << "   r0: " << r0 << '\n';
-        std::cout << "Truncation will be performed on the semi-infinite domain..." << '\n';
-        std::cout << std::flush;
+        // std::cout << linebreak;
+        // std::cout << std::setprecision(12);
+        // std::cout << funcID << " qagiu failed with status: " << status << '\n';
+        // std::cout << "No solution found with rel/abs error smaller than: " << publicationcrit << '\n';
+        // std::cout << "   umax: " << umax << '\n';
+        // std::cout << "   @time: " << deltat << '\n';
+        // std::cout << "   ka: " << kr << '\n';
+        // std::cout << "   D: " << Dtot << '\n';
+        // std::cout << "   r0: " << r0 << '\n';
+        // std::cout << "Truncation will be performed on the semi-infinite domain..." << '\n';
+        // std::cout << std::flush;
 
         it = 0;
         while (status != GSL_SUCCESS) {
@@ -56,11 +56,11 @@ double integrator(gsl_function F, IntegrandParams params, gsl_integration_worksp
             it += 1;
         }
 
-        std::cout << "New integration upper bound " << umax / 0.9 << " found after " << it << " iterations." << '\n';
-        std::cout << "   err: " << error << '\n';
-        std::cout << linebreak;
-        std::cout << "Time of 2D table generation: "
-                  << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() << '\n';
+        // std::cout << "New integration upper bound " << umax / 0.9 << " found after " << it << " iterations." << '\n';
+        // std::cout << "   err: " << error << '\n';
+        // std::cout << linebreak;
+        // std::cout << "Time of 2D table generation: "
+        //           << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() << '\n';
     }
     return result;
 }
