@@ -1,0 +1,8 @@
+
+If you use/modify our code, please be kind and cite us:
+
+Continuum membrane implementation: 
+Fu, Y., Yogurtcu, O.N., Kothari, R., Thorkelsdottir, G., Sodt, A.J. & Johnson, M.E.* An implicit lipid model for efficient reaction-diffusion simulations of protein binding to surfaces of arbitrary topology. J Chem Phys. 151, 124115 (2019)
+
+Membrane energies and insertion: 
+Fu, Y., Zeno, W., Stachowiak, J. & Johnson, M.E.* A continuum membrane model predicts curvature sensing by helix insertion. Submitted (2021)
