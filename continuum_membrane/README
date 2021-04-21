@@ -1,8 +1,15 @@
+The code of continuum membrane model is programmed in C++ with Armadillo library and parallelization OpenMP.
+
+The main code is ‘continuummodel_maincode.cpp’, and ‘funcitons_file1.cpp’ and ‘functions_file2.cpp’ list all the functions this membrane utilize. Specifically, the functions for setting up triangular mesh are listed ‘functions_file2.cpp’, and the functions for calculating the system energy and the vertex force are defined in ‘functions_file1.cpp’.
+
+To compile the file:
+g++ continuummodel_maincode.cpp -larmadillo -fopenmp -o out
+Then to run the code:
+./out
 
 If you use/modify our code, please be kind and cite us:
-
-Continuum membrane implementation: 
+1.	Continuum membrane implementation: 
 Fu, Y., Yogurtcu, O.N., Kothari, R., Thorkelsdottir, G., Sodt, A.J. & Johnson, M.E.* An implicit lipid model for efficient reaction-diffusion simulations of protein binding to surfaces of arbitrary topology. J Chem Phys. 151, 124115 (2019)
 
-Membrane energies and insertion: 
+2.	Membrane energies and insertion: 
 Fu, Y., Zeno, W., Stachowiak, J. & Johnson, M.E.* A continuum membrane model predicts curvature sensing by helix insertion. Submitted (2021)
