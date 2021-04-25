@@ -7,10 +7,12 @@ start parameters
     timeWrite = 50
     trajWrite = 500000000
     pdbWrite = 50000
+    transitionWrite = 3000000
     restartWrite = 50000
     checkPoint = 5000000
     scaleMaxDisplace = 10.0
     overlapSepLimit = 7.0
+    clusterOverlapCheck = true
 end parameters
 
 start boundaries

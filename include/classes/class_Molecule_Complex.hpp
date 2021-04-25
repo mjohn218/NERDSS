@@ -256,6 +256,7 @@ public:
     double mass {};
     std::vector<int> memberList {}; //!< list of member Molecule's indices
     std::vector<int> numEachMol {}; //!< list of the number of each Molecules in this complex
+    std::vector<long long int> lastNumberUpdateItrEachMol {}; //!< list of the last size update itr of each Molecules in this complex
     Coord D { 0, 0, 0 }; //!< Complex's translational diffusion constants
     Coord Dr { 0, 0, 0 }; //!< Complex's rotational diffusion constants
     bool isEmpty { false }; //!< true if the complex has been destroyed and is a void

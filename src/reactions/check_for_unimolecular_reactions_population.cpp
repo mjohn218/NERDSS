@@ -299,7 +299,7 @@ void check_for_unimolecular_reactions_population(unsigned simItr, Parameters& pa
                                 }
 
                                 bool breakLinkComplex
-                                    = break_interaction(ifaceIndexA, ifaceIndexB, moleculeList[molIndexA], moleculeList[molIndexB],
+                                    = break_interaction(simItr, ifaceIndexA, ifaceIndexB, moleculeList[molIndexA], moleculeList[molIndexB],
                                         oneRxn, moleculeList, complexList, molTemplateList, membraneObject.implicitlipidIndex);
 
                                 if (breakLinkComplex)

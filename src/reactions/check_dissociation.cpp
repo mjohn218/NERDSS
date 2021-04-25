@@ -86,7 +86,7 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
                             exit(1);
                         }
                         bool breakLinkComplex
-                            = break_interaction(relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
+                            = break_interaction(simItr, relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
                                 backRxns[mu], moleculeList, complexList, molTemplateList, membraneObject.implicitlipidIndex);
 
                         if (breakLinkComplex)

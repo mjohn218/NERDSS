@@ -16,6 +16,9 @@
 #include "io/io.hpp"
 #include "parser/parser_functions.hpp"
 
+double Parameters::dt = 0.0;
+std::vector<long long int> Parameters::lastUpdateTransition {};
+
 // this is so we can compare parsed keywords with the enumerations (we need them as strings)
 std::map<const std::string, ParamKeyword> parmKeywords = {
     { "nummoltypes", ParamKeyword::numMolTypes }, { "numtotalspecies", ParamKeyword::numTotalSpecies },
@@ -26,7 +29,8 @@ std::map<const std::string, ParamKeyword> parmKeywords = {
     { "mass", ParamKeyword::mass }, { "restartwrite", ParamKeyword::restartWrite },
     { "pdbwrite", ParamKeyword::pdbWrite },
     { "overlapseplimit", ParamKeyword::overlapSepLimit }, { "name", ParamKeyword::name },
-    { "checkpoint", ParamKeyword::checkPoint }, { "scalemaxdisplace", ParamKeyword::scaleMaxDisplace }
+    { "checkpoint", ParamKeyword::checkPoint }, { "scalemaxdisplace", ParamKeyword::scaleMaxDisplace },
+    { "transitionwrite", ParamKeyword::transitionWrite }, { "clusteroverlapcheck", ParamKeyword::clusterOverlapCheck }
 };
 
 void Parameters::set_value(std::string value, ParamKeyword keywords)
@@ -36,7 +40,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
      * @param value value of the parameter as a string
      * @param keywords the keyword parsed from the input file to match to the enumeration Keywords
      */
-    double nit, checkit;
+    double nit, checkit, transitionit;
     try {
         auto key = static_cast<std::underlying_type<ParamKeyword>::type>(keywords);
         switch (key) {
@@ -99,8 +103,17 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             std::cout << "Read in checkPoint: " << this->checkPoint << " timeSteps" << std::endl;
             break;
         case 15:
-	    this->scaleMaxDisplace = std::stod(value);
-	    std::cout << "Read in scaleMaxDisplace: " << this->scaleMaxDisplace << std::endl;
+	        this->scaleMaxDisplace = std::stod(value);
+	        std::cout << "Read in scaleMaxDisplace: " << this->scaleMaxDisplace << std::endl;
+            break;
+        case 16:
+            transitionit = std::stod(value);
+            this->transitionWrite = (long long)(transitionit);
+            std::cout << "Read in transitionWrite: " << this->transitionWrite << " timeSteps" << std::endl;
+            break;
+        case 17:
+            this->clusterOverlapCheck = read_boolean(value);
+            std::cout << "Read in clusterOverlapCheck: " << std::boolalpha << this->clusterOverlapCheck << std::endl;
             break;
         default:
             throw std::invalid_argument("Not a valid keyword.");
@@ -173,6 +186,8 @@ void Parameters::display()
     std::cout << "PDB Coordinate write interval: " << pdbWrite << " timesteps\n";
     std::cout << "Checkpoint write interval: " << checkPoint << " timesteps\n";
     std::cout << "overlapSepLimit: " << overlapSepLimit << " nm\n";
+    std::cout << "Transition matrix write interval: " << transitionWrite << " timesteps\n";
+    std::cout << "ClusterOverlapCheck: " << clusterOverlapCheck << "\n";
 
     std::cout << "Molecule specific parameters:\n";
     std::cout << "Number of unique molecule types: " << numMolTypes << '\n';

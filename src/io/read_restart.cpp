@@ -106,6 +106,23 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.scaleMaxDisplace;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.transitionWrite;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.clusterOverlapCheck;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            unsigned long lastUpdateTransitionSize { 0 };
+            restartFile >> lastUpdateTransitionSize;
+            for (unsigned itr { 0 }; itr < lastUpdateTransitionSize; ++itr) {
+                int index { 0 };
+                restartFile >> index;
+                Parameters::lastUpdateTransition.push_back(index);
+            }
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         std::cout << "restart write, pdbWrite: " << params.restartWrite << ' ' << params.pdbWrite << std::endl;
         /*	std::cout<<"READ IN SUB volume PARTITIONING from restart file"<<std::endl;
@@ -177,7 +194,7 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 restartFile >> oneTemp.copies >> oneTemp.mass >> oneTemp.radius;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-                restartFile >> oneTemp.isLipid >> oneTemp.isImplicitLipid >> oneTemp.isRod >> oneTemp.isPoint >> oneTemp.checkOverlap;
+                restartFile >> oneTemp.isLipid >> oneTemp.isImplicitLipid >> oneTemp.isRod >> oneTemp.isPoint >> oneTemp.checkOverlap >> oneTemp.countTransition >> oneTemp.transitionMatrixSize;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> oneTemp.comCoord.x >> oneTemp.comCoord.y >> oneTemp.comCoord.z;
@@ -302,6 +319,38 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                     oneTemp.monomerList.push_back(elem);
                 }
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                // read lifetime
+                if(oneTemp.countTransition == true) {
+                    unsigned lifeTimeSize {0};
+                    oneTemp.lifeTime.resize(oneTemp.transitionMatrixSize);
+                    for(int indexOne = 0; indexOne < oneTemp.transitionMatrixSize; ++indexOne) {
+                        restartFile >> lifeTimeSize;
+                        for (unsigned rxnItr { 0 }; rxnItr < lifeTimeSize; ++rxnItr) {
+                            double elem { 0.0 };
+                            restartFile >> elem;
+                            oneTemp.lifeTime[indexOne].push_back(elem);
+                        }
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    }
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }
+
+                // read transition matrix
+                if(oneTemp.countTransition == true) {
+                    oneTemp.transitionMatrix.resize(oneTemp.transitionMatrixSize);
+                    for (int indexOne = 0; indexOne < oneTemp.transitionMatrixSize; ++indexOne) {
+                        oneTemp.transitionMatrix[indexOne].resize(oneTemp.transitionMatrixSize);
+                    }
+
+                    for(int indexOne = 0; indexOne < oneTemp.transitionMatrixSize; ++indexOne){
+                        for (int indexTwo = 0; indexTwo < oneTemp.transitionMatrixSize; ++indexTwo){
+                            restartFile >> oneTemp.transitionMatrix[indexOne][indexTwo];
+                        }
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    }
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }
 
                 // done reading template, add to template list
                 molTemplateList.emplace_back(oneTemp);
@@ -897,6 +946,14 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                     int memMol { -1 };
                     restartFile >> memMol;
                     tmpCom.numEachMol.emplace_back(memMol);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                restartFile >> listSize;
+                for (unsigned itr { 0 }; itr < listSize; ++itr) {
+                    int memMol { -1 };
+                    restartFile >> memMol;
+                    tmpCom.lastNumberUpdateItrEachMol.emplace_back(memMol);
                 }
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 complexList.emplace_back(tmpCom);

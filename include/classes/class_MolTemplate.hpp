@@ -117,6 +117,10 @@ struct MolTemplate {
      */
     Coord comCoord { 0, 0, 0 }; //!< Center of mass coordinate
     bool checkOverlap { false }; //!< is overlap checked for during association?
+    bool countTransition { false }; //!< is transition counted during whole simulation?
+    int transitionMatrixSize {500}; //!< size of the transition matrix
+    std::vector<std::vector<long long int> > transitionMatrix {}; //!< transition matrix to track the changing of the size of cluster
+    std::vector<std::vector<double> > lifeTime {}; //!< to store the lifetime of each cluster size, unit: s 
     //    double bindSepFactor { 1.0 }; //!< separation factor for binding within the same complex
     /*HOW IS COPIES DIFFERENT THAN NumEachMolType?*/
     int copies { 0 }; //!< initial copy numbers of this molecule

@@ -255,6 +255,15 @@ void MolTemplate::set_value(std::string& line, MolKeyword molKeyword)
         std::cout << "Read in isImplicitLipid: " << std::boolalpha << isImplicitLipid << std::endl;
         break;
     }
+    case 13: {
+        countTransition = read_boolean(line);
+        std::cout << "Read in countTransition: " << std::boolalpha << countTransition << std::endl;
+        break;
+    }
+    case 14: {
+        transitionMatrixSize = std::stoi(line);
+        break;
+    }
     default: {
         std::cout << "Keyword [BLANK] is not a valid keyword, ignoring." << '\n';
     }

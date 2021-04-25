@@ -1,6 +1,8 @@
 these inputs are used to mimic the in vitro experimental conditions of https://doi.org/10.1091/mbc.e16-06-0399
 
-suggest using the nerdss_cluster executable
+suggest turn on the clusterOverlapCheck parm
+
+could restart before the overlap if it happened
 
 distinct labeled self interactions multiplied by 2.
 

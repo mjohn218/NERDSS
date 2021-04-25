@@ -45,6 +45,13 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
         restartFile << "pdbWrite = " << params.pdbWrite << '\n';
         restartFile << "checkPoint = " << params.checkPoint << '\n';
         restartFile << "scaleMaxDisplace = " << params.scaleMaxDisplace << '\n';
+        restartFile << "transitionWrite = " << params.transitionWrite << '\n';
+        restartFile << "clusterOverlapCheck = " << params.clusterOverlapCheck << '\n';
+
+        restartFile << Parameters::lastUpdateTransition.size();
+        for (auto& index : Parameters::lastUpdateTransition)
+            restartFile << ' ' << index;
+        restartFile << '\n';
     }
     /*
     // write Simulation Volume
@@ -85,7 +92,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
             restartFile << oneTemp.molTypeIndex << ' ' << oneTemp.molName << '\n';
             restartFile << oneTemp.copies << ' ' << oneTemp.mass << ' ' << oneTemp.radius << '\n';
             restartFile << oneTemp.isLipid << ' ' << oneTemp.isImplicitLipid << ' ' << oneTemp.isRod << ' ' << oneTemp.isPoint << ' '
-                        << oneTemp.checkOverlap << '\n';
+                        << oneTemp.checkOverlap << ' ' << oneTemp.countTransition << ' ' << oneTemp.transitionMatrixSize << '\n';
             restartFile << oneTemp.comCoord.x << ' ' << oneTemp.comCoord.y << ' ' << oneTemp.comCoord.z
                         << '\n';
             restartFile << oneTemp.D.x << ' ' << oneTemp.D.y << ' ' << oneTemp.D.z << '\n';
@@ -147,6 +154,29 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
                 restartFile << ' ' << elem;
             }
             restartFile << '\n';
+
+            //write lifetime
+            if(oneTemp.countTransition == true){
+                for(int indexOne = 0; indexOne < oneTemp.transitionMatrixSize; ++indexOne){
+                    restartFile << oneTemp.lifeTime[indexOne].size();
+                    for (auto elem : oneTemp.lifeTime[indexOne]) {
+                        restartFile << ' ' << elem;
+                    }
+                    restartFile << '\n';
+                }
+                restartFile << '\n';
+            }
+
+            //write transition matrix
+            if(oneTemp.countTransition == true){
+                for(int indexOne = 0; indexOne < oneTemp.transitionMatrixSize; ++indexOne){
+                    for (int indexTwo = 0; indexTwo < oneTemp.transitionMatrixSize; ++indexTwo){
+                        restartFile << ' ' << oneTemp.transitionMatrix[indexOne][indexTwo];
+                    }
+                    restartFile << '\n';
+                }
+                restartFile << '\n';
+            }
         }
     }
 
@@ -444,6 +474,11 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
             restartFile << '\n';
             restartFile << oneCom.numEachMol.size();
             for (const auto& memMol : oneCom.numEachMol)
+                restartFile << ' ' << memMol;
+            restartFile << '\n';
+
+            restartFile << oneCom.lastNumberUpdateItrEachMol.size();
+            for (const auto& memMol : oneCom.lastNumberUpdateItrEachMol)
                 restartFile << ' ' << memMol;
             restartFile << '\n';
         }

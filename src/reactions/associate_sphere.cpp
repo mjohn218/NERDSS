@@ -8,7 +8,7 @@
 #include <cmath>
 #include <iomanip>
 
-void associate_sphere(
+void associate_sphere(long long int iter, 
     int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
     Complex& reactCom1, Complex& reactCom2, const Parameters& params,
     ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
@@ -31,6 +31,19 @@ void associate_sphere(
             std::cout << "WRONG: implicit-lipid binding involves wrong function file. associate_ImplicitLipid_sphere should be called instead of associate_sphere!" << std::endl;
             exit(1);
         }
+
+        // record the previous lastNumberUpdateItrEachMol & numEachMol
+        std::vector<int> numEachMolPrevious1 {};
+        std::vector<long long int> lastNumberUpdateItrEachMolPrevious1 {};
+        std::vector<int> numEachMolPrevious2 {};
+        std::vector<long long int> lastNumberUpdateItrEachMolPrevious2 {};
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            numEachMolPrevious1.emplace_back(complexList[reactMol1.myComIndex].numEachMol[index]);
+            lastNumberUpdateItrEachMolPrevious1.emplace_back(complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]);
+            numEachMolPrevious2.emplace_back(complexList[reactMol2.myComIndex].numEachMol[index]);
+            lastNumberUpdateItrEachMolPrevious2.emplace_back(complexList[reactMol2.myComIndex].lastNumberUpdateItrEachMol[index]);
+        }
+
         // set up temporary coordinates
         for (auto& memMol : reactCom1.memberList)
             moleculeList[memMol].set_tmp_association_coords();
@@ -414,9 +427,54 @@ void associate_sphere(
         }
 
         // update complexes
+
+        // add lifetime to the previous small clusters
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            if(molTemplateList[index].countTransition == true){
+                // com2 destroty
+                molTemplateList[index].lifeTime[numEachMolPrevious2[index]-1].emplace_back((iter-lastNumberUpdateItrEachMolPrevious2[index])*Parameters::dt/1E6);
+            }
+        }
+
         reactCom2.memberList.clear(); // clear the member list so the molecules don't get destroyed
         reactCom2.destroy(moleculeList, complexList); // destroy the complex
         reactCom1.update_properties(moleculeList, molTemplateList); // recalculate the properties of the first complex
+
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]>numEachMolPrevious1[index]){
+                // grow
+                molTemplateList[index].lifeTime[numEachMolPrevious1[index]-1].emplace_back((iter-lastNumberUpdateItrEachMolPrevious1[index])*Parameters::dt/1E6);
+                complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]=iter;
+            }
+        }
+
+        // update transition matrix
+        // compare current cluster size with the previous ones
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]>numEachMolPrevious1[index]){
+                // grow
+                if(numEachMolPrevious1[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[numEachMolPrevious1[index]-1][numEachMolPrevious1[index]-1] += iter-Parameters::lastUpdateTransition[index]-1;
+                if(numEachMolPrevious2[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[numEachMolPrevious2[index]-1][numEachMolPrevious2[index]-1] += iter-Parameters::lastUpdateTransition[index]-1;
+                if(complexList[reactMol1.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious1[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index]-1][numEachMolPrevious1[index]-1] += 1;
+                if(complexList[reactMol1.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious2[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index]-1][numEachMolPrevious2[index]-1] += 1;
+
+                // update diagonal elements for unchanged complexes
+                for(unsigned indexCom=0;indexCom<complexList.size();indexCom++){
+                    if(indexCom != reactMol1.myComIndex){
+                        if(complexList[indexCom].numEachMol[index]-1 >= 0){
+                            molTemplateList[index].transitionMatrix[complexList[indexCom].numEachMol[index]-1][complexList[indexCom].numEachMol[index]-1] += iter-Parameters::lastUpdateTransition[index];
+                        }
+                    }
+                }
+
+                // update lastUpdateTransition
+                Parameters::lastUpdateTransition[index] = iter;
+            }
+        }
 
         // Enforce boundary conditions
         reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, 0.0);

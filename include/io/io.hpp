@@ -49,6 +49,11 @@ void write_traj(long long int iter, std::ofstream& trajFile, const Parameters& p
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
 
 /*! \ingroup IO
+ * \brief Writes/appends the transition matrix in the system to the transition matrix file.
+ */
+void write_transition(double iter, std::ofstream& transitionFile, const std::vector<MolTemplate>& molTemplateList);
+
+/*! \ingroup IO
  * \brief Debugging IO function to write an xyz file for a associating complexes.
  */
 void write_xyz_assoc(std::string filename, const Complex& reactCom1, const Complex& reactCom2,

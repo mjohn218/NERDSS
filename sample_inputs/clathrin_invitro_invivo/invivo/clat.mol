@@ -4,6 +4,8 @@
 
 Name = clat
 checkOverlap = true
+countTransition = true
+transitionMatrixSize = 500
 
 # translational diffusion constants
 D = [13.0, 13.0, 13.0]

@@ -1,4 +1,4 @@
-# NERDSS release
+# nerdss
 Software for structure-resolved RD
 
 1. To compile the code, see INSTALL
@@ -9,5 +9,3 @@ sample_inputs
 ./nerdss -f parms.inp
 
 should initiate the simulations. 
-
-3. Detailed documentation in NERDSS_USER_GUIDE.pdf

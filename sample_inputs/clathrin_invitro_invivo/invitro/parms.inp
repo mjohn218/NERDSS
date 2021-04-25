@@ -11,6 +11,7 @@ start parameters
     restartWrite = 50000
     scaleMaxDisplace = 10.0
     overlapSepLimit = 7.0
+    clusterOverlapCheck = true
 end parameters
 
 start boundaries

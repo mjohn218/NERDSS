@@ -49,10 +49,6 @@ ifeq (serial,$(MAKECMDGOALS))
 	_EXEC = nerdss
 endif
 
-ifeq (cluster,$(MAKECMDGOALS))
-	_EXEC = nerdss_cluster
-endif
-
 ifeq (mpi,$(MAKECMDGOALS))
 	_EXEC = nerdss_mpi
          DEFS = -DMPI
@@ -116,7 +112,7 @@ endif
 
 syntax:
 	@echo "------------------------------------"
-	@printf '\033[31m%s\033[0m\n' "   USAGE: make serial|cluster|mpi|omp"
+	@printf '\033[31m%s\033[0m\n' "   USAGE: make serial|mpi|omp"
 	@echo "------------------------------------"
 	exit 0
 

@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
     // TODO: change these to open and close as needed
     std::string observablesFileName { "observables_time.dat" };
     std::string trajFileName { "trajectory.xyz" };
+    std::string transitionFileName { "transition_matrix_time.dat" };
     std::string restartFileName { "restart.dat" };
     std::string addFileNameInput {}; // this is for restart with changed params or adding molecules and reactions
     std::string restartFileNameInput; //if you read it in, allow it to have its own name.
@@ -204,6 +205,33 @@ int main(int argc, char* argv[])
         std::ofstream trajFile { trajFileName };
         write_traj(0, trajFile, params, moleculeList, molTemplateList, membraneObject);
         trajFile.close();
+
+        // initialize transition matrix for each molType
+        for (auto& molTemp : molTemplateList){
+            if(molTemp.countTransition == true){
+                molTemp.transitionMatrix.resize(molTemp.transitionMatrixSize);
+                molTemp.lifeTime.resize(molTemp.transitionMatrixSize);
+                for (int indexOne = 0; indexOne < molTemp.transitionMatrixSize; ++indexOne) {
+                    molTemp.transitionMatrix[indexOne].resize(molTemp.transitionMatrixSize);
+                }
+            }
+
+            // print transition matrix
+            // if(molTemp.countTransition == true){
+            //     std::cout << molTemp.molName << std::endl;
+            //     for (int indexOne = 0; indexOne < molTemp.transitionMatrixSize; ++indexOne) {
+            //         for (int indexTwo = 0; indexTwo < molTemp.transitionMatrixSize; ++indexTwo) {
+            //             std::cout <<' '<< molTemp.transitionMatrix[indexOne][indexTwo];
+            //         }
+            //         std::cout << std::endl;
+            //     }
+            // }
+        }
+
+        // write beginning of transition matrix
+        std::ofstream transitionFile { transitionFileName };
+        write_transition(0, transitionFile, molTemplateList);
+        transitionFile.close();
     } else if (params.fromRestart) { // && paramFile.empty()) {
         std::cout << "This is a restart simulation with restart file: " << restartFileNameInput << std::endl;
         read_rng_state(); // read the current RNG state
@@ -320,6 +348,8 @@ int main(int argc, char* argv[])
                 tmpComplex.numEachMol.resize(molTemplateList.size());
                 for (auto& memMol : tmpComplex.memberList)
                     ++tmpComplex.numEachMol[moleculeList[memMol].molTypeIndex];
+
+                tmpComplex.lastNumberUpdateItrEachMol.resize(molTemplateList.size());
             }
 
             write_psf(params, moleculeList, molTemplateList);
@@ -428,7 +458,7 @@ int main(int argc, char* argv[])
     print_dimers(complexList, dimerfile, simItr, params, molTemplateList);
     print_association_events(counterArrays, eventFile, simItr, params);
     //this will be wrong if there are no implicit lipids.
-    const int ILcopyIndex = moleculeList[implicitlipidIndex].interfaceList[0].index;
+    //const int ILcopyIndex = moleculeList[implicitlipidIndex].interfaceList[0].index;
 
     int number_of_lipids = 0; //sum of all states of IL
     for (int i = 0; i < membraneObject.numberOfFreeLipidsEachState.size(); i++) {
@@ -439,6 +469,9 @@ int main(int argc, char* argv[])
     //set some parameters
     if (params.checkPoint == -1) {
         params.checkPoint = params.nItr / 10;
+    }
+    if (params.transitionWrite == -1) {
+        params.transitionWrite = params.nItr / 10;
     }
 
     // set the excludeVolumeBoundList for each molTemplate according to the reaction list
@@ -467,6 +500,9 @@ int main(int argc, char* argv[])
     for (auto& oneComplex : complexList) {
         oneComplex.update_properties(moleculeList, molTemplateList);
     }
+
+    Parameters::dt = params.timeStep;
+    Parameters::lastUpdateTransition.resize(molTemplateList.size());
 
     /*Print out system information*/
     std::cout << "\nSimulation Parameters\n";
@@ -666,12 +702,12 @@ int main(int argc, char* argv[])
                             // For association, molecules must be read in in the order used to define the reaction parameters.
                             if (moleculeList[molItr].interfaceList[ifaceIndex1].index
                                 == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) {
-                                associate(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
+                                associate(simItr, ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
                                     complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
                                     moleculeList, molTemplateList, observablesList,
                                     counterArrays, complexList, membraneObject, forwardRxns, backRxns);
                             } else {
-                                associate(ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
+                                associate(simItr, ifaceIndex2, ifaceIndex1, moleculeList[molItr2], moleculeList[molItr],
                                     complexList[moleculeList[molItr2].myComIndex], complexList[moleculeList[molItr].myComIndex], params, forwardRxns[rxnIndex[0]],
                                     moleculeList, molTemplateList, observablesList,
                                     counterArrays, complexList, membraneObject, forwardRxns, backRxns);
@@ -797,8 +833,14 @@ int main(int argc, char* argv[])
                     // TODO: Maybe do a boundary sphere overlap check first?
 
                     if (std::abs(complexList[mol.myComIndex].D.z) < 1E-10) {
-                        sweep_separation_complex_rot_memtest(
-                            simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
+                        if(params.clusterOverlapCheck == false){
+                            sweep_separation_complex_rot_memtest(
+                                simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
+                        }
+                        else{
+                            sweep_separation_complex_rot_memtest_cluster(
+                                simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
+                        }
                     } else {
                         sweep_separation_complex_rot(
                             simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
@@ -844,6 +886,15 @@ int main(int argc, char* argv[])
             if (simItr % params.pdbWrite == 0) {
                 // std::cout << "Writing PDB file for current frame...\n";
                 write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
+            }
+        }
+
+        if (params.transitionWrite != -1) {
+            if (simItr % params.transitionWrite == 0) {
+                // std::cout << "Writing transition matrix...\n";
+                std::ofstream transitionFile { transitionFileName, std::ios::app }; // for append
+                write_transition((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, transitionFile, molTemplateList);
+                transitionFile.close();
             }
         }
 
@@ -1122,6 +1173,13 @@ int main(int argc, char* argv[])
         if (params.pdbWrite != -1) {
             // std::cout << "Writing PDB file for current frame.\n";
             write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
+        }
+
+        if (params.transitionWrite != -1) {
+            // std::cout << "Writing transition matrix...\n";
+            std::ofstream transitionFile { transitionFileName, std::ios::app }; // for append
+            write_transition((simItr - params.itrRestartFrom) * params.timeStep * Constants::usToSeconds + params.timeRestartFrom, transitionFile, molTemplateList);
+            transitionFile.close();
         }
 
         if (params.debugParams.printSystemInfo) {

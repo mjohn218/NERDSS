@@ -50,6 +50,8 @@ enum class ParamKeyword : int {
     name = 13, //!< name of the simulation
     checkPoint = 14, //!< interval to write checkpoint
     scaleMaxDisplace = 15, //!< scalar of average displacement that is acceptable upon association.
+    transitionWrite = 16, //!< interval to write to transition matrix file
+    clusterOverlapCheck = 17, //!< is overlap checked by cluster
 };
 
 /*! \enum MolKeyword
@@ -70,6 +72,8 @@ enum class MolKeyword : int {
     bonds = 10, //!< optional bond definitions for PSF
     isPoint = 11, //!< is the Molecule a point (i.e. do all its interfaces overlap with the COM)
     isImplicitLipid = 12, //!< Is it an implicit lipid.
+    countTransition = 13, //!< is transition counted during whole simulation
+    transitionMatrixSize = 14, //!< size of the transition matrix
 };
 
 /*! \enum RxnKeyword
@@ -130,6 +134,9 @@ struct Parameters {
     long long int itrRestartFrom { 0 }; //!< number of timesteps from when the simlation restart
     double timeRestartFrom { 0.0 }; //!< time from when the simulation restart (unit: s)
 
+    static double dt; //!< timestep, in microseconds.
+    static std::vector<long long int> lastUpdateTransition; //!< steps that last update transition matrix
+
     int numLipids { 0 }; //!< total number of lipids in the system
 
     double overlapSepLimit { 0.1 }; //!< in nm. COM-COM distance less than this is cancelled, for checkOverlap molecules
@@ -159,6 +166,8 @@ struct Parameters {
     long long int restartWrite { 10 }; //!< timestep interval to write a restart file
     long long int pdbWrite { -1 }; //!< interval to write pdb
     long long int checkPoint { -1 }; //!< interval to write checkpoint
+    long long int transitionWrite { -1 }; //!< timestep interval to write transition matrix
+    bool clusterOverlapCheck { false }; //!< is overlap checked by cluster 
 
     void display();
     void parse_paramFile(std::ifstream& paramFile);

@@ -60,7 +60,7 @@ void check_for_destruction(unsigned simItr, const Parameters& params, const std:
     const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList);
 
-bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
+bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, int ILindexMol);
 

@@ -1,11 +1,19 @@
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
 #include "tracing.hpp"
 
-bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
+bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, int ILindexMol)
 {
     // TRACE();
+    // record the previous lastNumberUpdateItrEachMol & numEachMol
+    std::vector<int> numEachMolPrevious {};
+    std::vector<long long int> lastNumberUpdateItrEachMolPrevious {};
+    for(unsigned index=0;index<molTemplateList.size();index++){
+        numEachMolPrevious.emplace_back(complexList[reactMol1.myComIndex].numEachMol[index]);
+        lastNumberUpdateItrEachMolPrevious.emplace_back(complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]);
+    }
+
     bool breakLinkComplex { false };
     unsigned newComIndex = complexList.size();
     // std::cout << "empty complexes: " << Complex::emptyComList.size() << "\nMembers:";
@@ -98,6 +106,16 @@ bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, 
     if (!keepSameComplex) {
         /*continue on with the dissociation that creates two complexes*/
         complexList[reactMol1.myComIndex].update_properties(moleculeList, molTemplateList);
+        
+        // add a lifetime to the previous larger cluster
+        // compare current cluster size with the previous ones
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]<numEachMolPrevious[index]){
+                // shrink
+                molTemplateList[index].lifeTime[numEachMolPrevious[index]-1].emplace_back((iter-lastNumberUpdateItrEachMolPrevious[index])*Parameters::dt/1E6);
+                complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]=iter;
+            }
+        }
 
         double small = 1E-9;
         double dx;
@@ -116,7 +134,40 @@ bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, 
         complexList[reactMol1.myComIndex].update_properties(moleculeList, molTemplateList);
         if (reactMol2.isImplicitLipid == false) {
             complexList[reactMol2.myComIndex].update_properties(moleculeList, molTemplateList);
+
+            // update lastNumberUpdateItrEachMol for new complex
+            complexList[reactMol2.myComIndex].lastNumberUpdateItrEachMol.resize(molTemplateList.size());
+            for(unsigned index=0;index<molTemplateList.size();index++){
+                complexList[reactMol2.myComIndex].lastNumberUpdateItrEachMol[index]=iter;
+            }
+
             complexList[reactMol2.myComIndex].isEmpty = false;
+        }
+
+        // update transition matrix
+        // compare current cluster size with the previous ones
+        for(unsigned index=0;index<molTemplateList.size();index++){
+            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]<numEachMolPrevious[index]){
+                // shrink
+                if(numEachMolPrevious[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[numEachMolPrevious[index]-1][numEachMolPrevious[index]-1] += iter-Parameters::lastUpdateTransition[index]-1;
+                if(complexList[reactMol1.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index]-1][numEachMolPrevious[index]-1] += 1;
+                if(complexList[reactMol2.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious[index]-1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol2.myComIndex].numEachMol[index]-1][numEachMolPrevious[index]-1] += 1;
+
+                // update diagonal elements for unchanged complexes
+                for(unsigned indexCom=0;indexCom<complexList.size();indexCom++){
+                    if((indexCom != reactMol1.myComIndex) && (indexCom != reactMol2.myComIndex)){
+                        if(complexList[indexCom].numEachMol[index]-1 >= 0){
+                            molTemplateList[index].transitionMatrix[complexList[indexCom].numEachMol[index]-1][complexList[indexCom].numEachMol[index]-1] += iter-Parameters::lastUpdateTransition[index];
+                        }
+                    }
+                }
+
+                // update lastUpdateTransition
+                Parameters::lastUpdateTransition[index] = iter;
+            }
         }
 
         ++Complex::numberOfComplexes;

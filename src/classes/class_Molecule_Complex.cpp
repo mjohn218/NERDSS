@@ -53,6 +53,8 @@ Complex::Complex(const Molecule& mol, const MolTemplate& oneTemp)
     // Will elements of this array below be initialized to zero??
     numEachMol = std::vector<int>(MolTemplate::numMolTypes);
     ++numEachMol[oneTemp.molTypeIndex];
+
+    lastNumberUpdateItrEachMol.resize(MolTemplate::numMolTypes);
 }
 
 Complex::Complex(int _index, const Molecule& _memMol, const MolTemplate& _molTemp)
@@ -68,6 +70,8 @@ Complex::Complex(int _index, const Molecule& _memMol, const MolTemplate& _molTem
     // Will elements of this array below be initialized to zero??
     numEachMol = std::vector<int>(MolTemplate::numMolTypes);
     ++numEachMol[_molTemp.molTypeIndex];
+
+    lastNumberUpdateItrEachMol.resize(MolTemplate::numMolTypes);
 }
 
 Complex::Complex(Coord comcoords, Coord D, Coord Dr)
@@ -668,6 +672,7 @@ void Complex::destroy(
 
     memberList.clear();
     numEachMol.clear();
+    lastNumberUpdateItrEachMol.clear();
     isEmpty = true;
 
     // iterate down the number of complexes in the system.

@@ -5,10 +5,20 @@ To build NERDSS requires:
    For Mac, these are provided with XCode.
 2. Gnu Scientific Library installed (gsl  version 1.0 or higher)
    this can be downloaded from here: ftp://ftp.gnu.org/gnu/gsl/
-3. To compile using make:
-    1. Move to the main directory NERDSS
-    2. Type 'make serial' or 'make cluster' (cluster version uses the cluster check in sweep_2D routine for dense 2D system to avoid overlap)
-    3. Executable will be placed in the directory NERDSS/bin
+*3. EIther cmake (version 3.0 or higher) OR can be compiled directly using our Makefile--does not require cmake.
+    this can be downloaded from here: https://cmake.org/download/
+
+3a. To compile using cmake:
+    ## Quick Build
+    1. Create a build directory and move into it: `mkdir build; cd build`
+    2. Create the Makefile using CMake: `cmake ..`
+    3. Make the executable: `make`. You can use the `-j 2` flag for quicker building.
+    5. The executable is now in the build directory, entitled `nerdss`
+
+3b. To compile using make:
+    1. Move to the main directory
+    2. Type 'make serial'
+    3. Executable will be placed in the directory ./bin
 
 
 
