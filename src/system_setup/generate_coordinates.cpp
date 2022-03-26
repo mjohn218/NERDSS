@@ -65,7 +65,7 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
                             }
                             if (theyInteract) {
                                 Vector tmpVec { iface1.coord - iface2.coord };
-                                double mag = tmpVec.x * tmpVec.z + tmpVec.y * tmpVec.y + tmpVec.z * tmpVec.z;
+                                double mag = tmpVec.x * tmpVec.x + tmpVec.y * tmpVec.y + tmpVec.z * tmpVec.z;
                                 if (mag < forwardRxns[rxnIndex].bindRadius * forwardRxns[rxnIndex].bindRadius) {
                                     mol2.create_random_coords(mol2Temp, membraneObject);
                                     complexList[mol2.myComIndex].comCoord = mol2.comCoord;
