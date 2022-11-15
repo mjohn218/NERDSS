@@ -1,0 +1,171 @@
+ # Input file
+
+start parameters
+    nItr = 100000000
+    timestep = 0.5
+    timeWrite = 10000
+    trajWrite = 25000000
+    restartWrite = 10000
+    checkPoint = 10000
+    overlapSepLimit = 2.3
+    pdbWrite = 10000
+end parameters
+
+start boundaries
+    WaterBox = [250,250,250] #nm
+    xBCtype = reflect
+    yBCtype = reflect
+    zBCtype = reflect
+end boundaries
+
+start molecules
+    IL:4000
+    gag:1
+    pol:1
+end molecules
+
+start reactions
+    #### creating gag ####
+    0 -> gag(mem,hom,hx1,hx2,ref)
+    onRate3Dka = 0.00006
+
+    #### creating pol ####
+    0 -> pol(mem,hom,hx1,hx2,ref)
+    onRate3Dka = 0.000003
+
+    ### gag+IL
+    gag(mem) + IL(mmm) <-> gag(mem!1).IL(mmm!1)
+    onRate3Dka  = 0  #ka in nm3/us: ~9.8E5M-1s-1 kon
+    offRatekb = 1.013 #kb in /s
+    sigma   = 1  #nm
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    #lipids are normal to membrane plane, so M has theta value,
+    assocAngles = [M_PI, M_PI, nan, nan, nan]
+    length3Dto2D = 10
+
+    ### pol+IL
+    pol(mem) + IL(mmm) <-> pol(mem!1).IL(mmm!1)
+    onRate3Dka  = 0  #ka in nm3/us: ~9.8E5M-1s-1 kon
+    offRatekb = 1.013 #kb in /s
+    sigma   = 1  #nm
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    #lipids are normal to membrane plane, so M has theta value,
+    assocAngles = [M_PI, M_PI, nan, nan, nan]
+    length3Dto2D = 10
+
+    #### gag - gag (Dimer) ####
+    gag(hom) + gag(hom) <-> gag(hom!1).gag(hom!1)
+    onRate3Dka = 10.0
+    offRatekb = 0
+    sigma = 2.213754
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.167710, 2.167710, -2.004739, -2.004739, -1.723333]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### pol - pol (Dimer) ####
+    pol(hom) + pol(hom) <-> pol(hom!1).pol(hom!1)
+    onRate3Dka = 0
+    offRatekb = 0
+    sigma = 2.213754
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.167710, 2.167710, -2.004739, -2.004739, -1.723333]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### gag - pol (Dimer) ####
+    gag(hom) + pol(hom) <-> gag(hom!1).pol(hom!1)
+    onRate3Dka = 10.0
+    offRatekb = 0
+    sigma = 2.213754
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.167710, 2.167710, -2.004739, -2.004739, -1.723333]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### gag - gag (Hexamer) ####
+    gag(hx1) + gag(hx2) <-> gag(hx1!1).gag(hx2!1)
+    onRate3Dka = 10.0
+    offRatekb = 0
+    sigma = 0.417715
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.209888, 1.459407, 2.442776, 1.550480, 0.878990]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### pol - pol (Hexamer) ####
+    pol(hx1) + pol(hx2) <-> pol(hx1!1).pol(hx2!1)
+    onRate3Dka = 0
+    offRatekb = 0
+    sigma = 0.417715
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.209888, 1.459407, 2.442776, 1.550480, 0.878990]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### gag - pol (Hexamer) ####
+    gag(hx1) + pol(hx2) <-> gag(hx1!1).pol(hx2!1)
+    onRate3Dka = 10.0
+    offRatekb = 0
+    sigma = 0.417715
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.209888, 1.459407, 2.442776, 1.550480, 0.878990]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### pol - gag (Hexamer) ####
+    pol(hx1) + gag(hx2) <-> pol(hx1!1).gag(hx2!1)
+    onRate3Dka = 10.0
+    offRatekb = 0
+    sigma = 0.417715
+    norm1 = [-0.079763, -0.004093, 1.998405]
+    norm2 = [-0.079763, -0.004093, 1.998405]
+    assocAngles = [2.209888, 1.459407, 2.442776, 1.550480, 0.878990]
+    bindRadSameCom = 1.5 #scales sigma to define distance
+    loopCoopFactor = 0.1
+    length3Dto2D = 10 # in nm (default is 2*sigma)
+
+    #### gag - gag (ref) ####
+    gag(ref) + gag(ref) <-> gag(ref!1).gag(ref!1)
+    onRate3Dka = 0
+    offRatekb = 10
+    sigma = 2.5
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    bindRadSameCom = 0.5
+
+    #### pol - pol (ref) ####
+    pol(ref) + pol(ref) <-> pol(ref!1).pol(ref!1)
+    onRate3Dka = 0
+    offRatekb = 10
+    sigma = 2.5
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    bindRadSameCom = 0.5
+
+    #### gag - pol (ref) ####
+    gag(ref) + pol(ref) <-> gag(ref!1).pol(ref!1)
+    onRate3Dka = 0
+    offRatekb = 10
+    sigma = 2.5
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+    bindRadSameCom = 0.5
+ end reactions

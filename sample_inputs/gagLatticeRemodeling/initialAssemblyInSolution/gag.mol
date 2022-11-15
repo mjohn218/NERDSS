@@ -1,0 +1,26 @@
+##
+# gag molecule information file
+##
+
+Name  = gag
+checkOverlap  = true
+
+# translational diffusion constants
+D = [10.0,10.0,10.0]
+
+# rotational diffusion constants
+Dr  = [0.01,0.01,0.01]
+
+# Coordinates, with states below, or
+COM 0.0000  0.0000  0.0000
+mem -0.079763 -0.004093 1.998405
+hom -1.009830 -1.244242 -1.175406
+hx1 1.276666 -1.008930 -2.086828
+hx2 1.094901 0.312694 -2.119720
+ref 0.0000  0.0000  0.0000
+
+bonds = 4
+COM mem
+COM hom
+COM hx1
+COM hx2
