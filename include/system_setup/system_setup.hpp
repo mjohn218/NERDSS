@@ -59,7 +59,7 @@ Molecule initialize_molecule(int comIndex, const Parameters& params, const MolTe
 Complex initialize_complex(const Molecule& mol, const MolTemplate& molTemp);
 
 // set up some important parameters for implicit-lipid model;
-void initialize_paramters_for_implicitlipid_model(int& implicitlipidIndex, const Parameters& params, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns, std::vector<Molecule>& moleculeList,
+void initialize_paramters_for_implicitlipid_and_compartment_model(int& implicitlipidIndex, const Parameters& params, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::vector<Complex>& complexList, Membrane& membraneObject);
 
 //functions to generate new added molecules and complexes fo a restart simulation

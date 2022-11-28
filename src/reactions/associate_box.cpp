@@ -13,9 +13,10 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
     std::vector<MolTemplate>& molTemplateList,
     std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns)
 {
+    bool isInsideCompartment {molTemplateList[reactMol1.molTypeIndex].insideCompartment};
     if (reactCom1.index == reactCom2.index) {
         // skip to protein interation updates
-        // std::cout << "Closing a loop, no rotations performed.\n";
+        //std::cout << "Closing a loop, no rotations performed.\n";
         counterArrays.nLoops++;
         // update the Molecule's TrajStatus (this is done in the else, when Molecules are rotated but not otherwise)
         for (auto& memMol : reactCom1.memberList)
@@ -27,7 +28,9 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
         std::vector<long long int> lastNumberUpdateItrEachMolPrevious1 {};
         std::vector<int> numEachMolPrevious2 {};
         std::vector<long long int> lastNumberUpdateItrEachMolPrevious2 {};
-        for(unsigned index=0;index<molTemplateList.size();index++){
+
+
+        for (unsigned index = 0; index < molTemplateList.size(); index++) {
             numEachMolPrevious1.emplace_back(complexList[reactMol1.myComIndex].numEachMol[index]);
             lastNumberUpdateItrEachMolPrevious1.emplace_back(complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]);
             numEachMolPrevious2.emplace_back(complexList[reactMol2.myComIndex].numEachMol[index]);
@@ -283,7 +286,7 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
             com_of_two_tmp_complexes(reactCom2, reactCom2, afterTranShiftCOM2, moleculeList);
 
             /*
-	    FOR 2D AND 3D->2D, the SLOWPRO IS NOW BACK TO ITS ORIGINAL POSITION, MEANING THE OTHER PROTEIN DID ALL THE DISPLACING. 
+	    FOR 2D AND 3D->2D, the SLOWPRO IS NOW BACK TO ITS ORIGINAL POSITION, MEANING THE OTHER PROTEIN DID ALL THE DISPLACING.
 	    BASED ON THE AMOUNT THAT PRO2 HAD TO REORIENT, USE FRACTIONS OF DR TO ROTATE IT A BIT BACK.
 	    SINCE THEY ARE BOTH NOW IN 2D, ONLY WANT TO EVALUATE THE DISPLACEMENT THAT HAS OCCURED IN 2D.
 	  */
@@ -448,8 +451,8 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
         update_complex_tmp_com_crds(reactCom1, moleculeList);
         update_complex_tmp_com_crds(reactCom2, moleculeList);
 
-        reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, 0.0); // uses tmpCoords to calculate traj.
-        reflect_traj_tmp_crds(params, moleculeList, reactCom2, traj, membraneObject, 0.0);
+        reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, 0.0, isInsideCompartment); // uses tmpCoords to calculate traj.
+        reflect_traj_tmp_crds(params, moleculeList, reactCom2, traj, membraneObject, 0.0, isInsideCompartment);
 
         if (std::abs(traj[0] + traj[1] + traj[2]) > 1E-15) {
             // update the temporary coordinates for both complexes
@@ -471,8 +474,18 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
            OR FOR MOVING PROTEINS A LARGE DISTANCE DUE TO SNAPPING INTO PLACE */
         bool cancelAssoc { false };
         check_for_structure_overlap(cancelAssoc, reactCom1, reactCom2, moleculeList, params, molTemplateList);
+
         if (cancelAssoc == false) {
-            check_if_spans_box(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
+            // check if comparmment exists
+            if (membraneObject.hasCompartment == false) {
+                check_if_spans_box(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
+            } else {
+              if (isInsideCompartment){
+                  //Compartment exists and molecule is inside comparment
+                  check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject, membraneObject.compartmentR);
+              }
+            }
+
             if (cancelAssoc == true)
                 counterArrays.nCancelSpanBox++;
         } else
@@ -531,10 +544,11 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
         // update complexes
 
         // add lifetime to the previous small clusters
-        for(unsigned index=0;index<molTemplateList.size();index++){
-            if(molTemplateList[index].countTransition == true){
+        for (unsigned index = 0; index < molTemplateList.size(); index++) {
+            if (molTemplateList[index].countTransition == true) {
                 // com2 destroty
-                molTemplateList[index].lifeTime[numEachMolPrevious2[index]-1].emplace_back((iter-lastNumberUpdateItrEachMolPrevious2[index])*Parameters::dt/1E6);
+                if (numEachMolPrevious2[index] - 1 >= 0)
+                    molTemplateList[index].lifeTime[numEachMolPrevious2[index] - 1].emplace_back((iter - lastNumberUpdateItrEachMolPrevious2[index]) * Parameters::dt / 1E6);
             }
         }
 
@@ -542,33 +556,35 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
         reactCom2.destroy(moleculeList, complexList); // destroy the complex
         reactCom1.update_properties(moleculeList, molTemplateList); // recalculate the properties of the first complex
 
-        for(unsigned index=0;index<molTemplateList.size();index++){
-            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]>numEachMolPrevious1[index]){
+        for (unsigned index = 0; index < molTemplateList.size(); index++) {
+            if (molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index] > numEachMolPrevious1[index]) {
                 // grow
-                molTemplateList[index].lifeTime[numEachMolPrevious1[index]-1].emplace_back((iter-lastNumberUpdateItrEachMolPrevious1[index])*Parameters::dt/1E6);
-                complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index]=iter;
+                if (numEachMolPrevious1[index] - 1 >= 0) {
+                    molTemplateList[index].lifeTime[numEachMolPrevious1[index] - 1].emplace_back((iter - lastNumberUpdateItrEachMolPrevious1[index]) * Parameters::dt / 1E6);
+                    complexList[reactMol1.myComIndex].lastNumberUpdateItrEachMol[index] = iter;
+                }
             }
         }
 
         // update transition matrix
         // compare current cluster size with the previous ones
-        for(unsigned index=0;index<molTemplateList.size();index++){
-            if(molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index]>numEachMolPrevious1[index]){
+        for (unsigned index = 0; index < molTemplateList.size(); index++) {
+            if (molTemplateList[index].countTransition == true && complexList[reactMol1.myComIndex].numEachMol[index] > numEachMolPrevious1[index]) {
                 // grow
-                if(numEachMolPrevious1[index]-1 >= 0)
-                    molTemplateList[index].transitionMatrix[numEachMolPrevious1[index]-1][numEachMolPrevious1[index]-1] += iter-Parameters::lastUpdateTransition[index]-1;
-                if(numEachMolPrevious2[index]-1 >= 0)
-                    molTemplateList[index].transitionMatrix[numEachMolPrevious2[index]-1][numEachMolPrevious2[index]-1] += iter-Parameters::lastUpdateTransition[index]-1;
-                if(complexList[reactMol1.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious1[index]-1 >= 0)
-                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index]-1][numEachMolPrevious1[index]-1] += 1;
-                if(complexList[reactMol1.myComIndex].numEachMol[index]-1 >= 0 && numEachMolPrevious2[index]-1 >= 0)
-                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index]-1][numEachMolPrevious2[index]-1] += 1;
+                if (numEachMolPrevious1[index] - 1 >= 0)
+                    molTemplateList[index].transitionMatrix[numEachMolPrevious1[index] - 1][numEachMolPrevious1[index] - 1] += iter - Parameters::lastUpdateTransition[index] - 1;
+                if (numEachMolPrevious2[index] - 1 >= 0)
+                    molTemplateList[index].transitionMatrix[numEachMolPrevious2[index] - 1][numEachMolPrevious2[index] - 1] += iter - Parameters::lastUpdateTransition[index] - 1;
+                if (complexList[reactMol1.myComIndex].numEachMol[index] - 1 >= 0 && numEachMolPrevious1[index] - 1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index] - 1][numEachMolPrevious1[index] - 1] += 1;
+                if (complexList[reactMol1.myComIndex].numEachMol[index] - 1 >= 0 && numEachMolPrevious2[index] - 1 >= 0)
+                    molTemplateList[index].transitionMatrix[complexList[reactMol1.myComIndex].numEachMol[index] - 1][numEachMolPrevious2[index] - 1] += 1;
 
                 // update diagonal elements for unchanged complexes
-                for(unsigned indexCom=0;indexCom<complexList.size();indexCom++){
-                    if(indexCom != reactMol1.myComIndex){
-                        if(complexList[indexCom].numEachMol[index]-1 >= 0){
-                            molTemplateList[index].transitionMatrix[complexList[indexCom].numEachMol[index]-1][complexList[indexCom].numEachMol[index]-1] += iter-Parameters::lastUpdateTransition[index];
+                for (unsigned indexCom = 0; indexCom < complexList.size(); indexCom++) {
+                    if (indexCom != reactMol1.myComIndex) {
+                        if (complexList[indexCom].numEachMol[index] - 1 >= 0) {
+                            molTemplateList[index].transitionMatrix[complexList[indexCom].numEachMol[index] - 1][complexList[indexCom].numEachMol[index] - 1] += iter - Parameters::lastUpdateTransition[index];
                         }
                     }
                 }
@@ -579,7 +595,7 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
         }
 
         // Enforce boundary conditions
-        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, 0.0);
+        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, 0.0, isInsideCompartment);
     } // end of if these molecules are closing a loop or not.
 
     //------------------------START UPDATE MONOMERLIST-------------------------
@@ -702,6 +718,7 @@ void associate_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecul
 
         counterArrays.bindPairList[currRxn.productListNew[0].absIfaceIndex].emplace_back(molIndex);
     }
+
     //-----------------------END UPDATE BINDPAIRLIST--------------------------
 
     // std::cout << " After ASSOCIATE, CHANGE COPY NUMBERS, interfaces: " << ifaceIndex1 << ' ' << ifaceIndex2

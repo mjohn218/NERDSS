@@ -74,6 +74,8 @@ enum class MolKeyword : int {
     isImplicitLipid = 12, //!< Is it an implicit lipid.
     countTransition = 13, //!< is transition counted during whole simulation
     transitionMatrixSize = 14, //!< size of the transition matrix
+    outsideCompartment = 15, //!< outside the compartment
+    insideCompartment = 16, //!< inside the compartment
 };
 
 /*! \enum RxnKeyword

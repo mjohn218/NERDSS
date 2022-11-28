@@ -20,18 +20,20 @@
  */
 // void reflect_complex_rad_rot(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput);
 void reflect_complex_rad_rot_inx(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList);
-void reflect_complex_rad_rot(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput);
+void reflect_complex_rad_rot(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput, bool isInsideCompartment);
 void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput);
-void reflect_complex_rad_rot_sphere(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput);
+void reflect_complex_rad_rot_sphere(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double radius, double RS3Dinput);
+void reflect_complex_compartment(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput);
 
 /* TRAJ PROPAGATION FUNCTIONS */
 
 /*! \ingroup BoundaryConditions
  * \brief Enforces reflecting boundary conditions during complex propagation.
  */
-void reflect_traj_complex_rad_rot(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput);
+void reflect_traj_complex_rad_rot(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput, bool isInsideCompartment);
 void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput);
-void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput);
+void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double radius, double RS3Dinput);
+void reflect_traj_complex_compartment(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput);
 // void reflect_traj_complex_rad_rot_new(
 //     const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 9>& M, const Membrane& membraneObject, double RS3Dinput);
 
@@ -44,7 +46,7 @@ void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<M
 //     std::vector<Molecule>& moleculeList, std::array<double, 9>& M, const Membrane& membraneObject, double RS3Dinput);
 void reflect_traj_check_span(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput);
 void reflect_traj_check_span_box(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput);
-void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput);
+void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double radius, double RS3Dinput);
 
 /*!
  * \brief Enforces reflecting boundary conditions by placing Complex and component Molecules back into the box without
@@ -70,16 +72,17 @@ void reflect_traj_complex_rad_rot_nocheck_sphere(const Parameters& params, Compl
 //     std::vector<Molecule>& moleculeList, const Membrane& membraneObject);
 void check_if_spans(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList, const Membrane& membraneObject);
 void check_if_spans_box(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList, const Membrane& membraneObject);
-void check_if_spans_sphere(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList, const Membrane& membraneObject);
+void check_if_spans_sphere(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double radius);
 
 /*! \ingroup BoundaryConditions
- * \brief evaluates size of reflection off of walls during association, stores in temporary vector traj. 
+ * \brief evaluates size of reflection off of walls during association, stores in temporary vector traj.
  *based on tmpCoords, does not update complex.traj vectors..
  */
 // void reflect_traj_tmp_crds(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput);
-void reflect_traj_tmp_crds(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput);
+void reflect_traj_tmp_crds(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput, bool isInsideCompartment);
 void reflect_traj_tmp_crds_box(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput);
-void reflect_traj_tmp_crds_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput);
+void reflect_traj_tmp_crds_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double radius, double RS3Dinput);
+void reflect_traj_tmp_crds_compartment(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput);
 
 // function to calculate the position of one interface after translation and rotation on sphere surface
 Coord calculate_update_position_interface(const Complex targCom, const Coord ifacecrds); // iface is cardesian coords

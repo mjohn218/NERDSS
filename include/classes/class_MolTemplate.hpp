@@ -119,6 +119,10 @@ struct MolTemplate {
     bool checkOverlap { false }; //!< is overlap checked for during association?
     bool countTransition { false }; //!< is transition counted during whole simulation?
     int transitionMatrixSize {500}; //!< size of the transition matrix
+    bool insideCompartment {false}; //!< this mol type is inside the compartment
+    bool outsideCompartment {false}; //!< this mol type is outside the compartment
+    bool crossesCompartment {false}; //!< this mol type can cross the compartment
+    int transmissionRxnIndex {-1};  //this points to reaction index in transmission reaction list  
     std::vector<std::vector<long long int> > transitionMatrix {}; //!< transition matrix to track the changing of the size of cluster
     std::vector<std::vector<double> > lifeTime {}; //!< to store the lifetime of each cluster size, unit: s 
     //    double bindSepFactor { 1.0 }; //!< separation factor for binding within the same complex
@@ -139,7 +143,7 @@ struct MolTemplate {
     ParsedMolNumState startingNumState {}; //!< record the starting numbers of each state
     bool canDestroy { false }; //!< set this true when there is destruction reaction for this mol type
     bool excludeVolumeBound { false }; //!< set this true when we need exclude volume for bound interface of this mol type
-    std::vector<int> monomerList {}; //!< list of the molecule index that is a monomer with trajStatus::none, used for the destruction; only update when canDestroy is true
+    std::vector<int> monomerList {}; //!< list of the molecule index that is a monomer with trajStatus::none, used for the destruction and transmission; only update when canDestroy is true
 
     // Molecule types, for checking to perform certain actions
     bool isRod { false }; //!< is the molecule a rod (is it strictly one dimensional)

@@ -97,6 +97,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
     const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
+    const std::vector<TransmissionRxn>& transmissionRxns,
     const std::map<std::string, int>& observablesList, const Membrane& membraneObject, const copyCounters& counterArrays);
 
 /*! \ingroup IO
@@ -106,6 +107,7 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
     std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<TransmissionRxn>& transmissionRxns,
     std::map<std::string, int>& observablesList, Membrane& membraneObject, copyCounters& counterArrays);
 
 /*! \ingroup IO

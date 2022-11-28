@@ -53,7 +53,7 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
                 // make sure that the time step is resonable according to the prob of reaction
                 if (prob > 1.000001) {
                     std::cerr << "Error: prob of reaction > 1. Avoid this using a smaller time step." << std::endl;
-                    exit(1);
+                    //exit(1);
                 }
                 if (prob > 0.5) {
                     // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;
@@ -62,54 +62,54 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
                 if (params.debugParams.forceDissoc)
                     prob = 1.0;
 
-                double rnum = gsl_rng_uniform(r);
+                double rnum = rand_gsl64();
                 if (prob > rnum) {
-                    double rnum2 { rnum + gsl_rng_uniform(r) * 1.0 / (gsl_rng_max(r) + 1.0) }; // to get higher resolution
 
-                    if (prob > rnum2) {
-                        // std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
-                        //           << " partner: " << pro2Index << '\n';
-                        // std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
-                        //           << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
-                        /*Perform this dissociation reaction.
+                    // std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
+                    //           << " partner: " << pro2Index << '\n';
+                    // std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
+                    //           << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
+                    /*Perform this dissociation reaction.
                         Sometimes it is a bond broken, not a full dissociation to two complexes if
                         the two interfaces are part of the same complex
                         */
 
-                        /*std::cout << "Complex members:";
+                    /*std::cout << "Complex members:";
                         for (const auto& memMol : complexList[moleculeList[molItr].myComIndex].memberList)
                             std::cout << ' ' << memMol;
                         std::cout << '\n';
 			*/
-                        if (moleculeList[molItr].myComIndex != moleculeList[pro2Index].myComIndex) {
-                            std::cerr << "ERROR: Molecules in different complexes are attempting to dissociate.\n";
-                            exit(1);
-                        }
-                        bool breakLinkComplex
-                            = break_interaction(simItr, relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
-                                backRxns[mu], moleculeList, complexList, molTemplateList, membraneObject.implicitlipidIndex);
+                    if (moleculeList[molItr].myComIndex != moleculeList[pro2Index].myComIndex) {
+                        std::cerr << "ERROR: Molecules in different complexes are attempting to dissociate.\n";
+                        exit(1);
+                    }
+                    bool breakLinkComplex;
+					bool cancelDissociation= break_interaction(simItr, relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
+											backRxns[mu], moleculeList, complexList, molTemplateList, membraneObject.implicitlipidIndex, forwardRxns[backRxns[mu].conjForwardRxnIndex], breakLinkComplex, params.timeStep);
+					if(cancelDissociation==false){
+					  if (breakLinkComplex)
+                        counterArrays.nLoops--;
+					  --relIface1Itr; // replaced this reaction, so stay on this one
 
-                        if (breakLinkComplex)
-                            counterArrays.nLoops--;
-                        --relIface1Itr; // replaced this reaction, so stay on this one
+					  /*Change the number of bound pairs in the system.*/
+					  update_Nboundpairs(moleculeList[molItr].molTypeIndex, moleculeList[pro2Index].molTypeIndex, -1,
+										 params, counterArrays);
+					  /*Update species copy numbers*/
+					  // decrement bound state
+					  counterArrays.copyNumSpecies[backRxns[mu].reactantListNew[0].absIfaceIndex]--;
+					  // increment free species
+					  counterArrays.copyNumSpecies[backRxns[mu].productListNew[0].absIfaceIndex]++;
+					  counterArrays.copyNumSpecies[backRxns[mu].productListNew[1].absIfaceIndex]++;
 
-                        /*Change the number of bound pairs in the system.*/
-                        update_Nboundpairs(moleculeList[molItr].molTypeIndex, moleculeList[pro2Index].molTypeIndex, -1,
-                            params, counterArrays);
-                        /*Update species copy numbers*/
-                        // decrement bound state
-                        counterArrays.copyNumSpecies[backRxns[mu].reactantListNew[0].absIfaceIndex]--;
-                        // increment free species
-                        counterArrays.copyNumSpecies[backRxns[mu].productListNew[0].absIfaceIndex]++;
-                        counterArrays.copyNumSpecies[backRxns[mu].productListNew[1].absIfaceIndex]++;
-
-                        /*If dissociated products are removed from overlap lists, use ncross=-1.
+					  /*If dissociated products are removed from overlap lists, use ncross=-1.
                         If they remain in list to avoid overlap, use movestat=2 and also
                         ensure that they are not allowed to diffuse again, by, for example,
                         temporarily setting D=0.
                         */
+
+                        //**Commented out since molecules undergoing dissociation do not move**//
                         // consider the reflecting-surface movement
-                        reflect_complex_rad_rot(membraneObject, complexList[moleculeList[molItr].myComIndex], moleculeList, 0.0);
+                        // reflect_complex_rad_rot(membraneObject, complexList[moleculeList[molItr].myComIndex], moleculeList, 0.0);
 
                         // std::cout << "Coords of p1 (COM): " << moleculeList[molItr].comCoord << '\n';
                         // std::cout << "Coords of p2 (COM): " << moleculeList[pro2Index].comCoord << '\n';

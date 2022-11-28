@@ -90,9 +90,9 @@ void MolTemplate::display() const
     std::cout << "Molecule template " << molTypeIndex << '\n';
     std::cout << "Name: " << molName << '\n';
     std::cout << "Copy number:" << copies << '\n';
-    std::cout <<" Diffusion trans: "<<D.x <<' '<<D.y<<' '<<D.z<<'\n';
-    std::cout <<" Diffusion Rot: "<<Dr.x <<' '<<Dr.y<<' '<<Dr.z<<'\n';
-    
+    std::cout << " Diffusion trans: " << D.x << ' ' << D.y << ' ' << D.z << '\n';
+    std::cout << " Diffusion Rot: " << Dr.x << ' ' << Dr.y << ' ' << Dr.z << '\n';
+
     if (isLipid) {
         if (isImplicitLipid)
             std::cout << "Is a implicitLipid: " << std::boolalpha << isImplicitLipid << '\n';
@@ -262,6 +262,20 @@ void MolTemplate::set_value(std::string& line, MolKeyword molKeyword)
     }
     case 14: {
         transitionMatrixSize = std::stoi(line);
+        break;
+    }
+    case 15: {
+        outsideCompartment = read_boolean(line);
+        if (outsideCompartment == true) {
+            crossesCompartment = true;
+        }
+        break;
+    }
+    case 16: {
+        insideCompartment = read_boolean(line);
+        if (insideCompartment == true) {
+            crossesCompartment = true;
+        }
         break;
     }
     default: {

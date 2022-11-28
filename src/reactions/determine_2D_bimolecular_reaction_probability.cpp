@@ -67,9 +67,9 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
         moleculeList[biMolData.pro2Index].probvec.push_back(0);
     }
 
-    if (moleculeList[biMolData.pro1Index].trajStatus != TrajStatus::propagated
-        && moleculeList[biMolData.pro2Index].trajStatus != TrajStatus::propagated) {
-        /*This movestat check is if you allow just dissociated proteins to avoid
+    if (moleculeList[biMolData.pro1Index].isDissociated != true
+        && moleculeList[biMolData.pro2Index].isDissociated != true) {
+    /*This movestat check is if you allow just dissociated proteins to avoid
          * overlap*/
         if (withinRmax && forwardRxns[rxnIndex].rateList[rateIndex].rate > 0) {
             bool probValExists { false };
@@ -198,7 +198,7 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             moleculeList[biMolData.pro2Index].probvec.back() = rxnProb * currnorm;
             if (rxnProb > 1.000001) {
                 std::cerr << "Error: prob of reaction is: " << rxnProb << " > 1. Avoid this using a smaller time step." << std::endl;
-                exit(1);
+                //exit(1);
             }
             if (rxnProb > 0.5) {
                 // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;

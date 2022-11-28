@@ -462,14 +462,14 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
         traj[mm] = 0;
 
     /*This needs to evaluate the traj update, based on it initially being zero.
-	  And here, it should be called based on the tmpCoords, not the full coordinates. 
+	  And here, it should be called based on the tmpCoords, not the full coordinates.
 	  also requires updating the COM of this temporary new position
 	*/
     update_complex_tmp_com_crds(facilitatorCom, moleculeList);
     update_complex_tmp_com_crds(stateChangeCom, moleculeList);
 
-    reflect_traj_tmp_crds(params, moleculeList, facilitatorCom, traj, membraneObject, 0.0); //uses tmpCoords to calculate traj.
-    reflect_traj_tmp_crds(params, moleculeList, stateChangeCom, traj, membraneObject, 0.0);
+    reflect_traj_tmp_crds(params, moleculeList, facilitatorCom, traj, membraneObject, 0.0, false); //uses tmpCoords to calculate traj.
+    reflect_traj_tmp_crds(params, moleculeList, stateChangeCom, traj, membraneObject, 0.0, false);
 
     if (std::abs(traj[0] + traj[1] + traj[2]) > 1E-15) {
         // update the temporary coordinates for both complexes
@@ -487,7 +487,7 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
     check_for_structure_overlap(cancelAssoc, facilitatorCom, stateChangeCom, moleculeList, params, molTemplateList);
 
     if (cancelAssoc == false)
-        check_if_spans_sphere(cancelAssoc, params, facilitatorCom, stateChangeCom, moleculeList, membraneObject);
+        check_if_spans_sphere(cancelAssoc, params, facilitatorCom, stateChangeCom, moleculeList, membraneObject, membraneObject.sphereR);
     if (cancelAssoc == false)
         check_for_structure_overlap_system(cancelAssoc, facilitatorCom, stateChangeCom, moleculeList, params, molTemplateList, complexList, forwardRxns, backRxns);
 
@@ -525,7 +525,7 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
     stateChangeCom.update_properties(moleculeList, molTemplateList);
 
     // Enforce boundary conditions
-    reflect_complex_rad_rot(membraneObject, facilitatorCom, moleculeList, 0.0);
+    reflect_complex_rad_rot(membraneObject, facilitatorCom, moleculeList, 0.0, false);
 
     for (unsigned crossItr { 0 }; crossItr < stateChangeMol.crossbase.size(); ++crossItr) {
         int skipMol { stateChangeMol.crossbase[crossItr] };

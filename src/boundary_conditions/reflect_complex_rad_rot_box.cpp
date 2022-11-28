@@ -22,6 +22,19 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
     } else { // in solution
         RS3D = RS3Dinput;
     }
+	
+	//if moleculeList[memMol].enforceCompartmentBC is true, we need to prevent the molecule from crossing the compartment.
+	//if its inside the compartment, it only needs to check the compartment boundaries, not the box boundaries, so we should skip the box boundary checks.
+	//if its outside the compartment, we need to check both boundaries: box and compartment. 
+
+	/*for (auto& memMol : targCom.memberList) {
+	  //should be all elements of the complex have this same property.
+	  if( moleculeList[memMol].enforceCompartmentBC == true )
+		{
+		  //also if within the compartment, ignore the system box.
+		  
+		}
+		}*/
 
     // declare the six boundary sides of the system box;
     double posX = membraneObject.waterBox.x / 2.0;
@@ -47,6 +60,8 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
     if ((currz + targCom.radius) > posZ || (currz - targCom.radius) < negZ)
         canBeOutsideZ = true;
 
+	
+	
     if (canBeOutsideX) {
         double posWall = negX;
         double negWall = posX;

@@ -60,19 +60,25 @@ void check_implicit_reactions(int pro1Index, int pro2Index, int simItr,
                     int relIface2 { moleculeList[pro2Index].freelist[relIface2Idx] };
                     int absIface2 { moleculeList[pro2Index].interfaceList[relIface2].index };
                     for (int tmpImplicitLipidStateIndex = 0; tmpImplicitLipidStateIndex < membraneObject.nStates; tmpImplicitLipidStateIndex++) {
-                        if ((absIface2 == statePartner - tmpImplicitLipidStateIndex) && membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex] > 0) { // both binding interfaces are available!
+                        //std::cout << "debug_information: "
+                        //          << "absIface2: " << absIface2 << "statePartner - tmpImplicitLipidStateIndex: " << statePartner - tmpImplicitLipidStateIndex << "membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex]: " << membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex] << std::endl;
+                        if ((absIface2 == statePartner - tmpImplicitLipidStateIndex) && membraneObject.numberOfFreeLipidsEachState[tmpImplicitLipidStateIndex] >= 0) { // both binding interfaces are available!
                             int rxnIndex { -1 };
                             int rateIndex { -1 };
                             bool isStateChangeBackRxn { false };
 
-                            relIface2 += tmpImplicitLipidStateIndex;
-                            absIface2 += tmpImplicitLipidStateIndex;
+                            //relIface2 += tmpImplicitLipidStateIndex;
+                            moleculeList[pro2Index].interfaceList[relIface2].index += tmpImplicitLipidStateIndex;
 
                             find_which_reaction(relIface1, relIface2, rxnIndex, rateIndex, isStateChangeBackRxn, state,
                                 moleculeList[pro1Index], moleculeList[pro2Index], forwardRxns, backRxns, molTemplateList);
 
-                            relIface2 -= tmpImplicitLipidStateIndex;
-                            absIface2 -= tmpImplicitLipidStateIndex;
+                            //std::cout << "debug_information: " << std::endl
+                            //          << "mol1: " << molTemplateList[moleculeList[pro1Index].molTypeIndex].molName << " mol2: " << molTemplateList[moleculeList[pro2Index].molTypeIndex].molName
+                            //          << "rxnIndex: " << rxnIndex << "rateIndex: " << rateIndex << std::endl;
+
+                            //relIface2 -= tmpImplicitLipidStateIndex;
+                            moleculeList[pro2Index].interfaceList[relIface2].index -= tmpImplicitLipidStateIndex;
 
                             if (rxnIndex != -1 && rateIndex != -1) {
                                 //int com1Index { moleculeList[pro1Index].myComIndex };

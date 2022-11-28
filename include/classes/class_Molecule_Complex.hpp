@@ -163,12 +163,16 @@ struct Molecule {
     std::vector<Iface> interfaceList; //!< interface coordinates
     bool isEmpty { false }; //!< true if the molecule has been destroyed and is void
     TrajStatus trajStatus { TrajStatus::none }; //!< Status of the molecule in that timestep
+    bool isDissociated {false}; //!< true if the molecule just dissociated in this timestep
 
     bool isImplicitLipid = false;
     int linksToSurface { 0 }; //!<store each proteins links to surface, to ease updating complex.
     // static variables
     static int numberOfMolecules; //!< counter for the number of molecules in the system
     static std::vector<int> emptyMolList; //!< list of indices to empty Molecules in moleculeList
+
+    double transmissionProb {-1} ; //The transmission probability
+    bool enforceCompartmentBC {false}; //Boundary conditions for the compartment
 
     // association variables
     // temporary positions
@@ -194,6 +198,7 @@ struct Molecule {
     std::vector<int> crossbase; // proteins base encountered
     std::vector<int> mycrossint; // interfaces base encountered other proteins with
     //    std::vector<int> crossrxn;
+
     std::vector<std::array<int, 3>> crossrxn;
 
     std::vector<double> probvec_dissociate;

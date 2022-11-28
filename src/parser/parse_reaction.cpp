@@ -5,7 +5,7 @@
 
 void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvidedRxns,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::map<std::string, int>& observablesList, Membrane& membraneObject)
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::map<std::string, int>& observablesList, Membrane& membraneObject)
 {
     /* NOTE: need to edit both this and enum class RxnKeyword if you want to add keywords  */
     std::map<const std::string, RxnKeyword> rxnKeywords = { { "onrate3dka", RxnKeyword::onRate3Dka }, { "onrate3dmacro", RxnKeyword::onRate3DMacro },
@@ -172,6 +172,16 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         }
     }
 
+    // figure out whether it is a transmission reaction according to the molIndex of reactant
+    for (auto& oneMol : parsedRxn.reactantList) {
+        if (oneMol.molTypeIndex == -2) { // this is compartment
+            parsedRxn.rxnType = ReactionType::transmission;
+        }
+    }
+    // These next two lines give an error when running code. I think it gets fixed by either using remove_if or including reactantList.end() at end of erase.
+
+    parsedRxn.reactantList.erase(std::remove_if(parsedRxn.reactantList.begin(), parsedRxn.reactantList.end(), [&](const ParsedMol& mol) { return mol.molTypeIndex == -2; }), parsedRxn.reactantList.end());
+    parsedRxn.productList.erase(std::remove_if(parsedRxn.productList.begin(), parsedRxn.productList.end(), [&](const ParsedMol& mol) { return mol.molTypeIndex == -2; }), parsedRxn.productList.end());
     // Get the reaction parameters
     std::string line;
     std::string tmpLine { line }; // to avoid altering the original line, just in case
@@ -248,6 +258,8 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                 parsedRxn.rxnReactants.emplace_back(iface);
             }
         }
+    } else if ( parsedRxn.rxnType == ReactionType::transmission ){
+        parsedRxn.determine_creation_products(molTemplateList);
     }
 
     // TODO: temporary. add to observables list
@@ -299,6 +311,9 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
     if (parsedRxn.rxnType == ReactionType::uniMolCreation) {
         parsedRxn.productName = "uniMolCreation";
     }
+    if (parsedRxn.rxnType == ReactionType::transmission) {
+        parsedRxn.productName = "transmission";
+    }
 
     if (parsedRxn.rxnType == ReactionType::bimolecular || parsedRxn.rxnType == ReactionType::biMolStateChange) {
         /*for all bimolecular reactions, they might take place in 2D, need to assign 3Dto2D length. By default,
@@ -307,7 +322,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         if (parsedRxn.length3Dto2D == -1)
             parsedRxn.length3Dto2D = 2.0 * parsedRxn.bindRadius;
     }
-
+//NOTE: we donnot know whether to add the 'transmission' into this if, something about the reaction rate
     if (parsedRxn.rxnType == ReactionType::bimolecular || parsedRxn.rxnType == ReactionType::biMolStateChange) {
         // set the micro rate according to the macro rate
         // for 3D reaction, Dz != 0 for each reactant; for 3D->2D, Dz == 0 for one reactant. determine this first
@@ -335,11 +350,19 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                     for (auto& reactant : parsedRxn.reactantList) {
                         Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
                     }
-                    parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                    if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                        parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                    } else {
+                        parsedRxn.onRate3Dka = 0;
+                    }
                 }
                 if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
                     if (std::isnan(parsedRxn.offRateMacro) == false) {
-                        parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                        if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                            parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                        } else {
+                            parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                        }
                     }
                 }
             }
@@ -365,11 +388,19 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                         double sigma { parsedRxn.bindRadius };
                         b = 2.0 * pow(area / (M_PI * maxN) + parsedRxn.bindRadius * parsedRxn.bindRadius, 0.5);
                         tempVariable = 4.0 * log(b / sigma) / pow(1.0 - pow(sigma / b, 2.0), 2.0) - 2.0 / (1.0 - pow(sigma / b, 2.0)) - 1.0;
-                        parsedRxn.onRate3Dka = 2.0 * parsedRxn.bindRadius / (1.0 / (1.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (8.0 * M_PI * Dtot) * tempVariable);
+                        if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                            parsedRxn.onRate3Dka = 2.0 * parsedRxn.bindRadius / (1.0 / (1.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (8.0 * M_PI * Dtot) * tempVariable);
+                        } else {
+                            parsedRxn.onRate3Dka = 0;
+                        }
                     }
                     if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
                         if (std::isnan(parsedRxn.offRateMacro) == false) {
-                            parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / (2.0 * parsedRxn.bindRadius) / parsedRxn.onRate3DMacro;
+                            if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / (2.0 * parsedRxn.bindRadius) / parsedRxn.onRate3DMacro;
+                            } else {
+                                parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                            }
                         }
                     }
                 }
@@ -382,11 +413,19 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                             for (auto& reactant : parsedRxn.reactantList) {
                                 Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
                             }
-                            parsedRxn.onRate3Dka = 1.0 / (1.0 / (parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                            if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                parsedRxn.onRate3Dka = 1.0 / (1.0 / (parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                            } else {
+                                parsedRxn.onRate3Dka = 0;
+                            }
                         }
                         if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
                             if (std::isnan(parsedRxn.offRateMacro) == false) {
-                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                                if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                                } else {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                                }
                             }
                         }
                     }
@@ -398,11 +437,19 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                             for (auto& reactant : parsedRxn.reactantList) {
                                 Dtot += (1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.y + 1 / 3.0 * molTemplateList[reactant.molTypeIndex].D.z);
                             }
-                            parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                            if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                parsedRxn.onRate3Dka = 0.5 / (1.0 / (2.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
+                            } else {
+                                parsedRxn.onRate3Dka = 0;
+                            }
                         }
                         if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
                             if (std::isnan(parsedRxn.offRateMacro) == false) {
-                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                                if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                                } else {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                                }
                             }
                         }
                     }
@@ -442,7 +489,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
             oneRxn.create_other_iface_lists(molTemplateList);
             // check if this is a repeat reaction and create new RateState if so
             if (!oneRxn.check_for_conditional_rates(totSpecies, forwardRxns, backRxns))
-                oneRxn.assemble_reactions(forwardRxns, backRxns, createDestructRxns, molTemplateList);
+                oneRxn.assemble_reactions(forwardRxns, backRxns, createDestructRxns, transmissionRxns, molTemplateList);
         }
     } else {
         // if all states are explicit, create the lists of ancillary ifaces
@@ -457,7 +504,7 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
                 exit(1);
             } else
                 std::cout << status.second << " [" << reaction << "].\n";
-            parsedRxn.assemble_reactions(forwardRxns, backRxns, createDestructRxns, molTemplateList);
+            parsedRxn.assemble_reactions(forwardRxns, backRxns, createDestructRxns, transmissionRxns, molTemplateList);
         }
     }
 

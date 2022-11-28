@@ -145,7 +145,7 @@ void resample_traj(int currStop, std::vector<ClusterPair>& pairList, std::vector
                     complexList[k1].trajRot.z = sqrt(2.0 * params.timeStep * complexList[k1].Dr.z) * GaussV();
                 }
 
-                reflect_traj_complex_rad_rot(params, moleculeList, complexList[k1], membraneObject, RS3Dinput);
+                reflect_traj_complex_rad_rot(params, moleculeList, complexList[k1], membraneObject, RS3Dinput, false);
 
                 didMove.push_back(k1);
             }
@@ -175,7 +175,7 @@ void resample_traj(int currStop, std::vector<ClusterPair>& pairList, std::vector
                     complexList[k2].trajRot.z = sqrt(2.0 * params.timeStep * complexList[k2].Dr.z) * GaussV();
                 }
 
-                reflect_traj_complex_rad_rot(params, moleculeList, complexList[k2], membraneObject, RS3Dinput);
+                reflect_traj_complex_rad_rot(params, moleculeList, complexList[k2], membraneObject, RS3Dinput, false);
 
                 didMove.push_back(k2);
             }

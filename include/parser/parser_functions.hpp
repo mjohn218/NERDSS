@@ -87,7 +87,7 @@
  */
 void parse_input(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);
 
 /*!\ingroup Parser
  * \brief This function parses input for restart with add.inp.
@@ -96,7 +96,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
  */
 void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd);
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd);
 
 /*!\ingroup Parser
  * \brief This function parses command line flag.
@@ -209,7 +209,7 @@ ParsedMolNumState parse_number_bngl(std::string oneLine);
  */
 void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvidedRxns,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
-    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns,
     std::map<std::string, int>& observablesList, Membrane& membraneObject);
 
 bool read_boolean(std::string fileLine);

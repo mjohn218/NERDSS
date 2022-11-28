@@ -13,9 +13,8 @@ void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1,
         return;
     }
     sigma.calc_magnitude();
-
     double currTheta { sigma.dot_theta(v1) };
-    // std::cout << "Desired theta: " << targAngle << " Current theta: " << currTheta << std::endl;
+    //std::cout << "Desired theta: " << targAngle << " Current theta: " << currTheta << std::endl;
 
     // Determine if we even need to rotate (i.e. if the theta is already aligned )
     if (std::abs(targAngle - currTheta) < 1E-8) {
@@ -56,9 +55,9 @@ void theta_rotation(Coord& reactIface1, Coord& reactIface2, Molecule& reactMol1,
 
         // if the angle between sigma and the rotated Molecule are correct, return.
         if ((areSameAngle(targAngle, M_PI) || areSameAngle(targAngle, 0)) && areSameAngle(currTheta, targAngle)) {
-            // std::cout << "Theta After: " << currTheta << std::endl;
+            //std::cout << "Theta After: " << currTheta << std::endl;
             return;
         }
-        // std::cout << "Theta After: " << currTheta << std::endl;
+        //std::cout << "Theta After: " << currTheta << std::endl;
     }
 }

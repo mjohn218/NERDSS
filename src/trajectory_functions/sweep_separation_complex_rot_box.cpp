@@ -60,14 +60,18 @@ void sweep_separation_complex_rot_box(int simItr, int pro1Index, Parameters& par
     //determine RS3Dinput
     double RS3Dinput { 0.0 };
     Complex targCom { complexList[com1Index] };
-    for (auto& molIndex : targCom.memberList) {
+    if(membraneObject.implicitLipid){
+      for (auto& molIndex : targCom.memberList) {
         for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
-            if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
-                RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
-                break;
-            }
+	  if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
+	    RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+	    break;
+	  }
         }
+      }
     }
+    int index = moleculeList[pro1Index].molTypeIndex;
+    bool isInsideCompartment = molTemplateList[index].insideCompartment;
 
     int tsave = 0;
     // if (reflectList[com1Index] == 0) {
@@ -154,7 +158,7 @@ void sweep_separation_complex_rot_box(int simItr, int pro1Index, Parameters& par
             complexList[com1Index].trajRot.z = sqrt(2.0 * params.timeStep * complexList[com1Index].Dr.z) * GaussV();
 
             // reflectList[com1Index] = 0;
-            reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], membraneObject, RS3Dinput);
+            reflect_traj_complex_rad_rot(params, moleculeList, complexList[com1Index], membraneObject, RS3Dinput, isInsideCompartment);
             // reflectList[com1Index] = 1;
 
             int resampleList[complexList.size()]; // if this is 0, we need resample
@@ -182,7 +186,7 @@ void sweep_separation_complex_rot_box(int simItr, int pro1Index, Parameters& par
                         complexList[com2Index].trajRot.y = sqrt(2.0 * params.timeStep * complexList[com2Index].Dr.y) * GaussV();
                         complexList[com2Index].trajRot.z = sqrt(2.0 * params.timeStep * complexList[com2Index].Dr.z) * GaussV();
                         // reflectList[com2Index] = 0;
-                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], membraneObject, RS3Dinput);
+                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[com2Index], membraneObject, RS3Dinput, isInsideCompartment);
                         // reflectList[com2Index] = 1;
                         resampleList[com2Index] = 1;
                     }

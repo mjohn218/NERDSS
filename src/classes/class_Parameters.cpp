@@ -40,7 +40,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
      * @param value value of the parameter as a string
      * @param keywords the keyword parsed from the input file to match to the enumeration Keywords
      */
-    double nit, checkit, transitionit;
+    double nit, checkit, transitionit, temp;
     try {
         auto key = static_cast<std::underlying_type<ParamKeyword>::type>(keywords);
         switch (key) {
@@ -54,7 +54,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             break;
         case 2:
             nit = std::stod(value);
-            this->nItr = (long long)(nit); //std::stoi(value);
+            this->nItr = (long long)(nit); // std::stoi(value);
             std::cout << "Read in nItr: " << this->nItr << " timeSteps" << std::endl;
             break;
         case 3:
@@ -62,11 +62,13 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             std::cout << "Read in fromRestart: " << std::boolalpha << this->fromRestart << std::endl;
             break;
         case 4:
-            this->timeWrite = std::stoi(value);
+            temp = std::stod(value);
+            this->timeWrite = (long long)(temp);
             std::cout << "Read in timeWrite: " << this->timeWrite << " timeSteps" << std::endl;
             break;
         case 5:
-            this->trajWrite = std::stoi(value);
+            temp = std::stod(value);
+            this->trajWrite = (long long)(temp);
             std::cout << "Read in trajWrite: " << this->trajWrite << " timeSteps" << std::endl;
             break;
         case 6:
@@ -82,11 +84,13 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             std::cout << "Read in mass: " << this->mass << std::endl;
             break;
         case 10:
-            this->restartWrite = std::stoi(value);
+            temp = std::stod(value);
+            this->restartWrite = (long long)(temp);
             std::cout << "Read in restartWrite: " << this->restartWrite << " timeSteps" << std::endl;
             break;
         case 11:
-            this->pdbWrite = std::stoi(value);
+            temp = std::stod(value);
+            this->pdbWrite = (long long)(temp);
             std::cout << "Read in pdbWrite: " << this->pdbWrite << " timeSteps" << std::endl;
             break;
         case 12:
@@ -103,8 +107,8 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             std::cout << "Read in checkPoint: " << this->checkPoint << " timeSteps" << std::endl;
             break;
         case 15:
-	        this->scaleMaxDisplace = std::stod(value);
-	        std::cout << "Read in scaleMaxDisplace: " << this->scaleMaxDisplace << std::endl;
+            this->scaleMaxDisplace = std::stod(value);
+            std::cout << "Read in scaleMaxDisplace: " << this->scaleMaxDisplace << std::endl;
             break;
         case 16:
             transitionit = std::stod(value);

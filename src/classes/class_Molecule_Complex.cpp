@@ -353,8 +353,10 @@ void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membra
             this->create_random_coords(molTemplate, membraneObject);
 
     } else {
-        comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
-        comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
+	  //boundaries are a box.
+
+	  comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
+	  comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
 
         bool outOfBox { false }; // TODO: commented out for testing purposes only
         // if the molecule is a lipid, place it along the bottom of the box and don't give it a rotation
@@ -382,7 +384,35 @@ void Molecule::create_random_coords(const MolTemplate& molTemplate, const Membra
                 interfaceList[ifaceItr].molTypeIndex = molTemplate.molTypeIndex;
             }
         } else {
+		  //Solution molecule.
             comCoord.z = (membraneObject.waterBox.z * rand_gsl()) - (membraneObject.waterBox.z / 2.0);
+			/*Alternative is to sample r values from compartmentR to the box diagonal length (reach the corners!)
+			  but r can't be uniformly sampled, correct for the Jacobian factor.
+			  then, with that r, sample cos(phi) from -1 to 1 uniformly (polar angle), and then sample theta from 0 to 2pi.
+			  Then make sure the coordinates are still within the box.
+			*/
+			if(membraneObject.hasCompartment == true){
+			  //make sure the molecule is initialized outside of the compartment.
+                if (molTemplate.outsideCompartment == true) {
+                    double R = comCoord.get_magnitude();//length of this vector.
+  			        while( R < membraneObject.compartmentR ){
+  				        //resample position.
+  				        comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
+  				        comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
+  				        comCoord.z = (membraneObject.waterBox.z * rand_gsl()) - (membraneObject.waterBox.z / 2.0);
+  				        R = comCoord.get_magnitude();//length of this vector.
+  			        }
+                } else if (molTemplate.insideCompartment == true) {
+                    double R = comCoord.get_magnitude();//length of this vector.
+  			        while( R > membraneObject.compartmentR ){
+  				        //resample position.
+  				        comCoord.x = (membraneObject.waterBox.x * rand_gsl()) - (membraneObject.waterBox.x / 2.0);
+  				        comCoord.y = (membraneObject.waterBox.y * rand_gsl()) - (membraneObject.waterBox.y / 2.0);
+  				        comCoord.z = (membraneObject.waterBox.z * rand_gsl()) - (membraneObject.waterBox.z / 2.0);
+  				        R = comCoord.get_magnitude();//length of this vector.
+  			        }
+                }
+			}
 
             // set interface coordinates, with a random rotation on the entire molecule
             // TODO: Commented this out for testing against old version
@@ -475,6 +505,7 @@ void Complex::update_properties(
         comCoord.z += moleculeList[memMol].comCoord.z * moleculeList[memMol].mass;
         linksToSurface += moleculeList[memMol].linksToSurface;
     }
+    if(linksToSurface > 0) OnSurface = true;
     comCoord /= totMass;
     mass = totMass;
 
@@ -493,7 +524,7 @@ void Complex::update_properties(
     // update diffusion constants
     /*doesn't work for lipids: use Dt=c_avg/radius, where c_avg is a weighted average based on ci=radi*Di for each protein, weighted by 1/radi
       for Dr=c_avg/radius^3, where c_avg is a weighted average based on ci=radi^3*Dri for each protein, weighted by 1/radi^3
-     
+
     */
     double currRad = radius;
     //std::cout <<" curr radius of complex: "<<index<<" radius: "<<radius<<std::endl;
@@ -510,7 +541,7 @@ void Complex::update_properties(
         sumDr.z += pow(oneTemp.radius,  6.0) * oneTemp.Dr.z;
 
 	normDr  +=pow(oneTemp.radius,  3.0);
-	
+
         // Translational diffusion constants
         sumD.x += oneTemp.D.x * oneTemp.radius*oneTemp.radius;//r*r is r^2
         sumD.y += oneTemp.D.y * oneTemp.radius*oneTemp.radius;
@@ -519,7 +550,7 @@ void Complex::update_properties(
 	normD += oneTemp.radius;
 	//std::cout<<" curr normDr: "<<normDr<<" currnormD: "<<normD<<std::endl;
     }
-    
+
     double invR3=1.0/(currRad*currRad*currRad*normDr);
     Dr.x = sumDr.x*invR3;
     Dr.y = sumDr.x*invR3;

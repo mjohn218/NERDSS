@@ -50,7 +50,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
     if (isOnMembrane == false) {
         /*
       Perform reorientaion for 3D->2D case,
-      and for 2D case, to correct for proteins that have dropped below their 
+      and for 2D case, to correct for proteins that have dropped below their
       need orientation corrections for implicit model
     */
         // std::cout << "Before operate: " << std::endl;
@@ -112,12 +112,10 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
             //           << "THETA 1" << std::endl
             //           << std::setw(8) << ' ' << std::setfill(' ') << std::endl;
             theta_rotation(reactIface1, reactIface2, reactMol1, reactMol2, currRxn.assocAngles.theta1, reactCom1, reactCom2, moleculeList);
-
             // std::cout << std::setw(30) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
             // std::cout << "THETA 2" << std::endl
             //           << std::setw(8) << std::setfill('-') << ' ' << std::setfill(' ') << std::endl;
             theta_rotation(reactIface2, reactIface1, reactMol2, reactMol1, currRxn.assocAngles.theta2, reactCom2, reactCom1, moleculeList);
-
             /* OMEGA */
             // if protein has theta M_PI, uses protein norm instead of com_iface vector
             // std::cout << std::setw(6) << std::setfill('-') << ' ' << std::endl
@@ -258,10 +256,10 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
 
         /* This needs to evaluate the traj update, based on it initially being zero.
          * And here, it should be called based on the tmpCoords, not the full coordinates.
-         * also requires updating the COM of this temporary new position 
+         * also requires updating the COM of this temporary new position
          * */
         update_complex_tmp_com_crds(reactCom1, moleculeList);
-        reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, RS3D); // uses tmpCoords to calculate traj.
+        reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, RS3D, false); // uses tmpCoords to calculate traj.
         if (std::abs(traj[0] + traj[1] + traj[2]) > 1E-50) {
             // update the temporary coordinates for both complexes
             Vector vtraj { traj[0], traj[1], traj[2] };
@@ -339,7 +337,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         // std::cout << " Size of IL's complex:" << reactCom2.memberList.size() << " Interfaces on IL: " << moleculeList[reactMol2.index].interfaceList.size() << std::endl;
         reactCom2.update_properties(moleculeList, molTemplateList); // recalculate the properties of the second complex
         //Enforce boundary conditions
-        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, RS3D);
+        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, RS3D, false);
         //------------------------START UPDATE MONOMERLIST-------------------------
         // update oneTemp.monomerList when oneTemp.canDestroy is true and mol is monomer
         // reactMol1
@@ -424,7 +422,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         reactCom1.update_properties(moleculeList, molTemplateList); // recalculate the properties of the second complex
 
         //Enforce boundary conditions
-        reflect_complex_rad_rot(membraneObject, reactCom2, moleculeList, RS3D);
+        reflect_complex_rad_rot(membraneObject, reactCom2, moleculeList, RS3D, false);
         //------------------------START UPDATE MONOMERLIST-------------------------
         // update oneTemp.monomerList when oneTemp.canDestroy is true and mol is monomer
         // reactMol2

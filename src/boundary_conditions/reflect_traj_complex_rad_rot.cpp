@@ -2,12 +2,24 @@
 #include "math/matrix.hpp"
 
 void reflect_traj_complex_rad_rot(
-    const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput)
+    const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput, bool isInsideCompartment)
 {
-    if (membraneObject.isSphere == true)
-        reflect_traj_complex_rad_rot_sphere(params, moleculeList, targCom, membraneObject, RS3Dinput);
-    else
-        reflect_traj_complex_rad_rot_box(params, moleculeList, targCom, membraneObject, RS3Dinput);
+    if ( isInsideCompartment == false ){
+        // first check the box conditions
+        if (membraneObject.isSphere == true)
+            reflect_traj_complex_rad_rot_sphere(params, moleculeList, targCom, membraneObject, membraneObject.sphereR, RS3Dinput);
+        else
+            reflect_traj_complex_rad_rot_box(params, moleculeList, targCom, membraneObject, RS3Dinput);
+
+        // then check the comparmtent
+        if ( moleculeList[targCom.memberList[0]].enforceCompartmentBC == true ){
+            // a new reflect function for out-side compartment
+            reflect_traj_complex_compartment(params, moleculeList, targCom, membraneObject, RS3Dinput);
+        }
+    }else{
+        // inside the compartment 
+        reflect_traj_complex_rad_rot_sphere(params, moleculeList, targCom, membraneObject, membraneObject.compartmentR, RS3Dinput);
+    }
 
     // // NOTE: it only works for a box system with the membrane surface located on the Z-bottom.
 

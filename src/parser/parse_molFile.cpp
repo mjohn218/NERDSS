@@ -7,7 +7,8 @@ MolTemplate parse_molFile(std::string& mol)
         { "copies", MolKeyword::copies }, { "isrod", MolKeyword::isRod }, { "islipid", MolKeyword::isLipid },
         { "d", MolKeyword::d }, { "dr", MolKeyword::dr }, { "com", MolKeyword::com }, { "state", MolKeyword::state },
         { "mass", MolKeyword::mass }, { "checkoverlap", MolKeyword::checkOverlap }, { "bonds", MolKeyword::bonds }, { "isimplicitlipid", MolKeyword::isImplicitLipid },
-        { "ispoint", MolKeyword::isPoint } , { "counttransition", MolKeyword::countTransition }, { "transitionmatrixsize", MolKeyword::transitionMatrixSize }};
+        { "ispoint", MolKeyword::isPoint } , { "counttransition", MolKeyword::countTransition }, 
+        { "transitionmatrixsize", MolKeyword::transitionMatrixSize }, { "outsidecompartment", MolKeyword::outsideCompartment }, { "insidecompartment", MolKeyword::insideCompartment }};
 
     std::cout << mol + ".mol" << '\n';
     std::ifstream molFile { mol + ".mol" };

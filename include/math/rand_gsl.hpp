@@ -10,6 +10,7 @@ extern long long randNum;
  * \param[out] double Uniformly distributed random double.
  */
 double rand_gsl();
+double rand_gsl64();
 
 /*!
  * \brief Initializes the GSL random number generator.

@@ -16,7 +16,7 @@
 void reflect_traj_check_span(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput)
 {
     if (membraneObject.isSphere)
-        reflect_traj_check_span_sphere(params, targCom, moleculeList, membraneObject, RS3Dinput);
+        reflect_traj_check_span_sphere(params, targCom, moleculeList, membraneObject, membraneObject.sphereR, RS3Dinput);
     else
         reflect_traj_check_span_box(params, targCom, moleculeList, membraneObject, RS3Dinput);
 }

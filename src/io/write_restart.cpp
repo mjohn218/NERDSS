@@ -8,6 +8,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
     const std::vector<Molecule>& moleculeList, const std::vector<Complex>& complexList,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, const std::vector<CreateDestructRxn>& createDestructRxns,
+    const std::vector<TransmissionRxn>& transmissionRxns,
     const std::map<std::string, int>& observablesList, const Membrane& membraneObject, const copyCounters& counterArrays)
 {
     // TRACE();
@@ -36,7 +37,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
             }
         }
         restartFile << '\n';
-        restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereR << '\n';
+        restartFile << "implicitLipidsParams = " << membraneObject.implicitLipid << ' ' << membraneObject.TwoD << ' ' << membraneObject.isBox << ' ' << membraneObject.isSphere << ' ' << membraneObject.sphereR <<' ' << membraneObject.hasCompartment << ' ' << membraneObject.compartmentR << '\n';
         restartFile << "ifaceOverlapSepLimit = " << params.overlapSepLimit << '\n';
         restartFile << "rMaxLimit = " << params.rMaxLimit << '\n';
         restartFile << "timeWrite = " << params.timeWrite << '\n';
@@ -92,7 +93,8 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
             restartFile << oneTemp.molTypeIndex << ' ' << oneTemp.molName << '\n';
             restartFile << oneTemp.copies << ' ' << oneTemp.mass << ' ' << oneTemp.radius << '\n';
             restartFile << oneTemp.isLipid << ' ' << oneTemp.isImplicitLipid << ' ' << oneTemp.isRod << ' ' << oneTemp.isPoint << ' '
-                        << oneTemp.checkOverlap << ' ' << oneTemp.countTransition << ' ' << oneTemp.transitionMatrixSize << '\n';
+                        << oneTemp.checkOverlap << ' ' << oneTemp.countTransition << ' ' << oneTemp.transitionMatrixSize << ' ' 
+                        << oneTemp.outsideCompartment << ' ' << oneTemp.insideCompartment << ' ' << oneTemp.crossesCompartment << ' ' << oneTemp.transmissionRxnIndex << '\n';
             restartFile << oneTemp.comCoord.x << ' ' << oneTemp.comCoord.y << ' ' << oneTemp.comCoord.z
                         << '\n';
             restartFile << oneTemp.D.x << ' ' << oneTemp.D.y << ' ' << oneTemp.D.z << '\n';
@@ -184,7 +186,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
     {
         restartFile << "#Reactions \n";
         restartFile << RxnBase::numberOfRxns << ' ' << forwardRxns.size() << ' ' << backRxns.size() << ' '
-                    << createDestructRxns.size() << ' ' << RxnBase::totRxnSpecies << '\n';
+                    << createDestructRxns.size() << ' ' << transmissionRxns.size() << ' ' << RxnBase::totRxnSpecies << '\n';
 
         // forward reactions
         for (const auto& oneRxn : forwardRxns) {
@@ -378,6 +380,75 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
                 }
             }
         }
+
+        // print out transmission reactions
+        for (auto& oneRxn : transmissionRxns) {
+            restartFile << oneRxn.absRxnIndex << ' ' << oneRxn.relRxnIndex << '\n';
+            restartFile << static_cast<std::underlying_type<ReactionType>::type>(oneRxn.rxnType) << ' '
+                        << oneRxn.isOnMem << '\n';
+            restartFile << oneRxn.isObserved << ' ' << oneRxn.observeLabel << '\n';
+
+            // integer reactants
+            restartFile << oneRxn.intReactantList.size();
+            for (const auto& oneReact : oneRxn.intReactantList)
+                restartFile << ' ' << oneReact;
+            restartFile << '\n';
+
+            // integer products
+            restartFile << oneRxn.intProductList.size();
+            for (const auto& oneProd : oneRxn.intProductList)
+                restartFile << ' ' << oneProd;
+            restartFile << std::endl;
+
+            // reactant list
+            restartFile << oneRxn.reactantMolList.size() << '\n';
+            for (auto& oneReact : oneRxn.reactantMolList) {
+                restartFile << oneReact.molTypeIndex << ' ' << oneReact.molName << ' ' << oneReact.interfaceList.size()
+                            << '\n';
+                for (auto& oneIface : oneReact.interfaceList) {
+                    restartFile << oneIface.molTypeIndex << '\n';
+                    restartFile << oneIface.ifaceName << ' ' << oneIface.absIfaceIndex << ' ' << oneIface.relIfaceIndex
+                                << '\n';
+                    restartFile << oneIface.requiresState << ' ' << oneIface.requiresInteraction << '\n';
+                }
+            }
+
+            // product list
+            restartFile << oneRxn.productMolList.size() << '\n';
+            for (auto& oneProd : oneRxn.productMolList) {
+                restartFile << oneProd.molTypeIndex << ' ' << oneProd.molName << ' ' << oneProd.interfaceList.size()
+                            << '\n';
+                for (auto& oneIface : oneProd.interfaceList) {
+                    restartFile << oneIface.molTypeIndex << '\n';
+                    restartFile << oneIface.ifaceName << ' ' << oneIface.absIfaceIndex << ' ' << oneIface.relIfaceIndex
+                                << '\n';
+                    restartFile << oneIface.requiresState << ' ' << oneIface.requiresInteraction << '\n';
+                }
+            }
+
+            restartFile << oneRxn.rateList.size() << '\n';
+            for (auto& oneRate : oneRxn.rateList) {
+                restartFile << std::setprecision(20) << oneRate.rate << '\n';
+                restartFile << oneRate.otherIfaceLists.size() << '\n';
+                // if (oneRate.otherIfaceLists.size() != 0) {
+                //     for (const auto& anccIface : oneRate.otherIfaceLists[0]) {
+                //         restartFile << anccIface.molTypeIndex << ' ' << anccIface.ifaceName << ' '
+                //                     << anccIface.absIfaceIndex << ' ' << anccIface.relIfaceIndex << ' '
+                //                     << anccIface.requiresState << ' ' << anccIface.requiresInteraction << '\n';
+                //     }
+                // }
+                //  restartFile << oneRate.otherIfaceLists.size() << '\n';
+                for (const auto& otherIfaceList : oneRate.otherIfaceLists) {
+                    restartFile << otherIfaceList.size() << '\n';
+                    for (const auto& anccIface : otherIfaceList) {
+                        restartFile << anccIface.molTypeIndex << ' ' << anccIface.ifaceName << ' '
+                                    << anccIface.absIfaceIndex << ' ' << anccIface.relIfaceIndex << ' '
+                                    << anccIface.requiresState << ' ' << anccIface.requiresInteraction << '\n';
+                    }
+                }
+            }
+        }
+
     }
 
     // write Molecules

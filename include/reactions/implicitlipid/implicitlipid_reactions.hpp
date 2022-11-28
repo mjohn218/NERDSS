@@ -21,6 +21,8 @@ struct paramsIL {
     double kb;
     double area;
     double dt;
+    double compartmentR;
+    double compartSiteRho;
     int Na;
     int Nlipid;
 };
@@ -37,6 +39,8 @@ bool get_distance_to_surface(int pro1, int pro2, int iface1, int iface2, int rxn
 // h is the time-step dt; sigma is the bind_radius, rho is the lipid density on the surface.
 double pimplicitlipid_3D(double z, paramsIL& parameters3D);
 double pimplicitlipid_2D(paramsIL& parameters2D);
+double prob_entering_compartment(double dr, paramsIL& parameters);
+double prob_exiting_compartment(double dr, paramsIL& parameters);
 
 void determine_3D_implicitlipid_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     BiMolData& biMolData, const Parameters& params,
@@ -57,8 +61,13 @@ void break_interaction_implicitlipid(size_t relIface1, size_t relIface2, Molecul
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList);
 
+void determine_entering_compartment_probability(double distToCompartment, const std::vector<TransmissionRxn> &transmissionRxns, int rxnIndex, int pro1Index,
+                                                std::vector<Molecule> &moleculeList, double Dtot, const Parameters &parameters, Membrane &membraneObject);
+void determine_exiting_compartment_probability(double distToCompartment, const std::vector<TransmissionRxn> &transmissionRxns, int rxnIndex, int pro1Index,
+                                                std::vector<Molecule> &moleculeList, double Dtot, const Parameters& parameters, Membrane &membraneObject);
+
 // some functions that helps calculate the 2D binding probability.
-double dissociate2D(paramsIL& parameters2D);
+double dissociate2D(paramsIL &parameters2D);
 double integral_for_blockdistance2D(paramsIL& parameters2D);
 double function2D(double u, void* parameter);
 void block_distance(paramsIL& parameters2D);

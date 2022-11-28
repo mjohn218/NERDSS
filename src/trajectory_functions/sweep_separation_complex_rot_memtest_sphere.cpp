@@ -193,7 +193,7 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
             }
 
             // reflectList[comIndex1] = 0;
-            reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], membraneObject, RS3Dinput);
+            reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex1], membraneObject, RS3Dinput, false);
             // reflectList[comIndex1] = 1;
 
             int resampleList[complexList.size()]; // if this is 0, we need resample
@@ -232,7 +232,7 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
                         }
 
                         // reflectList[comIndex2] = 0;
-                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], membraneObject, RS3Dinput);
+                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[comIndex2], membraneObject, RS3Dinput, false);
                         // reflectList[comIndex2] = 1;
                         resampleList[comIndex2] = 1;
                     }

@@ -36,6 +36,7 @@ enum struct ReactionType : int {
     destruction = 4, //!< destruction reactions. Destroys entire complex, not just interface.
     uniMolCreation = 5, //!< creation reaction from Molecule (X -> X + Y).
     bindToSurface = 6,
+    transmission = 7, //!< transmission reaction cross the compartment
 };
 std::ostream& operator<<(std::ostream& os, const ReactionType& rxnType);
 
@@ -311,4 +312,40 @@ struct CreateDestructRxn : public RxnBase {
      * during the simulation
      */
     explicit CreateDestructRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& molTemplateList);
+};
+
+struct TransmissionRxn : public RxnBase {
+    /*! \struct TransmissionRxn
+     * \ingroup SimulClasses
+     * \ingroup Reactions
+     * \brief Holds information on the transmission reaction counterpart to a parseRxn
+     *
+     */
+
+
+    /*!
+     * \brief This constructor creates TransmissionRxn from a parseRxn
+     */
+
+    struct TransmissionMol {
+        int molTypeIndex { -1 };
+        std::string molName {};
+        std::vector<RxnIface> interfaceList;
+
+        TransmissionMol() = default;
+        TransmissionMol(int _molTypeIndex, const std::vector<RxnIface>& _interfaceList)
+            : molTypeIndex(_molTypeIndex)
+            , interfaceList(_interfaceList)
+        {
+        }
+    };
+
+    std::vector<TransmissionMol> reactantMolList {};
+    std::vector<TransmissionMol> productMolList;
+    double bindRadius { 1 };
+    
+    void display() const override;
+    TransmissionRxn() = default;
+    explicit TransmissionRxn(ParsedRxn& parsedRxn, std::vector<MolTemplate>& molTemplateList, bool isForward, int rxnIndex);
+    
 };

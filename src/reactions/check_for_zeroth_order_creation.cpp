@@ -24,13 +24,21 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, SimulV
                 // Change Volume depending upon box or sphere simulation
                 if (membraneObject.isSphere) {
                     Volume = membraneObject.sphereVol;
+                } else if ( membraneObject.hasCompartment == true && oneTemp.insideCompartment == true ){
+                    double r = membraneObject.compartmentR;
+                    double Vcompartment = 4.0/3.0 * M_PI * pow(r,3.0);
+                    Volume = Vcompartment;
+                }else if ( membraneObject.hasCompartment == true && oneTemp.outsideCompartment == true ){
+                    double r = membraneObject.compartmentR;
+                    double Vcompartment = 4.0/3.0 * M_PI * pow(r,3.0);
+                    Volume = membraneObject.waterBox.volume - Vcompartment;
                 } else {
                     Volume = membraneObject.waterBox.volume;
                 }
                 long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * Volume * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
                 long double prob { exp(-lambda) };
                 unsigned numEvents { 0 };
-                double rNum { 1.0 * gsl_rng_uniform(r) };
+                double rNum { rand_gsl() };
                 // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
 
                 while (rNum > prob) {
@@ -58,7 +66,6 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, SimulV
                     --numEvents;
                 }
             } else {
-
                 // Calculate the probability
                 // Poisson process, p(zero events) = exp(-k * V * deltaT), where k = rate (M/s), V = volume (L), deltaT=
                 // timestep (s)
@@ -66,14 +73,22 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, SimulV
                 // Change Volume depending upon box or sphere simulation
                 if (membraneObject.isSphere) {
                     Volume = membraneObject.sphereVol;
+                } else if ( membraneObject.hasCompartment == true && oneTemp.insideCompartment == true ){
+                    double r = membraneObject.compartmentR;
+                    double Vcompartment = 4.0/3.0 * M_PI * pow(r,3.0);
+                    Volume = Vcompartment;
+                }else if ( membraneObject.hasCompartment == true && oneTemp.outsideCompartment == true ){
+                    double r = membraneObject.compartmentR;
+                    double Vcompartment = 4.0/3.0 * M_PI * pow(r,3.0);
+                    Volume = membraneObject.waterBox.volume - Vcompartment;
                 } else {
                     Volume = membraneObject.waterBox.volume;
                 }
                 long double lambda { Constants::avogadro * oneRxn.rateList[0].rate * Volume
                     * Constants::nm3ToLiters * params.timeStep * Constants::usToSeconds };
                 long double prob { exp(-lambda) };
-                unsigned numEvents { 0 };
-                double rNum { 1.0 * gsl_rng_uniform(r) };
+                int numEvents { 0 };
+                double rNum { rand_gsl() };
                 // double rNum2 { rNum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
 
                 // std::cout << "Volume: " << std::setprecision(20) << Volume << std::endl;
@@ -86,6 +101,14 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, SimulV
                     // std::cout << "rNum2: " << std::setprecision(20) << rNum2 << std::endl;
                     ++numEvents;
                     prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
+                }
+
+                // whether to use the strong titration!
+                //This is specific for titration in and out of compartment
+                if ( oneRxn.rateList[0].rate == -1 ){ //} && membraneObject.hasCompartment == true ){
+                    numEvents = oneTemp.copies - oneTemp.monomerList.size();
+                    if ( numEvents < 0 ) // for the monomers more than the target number, then no need titration but need destruction
+                        numEvents = 0;
                 }
 
                 if (numEvents > 0) {

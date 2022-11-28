@@ -7,7 +7,9 @@
 std::map<const std::string, BoundaryKeyword> bcKeywords = {
     { "implicitlipid", BoundaryKeyword::implicitLipid }, { "waterbox", BoundaryKeyword::waterBox },
     { "xbctype", BoundaryKeyword::xBCtype }, { "ybctype", BoundaryKeyword::yBCtype },
-    { "zbctype", BoundaryKeyword::zBCtype }, { "issphere", BoundaryKeyword::isSphere }, { "spherer", BoundaryKeyword::sphereR }
+    { "zbctype", BoundaryKeyword::zBCtype }, { "issphere", BoundaryKeyword::isSphere }, { "spherer", BoundaryKeyword::sphereR },
+	{ "hascompartment", BoundaryKeyword::hasCompartment }, { "compartmentr", BoundaryKeyword::compartmentR },
+    { "compartmentsited", BoundaryKeyword::compartmentSiteD }, { "compartmentsiterho", BoundaryKeyword::compartmentSiteRho }
 };
 
 void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
@@ -48,6 +50,23 @@ void Membrane::set_value_BC(std::string value, BoundaryKeyword keywords)
             std::cout << "Read in sphereR: " << this->sphereR << " nm" << std::endl;
             this->isSphere = true;
             break;
+        case 7:
+            this->hasCompartment = read_boolean(value);
+            std::cout << "Read in hasCompartment: " << std::boolalpha << this->hasCompartment << std::endl;
+            break;
+        case 8:
+            this->compartmentR = std::stod(value);
+            std::cout << "Read in compartmentR: " << this->compartmentR << " nm" << std::endl;
+            this->hasCompartment = true;
+            break;
+        case 9:
+            this->droplet.D = std::stod(value);
+            std::cout << "Read in compartmentSiteD: " << this->droplet.D << " nm^2/us" << std::endl;
+            break;
+        case 10:
+            this->droplet.rho = std::stod(value);
+            std::cout << "Read in compartmentSiteRho: " << this->droplet.rho << " nm^-2" << std::endl;
+            break;
         default:
             throw std::invalid_argument("Not a valid keyword.");
         }
@@ -61,6 +80,8 @@ void Membrane::display()
 {
     std::cout << " isSphere? " << std::boolalpha << isSphere << std::endl;
     std::cout << " sphere Radius " << sphereR << std::endl;
+    std::cout << " hasCompartment? " << std::boolalpha << hasCompartment << std::endl;
+    std::cout << " compartment Radius " << compartmentR << std::endl;
     if (isBox == true) {
         std::cout << " BOX geometry, dimensions: " << std::endl;
         std::cout << waterBox.x << ' ' << waterBox.y << ' ' << waterBox.z << std::endl;
@@ -87,7 +108,7 @@ std::string create_tmp_line(const std::string& line)
 
 void parse_input(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject)
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject)
 {
     bool hasParsedMol = false;
     std::ifstream inputFile { fileName };
@@ -251,7 +272,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
                     // if it's neither, parse the line
                     inputFile.seekg(linePos);
                     parse_reaction(inputFile, totSpecies, numProvidedRxns, molTemplateList, forwardRxns, backRxns,
-                        createDestructRxns, observableList, membraneObject);
+                        createDestructRxns, transmissionRxns, observableList, membraneObject);
                 }
                 linePos = inputFile.tellg();
             }
@@ -372,7 +393,7 @@ void parse_input(std::string& fileName, Parameters& params, std::map<std::string
 
 void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std::string, int>& observableList,
     std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd)
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, int numDoubleBeforeAdd)
 {
     bool hasParsedMol = false;
     int addForwardRxnNum { static_cast<int>(forwardRxns.size()) }; //this is the origin number of forwardRxns for add case
@@ -538,7 +559,7 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
                     inputFile.seekg(linePos);
 
                     parse_reaction(inputFile, totSpecies, numProvidedRxns, molTemplateList, forwardRxns, backRxns,
-                        createDestructRxns, observableList, membraneObject);
+                        createDestructRxns, transmissionRxns, observableList, membraneObject);
                 }
                 linePos = inputFile.tellg();
             }

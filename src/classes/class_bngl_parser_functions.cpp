@@ -242,13 +242,17 @@ void ParsedMol::set_molTypeIndex(const std::vector<MolTemplate>& molTemplateList
     }
 
     if (this->molTypeIndex == -1) {
-        std::cerr << "Error, molecule " << this->molName << " not found. Exiting.\n";
-        exit(1);
+        if (this->molName == "compartment") {
+            this->molTypeIndex = -2; // this is compartment
+        } else {
+            std::cerr << "Error, molecule " << this->molName << " not found. Exiting.\n";
+            exit(1);
+        }
     }
 }
 
 void ParsedRxn::assemble_reactions(std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-    std::vector<CreateDestructRxn>& createDestructRxns, const std::vector<MolTemplate>& molTemplateList)
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList)
 {
 
     if (this->rxnType == ReactionType::bimolecular || this->rxnType == ReactionType::uniMolStateChange
@@ -263,6 +267,13 @@ void ParsedRxn::assemble_reactions(std::vector<ForwardRxn>& forwardRxns, std::ve
         } else {
             forwardRxns.back().conjBackRxnIndex = -1;
         }
+    } else if (this->rxnType == ReactionType::transmission) {
+        int currSize = transmissionRxns.size();
+        transmissionRxns.emplace_back(*this, molTemplateList, true, currSize); // passing forward transmission
+        if (this->isReversible) {
+            transmissionRxns.emplace_back(*this, molTemplateList, false, currSize + 1); // passing backward transmission
+        }
+
     } else {
         createDestructRxns.emplace_back(*this, molTemplateList);
         createDestructRxns.back().relRxnIndex = createDestructRxns.size() - 1;
@@ -542,6 +553,7 @@ void ParsedRxn::determine_reactants()
             }
         }
     } else {
+        // is bimolecular reaction
         std::vector<int> speciesUsed; // keep track of which reaction species you've found a reactant on
         for (auto& product : productList) {
             for (auto& prodIface : product.interfaceList) {
@@ -644,6 +656,7 @@ void ParsedRxn::determine_reactants()
 
         // if the two reactants have the same ifaceIndex, it's a symmetric reaction
         if (rxnReactants.size() != 2 && this->rxnType == ReactionType::bimolecular) {
+            std::cerr << rxnReactants.size() << "\n";
             std::cerr << "Error determining reactants, check reaction file for missing interfaces." << '\n';
             for (auto& reactant : rxnReactants) {
                 std::cerr << reactant << ' ';
@@ -746,12 +759,55 @@ bool ParsedRxn::check_for_conditional_rates(
                 std::swap(rxnProducts[0], rxnProducts[1]);
                 std::swap(otherIfaceLists[0], otherIfaceLists[1]);
             }
-            // ...give that ForwardRxn this on rate and list of ancillary interfaces...
-            oneRxn.rateList.emplace_back(onRate3Dka, otherIfaceLists);
-            // ...and the conjugate BackRxn the off rate and list of ancillary interfaces. and interfaces which change
-            // state (swapped, of course)
-            if (oneRxn.isReversible) {
-                backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRatekb, otherIfaceLists);
+            // check if this condition rate already exists
+            bool existedRate = false;
+            for (int i = 0; i < oneRxn.rateList.size(); i++) {
+                std::vector<std::vector<RxnIface>> tmpIfaceLists = oneRxn.rateList[i].otherIfaceLists;
+                bool sameIfaceLists = true;
+                if (tmpIfaceLists.size() != otherIfaceLists.size()) {
+                    sameIfaceLists = false;
+                } else {
+                    for (int j = 0; j < tmpIfaceLists.size(); j++) {
+                        if (tmpIfaceLists[j].size() != otherIfaceLists[j].size()) {
+                            sameIfaceLists = false;
+                        } else {
+                            for (int k = 0; k < tmpIfaceLists[j].size(); k++) {
+                                if (tmpIfaceLists[j][k].ifaceName != otherIfaceLists[j][k].ifaceName) {
+                                    sameIfaceLists = false;
+                                }
+                                if (tmpIfaceLists[j][k].molTypeIndex != otherIfaceLists[j][k].molTypeIndex) {
+                                    sameIfaceLists = false;
+                                }
+                                if (tmpIfaceLists[j][k].absIfaceIndex != otherIfaceLists[j][k].absIfaceIndex) {
+                                    sameIfaceLists = false;
+                                }
+                                if (tmpIfaceLists[j][k].relIfaceIndex != otherIfaceLists[j][k].relIfaceIndex) {
+                                    sameIfaceLists = false;
+                                }
+                                if (tmpIfaceLists[j][k].requiresState != otherIfaceLists[j][k].requiresState) {
+                                    sameIfaceLists = false;
+                                }
+                                if (tmpIfaceLists[j][k].requiresInteraction != otherIfaceLists[j][k].requiresInteraction) {
+                                    sameIfaceLists = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (sameIfaceLists == true) {
+                    oneRxn.rateList[i].rate = onRate3Dka;
+                    backRxns[oneRxn.conjBackRxnIndex].rateList[i].rate = this->offRatekb;
+                    existedRate = true;
+                }
+            }
+            if (existedRate == false) {
+                // ...give that ForwardRxn this on rate and list of ancillary interfaces...
+                oneRxn.rateList.emplace_back(onRate3Dka, otherIfaceLists);
+                // ...and the conjugate BackRxn the off rate and list of ancillary interfaces. and interfaces which change
+                // state (swapped, of course)
+                if (oneRxn.isReversible) {
+                    backRxns[oneRxn.conjBackRxnIndex].rateList.emplace_back(this->offRatekb, otherIfaceLists);
+                }
             }
             --totSpecies; // since it's not a new reaction, reduce the number of total species...
             std::cout << "Forward Reaction " << &oneRxn - &forwardRxns[0]

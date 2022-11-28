@@ -11,12 +11,23 @@
  */
 #include "boundary_conditions/reflect_functions.hpp"
 
-void reflect_complex_rad_rot(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput)
+void reflect_complex_rad_rot(const Membrane& membraneObject, Complex& targCom, std::vector<Molecule>& moleculeList, double RS3Dinput, bool isInsideCompartment)
 {
-    if (membraneObject.isSphere == true)
-        reflect_complex_rad_rot_sphere(membraneObject, targCom, moleculeList, RS3Dinput);
-    else
-        reflect_complex_rad_rot_box(membraneObject, targCom, moleculeList, RS3Dinput);
+    if (isInsideCompartment == false) {
+      if (membraneObject.isSphere == true)
+          reflect_complex_rad_rot_sphere(membraneObject, targCom, moleculeList, membraneObject.sphereR, RS3Dinput);
+      else
+          reflect_complex_rad_rot_box(membraneObject, targCom, moleculeList, RS3Dinput);
+
+      if (moleculeList[targCom.memberList[0]].enforceCompartmentBC == true) {
+          reflect_complex_compartment(membraneObject, targCom, moleculeList, RS3Dinput);
+      }
+
+    } else {
+      // inside the compartment
+      reflect_complex_rad_rot_sphere(membraneObject, targCom, moleculeList, membraneObject.compartmentR, RS3Dinput);
+    }
+
 }
 
 // /*! \file reflect_complex_targCom.radius_rot.cpp

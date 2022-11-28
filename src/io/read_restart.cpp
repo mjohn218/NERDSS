@@ -7,6 +7,7 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
     std::vector<MolTemplate>& molTemplateList, std::vector<ForwardRxn>& forwardRxns,
     std::vector<BackRxn>& backRxns, std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<TransmissionRxn>& transmissionRxns,
     std::map<std::string, int>& observablesList, Membrane& membraneObject, copyCounters& counterArrays)
 {
     // TRACE();
@@ -73,7 +74,7 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
             }
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
-            restartFile >> membraneObject.implicitLipid >> membraneObject.TwoD >> membraneObject.isBox >> membraneObject.isSphere >> membraneObject.sphereR;
+            restartFile >> membraneObject.implicitLipid >> membraneObject.TwoD >> membraneObject.isBox >> membraneObject.isSphere >> membraneObject.sphereR >> membraneObject.hasCompartment >> membraneObject.compartmentR;
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.overlapSepLimit;
@@ -194,7 +195,8 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 restartFile >> oneTemp.copies >> oneTemp.mass >> oneTemp.radius;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-                restartFile >> oneTemp.isLipid >> oneTemp.isImplicitLipid >> oneTemp.isRod >> oneTemp.isPoint >> oneTemp.checkOverlap >> oneTemp.countTransition >> oneTemp.transitionMatrixSize;
+                restartFile >> oneTemp.isLipid >> oneTemp.isImplicitLipid >> oneTemp.isRod >> oneTemp.isPoint >> oneTemp.checkOverlap >> oneTemp.countTransition >> oneTemp.transitionMatrixSize 
+                >> oneTemp.outsideCompartment >> oneTemp.insideCompartment >> oneTemp.crossesCompartment >> oneTemp.transmissionRxnIndex;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 restartFile >> oneTemp.comCoord.x >> oneTemp.comCoord.y >> oneTemp.comCoord.z;
@@ -363,7 +365,8 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
             unsigned forwardRxnsSize { 0 };
             unsigned backRxnsSize { 0 };
             unsigned createDestructRxnsSize { 0 };
-            restartFile >> RxnBase::numberOfRxns >> forwardRxnsSize >> backRxnsSize >> createDestructRxnsSize
+            unsigned transmissionRxnSize { 0 };
+            restartFile >> RxnBase::numberOfRxns >> forwardRxnsSize >> backRxnsSize >> createDestructRxnsSize >> transmissionRxnSize
                 >> RxnBase::totRxnSpecies;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << " Num rxns: " << RxnBase::numberOfRxns << " forwardRxns: " << forwardRxnsSize << '\n';
@@ -776,7 +779,133 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 }
                 createDestructRxns.emplace_back(tmpRxn);
             }
+
+            // tranmission reaction 
+            std::cout << "Now transmission reaction " << '\n';
+            for (unsigned rxnItr { 0 }; rxnItr < transmissionRxnSize; ++rxnItr) {
+                TransmissionRxn tmpRxn {};
+                restartFile >> tmpRxn.absRxnIndex >> tmpRxn.relRxnIndex;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                int rxnType { -1 };
+                restartFile >> rxnType >> tmpRxn.isOnMem;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                restartFile >> tmpRxn.isObserved; //>>tmpRxn.observeLabel;
+                if (tmpRxn.isObserved)
+                    restartFile >> tmpRxn.observeLabel;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                tmpRxn.rxnType = static_cast<ReactionType>(rxnType);
+
+                // integer reactants
+                unsigned intReactantListSize { 0 };
+                restartFile >> intReactantListSize;
+                for (unsigned itr { 0 }; itr < intReactantListSize; ++itr) {
+                    int reactant { -1 };
+                    restartFile >> reactant;
+                    tmpRxn.intReactantList.push_back(reactant);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                // integer products
+                unsigned intProductListSize { 0 };
+                restartFile >> intProductListSize;
+                for (unsigned itr { 0 }; itr < intProductListSize; ++itr) {
+                    int product { -1 };
+                    restartFile >> product;
+                    tmpRxn.intProductList.push_back(product);
+                }
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                // reactant list
+                unsigned reactantMolListSize { 0 };
+                restartFile >> reactantMolListSize;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                for (unsigned itr { 0 }; itr < reactantMolListSize; ++itr) {
+                    TransmissionRxn::TransmissionMol oneMol {};
+                    unsigned interfaceListSize { 0 };
+                    restartFile >> oneMol.molTypeIndex >> oneMol.molName >> interfaceListSize;
+                    std::cout << " Destroy molecule: " << oneMol.molName << std::endl;
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    for (unsigned ifaceItr { 0 }; ifaceItr < interfaceListSize; ++ifaceItr) {
+                        RxnIface tmpIface {};
+                        restartFile >> tmpIface.molTypeIndex;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        restartFile >> tmpIface.ifaceName >> tmpIface.absIfaceIndex >> tmpIface.relIfaceIndex;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        restartFile >> tmpIface.requiresState >> tmpIface.requiresInteraction;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        oneMol.interfaceList.emplace_back(tmpIface);
+                    }
+                    tmpRxn.reactantMolList.emplace_back(oneMol);
+                }
+
+                // product list
+                unsigned productMolListSize { 0 };
+                restartFile >> productMolListSize;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                for (unsigned itr { 0 }; itr < productMolListSize; ++itr) {
+                    TransmissionRxn::TransmissionMol oneMol {};
+                    unsigned interfaceListSize { 0 };
+                    restartFile >> oneMol.molTypeIndex >> oneMol.molName >> interfaceListSize;
+                    std::cout << " CREATION OF MOL: " << oneMol.molName << std::endl;
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    for (unsigned ifaceItr { 0 }; ifaceItr < interfaceListSize; ++ifaceItr) {
+                        RxnIface tmpIface {};
+                        restartFile >> tmpIface.molTypeIndex;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        restartFile >> tmpIface.ifaceName >> tmpIface.absIfaceIndex >> tmpIface.relIfaceIndex;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        restartFile >> tmpIface.requiresState >> tmpIface.requiresInteraction;
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        oneMol.interfaceList.emplace_back(tmpIface);
+                    }
+                    tmpRxn.productMolList.emplace_back(oneMol);
+                }
+
+                unsigned rateListSize { 0 };
+                restartFile >> rateListSize;
+                for (unsigned itr { 0 }; itr < rateListSize; ++itr) {
+                    RxnBase::RateState tmpRate {};
+                    restartFile >> tmpRate.rate;
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                    unsigned otherIfaceListsSize { 0 };
+                    restartFile >> otherIfaceListsSize;
+                    restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                    // for (unsigned ifaceItr { 0 }; ifaceItr < otherIfaceListSize; ++ifaceItr) {
+                    //     RxnIface tmpIface {};
+                    //     restartFile >> tmpIface.molTypeIndex >> tmpIface.ifaceName >> tmpIface.absIfaceIndex
+                    //         >> tmpIface.relIfaceIndex >> tmpIface.requiresState >> tmpIface.requiresInteraction;
+                    //     restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    //     tmpRate.otherIfaceLists.emplace_back(std::vector<RxnIface> { tmpIface });
+                    // }
+
+                    // restartFile >> otherIfaceListsSize;
+                    // restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    for (unsigned listItr { 0 }; listItr < otherIfaceListsSize; ++listItr) {
+                        unsigned oneListSize { 0 };
+                        std::vector<RxnIface> tmpIfaceVec {};
+                        restartFile >> oneListSize;
+                        std::cout << "onelistsize: " << oneListSize << '\n';
+                        restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        for (unsigned anccIfaceItr { 0 }; anccIfaceItr < oneListSize; ++anccIfaceItr) {
+                            RxnIface otherIface {};
+                            restartFile >> otherIface.molTypeIndex >> otherIface.ifaceName >> otherIface.absIfaceIndex
+                                >> otherIface.relIfaceIndex >> otherIface.requiresState
+                                >> otherIface.requiresInteraction;
+                            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                            tmpIfaceVec.emplace_back(otherIface);
+                        }
+                        tmpRate.otherIfaceLists.push_back(tmpIfaceVec);
+                    }
+                    //copied new version up to here.
+                    tmpRxn.rateList.emplace_back(tmpRate);
+                }
+                transmissionRxns.emplace_back(tmpRxn);
+            }
         }
+
         std::cout << "Now read in coordinates " << std::endl;
         restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         // write Molecules

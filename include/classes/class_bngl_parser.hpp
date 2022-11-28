@@ -232,7 +232,7 @@ struct ParsedRxn : public ForwardRxn {
      * relevant reactions for use in the simulations
      */
     void assemble_reactions(std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
-        std::vector<CreateDestructRxn>& createDestructRxns, const std::vector<MolTemplate>& molTemplateList);
+        std::vector<CreateDestructRxn>& createDestructRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<MolTemplate>& molTemplateList);
 
     // Parsing function
     void set_value(std::string& line, RxnKeyword rxnKeyword);

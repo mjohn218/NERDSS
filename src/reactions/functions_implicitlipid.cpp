@@ -212,3 +212,81 @@ double pimplicitlipid_3D(double z, paramsIL& parameters3D)
     }
     return out;
 }
+
+// for the droplet (compartment)
+// binding probability, no need to time the lipid density
+double prob_entering_compartment(double dr, paramsIL& parameters)
+{
+    double h = parameters.dt;
+    double D = parameters.Dtot;
+    double sigma = parameters.sigma;
+    double ka = parameters.ka;
+    double kd = 4.0 * M_PI * sigma * D;
+    double R = parameters.compartmentR;
+    double r = dr + R;
+    double rho = parameters.compartSiteRho;
+    if (ka < 1E-15) {
+        return 0.0;
+    }
+    if ( dr < sigma ){
+        dr = sigma;
+        r = dr + R;
+    }
+    double alpha = sqrt(D*h) * (ka + kd) / ( sigma*kd );
+    double conf = R/r * 2.0 * M_PI * rho * sigma * sigma * ka * kd / (ka + kd) / (ka + kd);
+    double x1 = (r+R-sigma)/sqrt(4.0*D*h);
+    double x2 = (r-R-sigma)/sqrt(4.0*D*h);
+    double func1{0};
+    double func2{0};
+    if (std::isinf(exp(alpha*alpha+2.0*alpha*x2)) == true) { // so for x1, it is also inf
+        func1 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x1)/sqrt(M_PI) )*exp(-x1*x1) + (2.0*alpha*x1+1.0)*erfc(x1);
+        func2 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x2)/sqrt(M_PI) )*exp(-x2*x2) + (2.0*alpha*x2+1.0)*erfc(x2);
+    }else if (std::isinf(exp(alpha*alpha+2.0*alpha*x1)) == true && std::isinf(exp(alpha*alpha+2.0*alpha*x2)) == false) {
+        func1 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x1)/sqrt(M_PI) )*exp(-x1*x1) + (2.0*alpha*x1+1.0)*erfc(x1);
+        func2 = - exp(alpha*alpha+2.0*alpha*x2)*erfc(alpha+x2) + (2.0*alpha*x2+1.0)*erfc(x2) - 2.0*alpha/sqrt(M_PI)*exp(-x2*x2);
+    }else{
+        func1 = - exp(alpha*alpha+2.0*alpha*x1)*erfc(alpha+x1) + (2.0*alpha*x1+1.0)*erfc(x1) - 2.0*alpha/sqrt(M_PI)*exp(-x1*x1);
+        func2 = - exp(alpha*alpha+2.0*alpha*x2)*erfc(alpha+x2) + (2.0*alpha*x2+1.0)*erfc(x2) - 2.0*alpha/sqrt(M_PI)*exp(-x2*x2);
+    }
+    double out = conf * ( func1 - func2 );
+    return out;
+}
+
+double prob_exiting_compartment(double dr, paramsIL& parameters)
+{
+    double h = parameters.dt;
+    double D = parameters.Dtot;
+    double sigma = parameters.sigma;
+    double ka = parameters.ka;
+    double kd = 4.0 * M_PI * sigma * D;
+    double R = parameters.compartmentR;
+    double r = - dr + R;
+    double rho = parameters.compartSiteRho;
+
+    if (ka < 1E-15) {
+        return 0.0;
+    }
+    if ( dr < sigma ){
+        dr = sigma;
+        r = - dr + R;
+    }
+    double alpha = sqrt(D*h) * (ka + kd) / ( sigma*kd );
+    double conf = R/r * 2.0 * M_PI * rho * sigma * sigma * ka * kd / (ka + kd) / (ka + kd);
+    double x1 = (R-sigma+r)/sqrt(4.0*D*h);
+    double x2 = (R-sigma-r)/sqrt(4.0*D*h);
+    double func1 = 0.0;
+    double func2 = 0.0;
+    if (std::isinf(exp(alpha*alpha+2.0*alpha*x2)) == true) { // so for x1, it is also inf
+        func1 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x1)/sqrt(M_PI) )*exp(-x1*x1) + (2.0*alpha*x1+1.0)*erfc(x1);
+        func2 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x2)/sqrt(M_PI) )*exp(-x2*x2) + (2.0*alpha*x2+1.0)*erfc(x2);
+    }else if (std::isinf(exp(alpha*alpha+2.0*alpha*x1)) == true && std::isinf(exp(alpha*alpha+2.0*alpha*x2)) == false) {
+        func1 = - ( 2.0*alpha/sqrt(M_PI) + 1.0/(alpha+x1)/sqrt(M_PI) )*exp(-x1*x1) + (2.0*alpha*x1+1.0)*erfc(x1);
+        func2 = - exp(alpha*alpha+2.0*alpha*x2)*erfc(alpha+x2) + (2.0*alpha*x2+1.0)*erfc(x2) - 2.0*alpha/sqrt(M_PI)*exp(-x2*x2);
+    }else{
+        func1 = - exp(alpha*alpha+2.0*alpha*x1)*erfc(alpha+x1) + (2.0*alpha*x1+1.0)*erfc(x1) - 2.0*alpha/sqrt(M_PI)*exp(-x1*x1);
+        func2 = - exp(alpha*alpha+2.0*alpha*x2)*erfc(alpha+x2) + (2.0*alpha*x2+1.0)*erfc(x2) - 2.0*alpha/sqrt(M_PI)*exp(-x2*x2);
+    }
+    double out = conf * ( func1 - func2 );
+
+    return out;
+}

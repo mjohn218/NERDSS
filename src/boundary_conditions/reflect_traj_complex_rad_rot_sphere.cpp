@@ -13,7 +13,7 @@
 #include "math/matrix.hpp"
 #include "tracing.hpp"
 
-void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double RS3Dinput)
+void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, const Membrane& membraneObject, double radius, double RS3Dinput)
 {
     // TRACE();
 
@@ -26,7 +26,9 @@ void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<M
     } else {
         RS3D = RS3Dinput;
     }
-    double sphereR = membraneObject.sphereR - RS3D;
+
+    //double sphereR = membraneObject.sphereR - RS3D;
+    double sphereR = radius - RS3D;
 
     std::array<double, 9> M;
     M = create_euler_rotation_matrix(targCom.trajRot);
@@ -97,6 +99,7 @@ void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<M
         //Test that new coordinates have not pushed you out of the box for a very large complex, if so, resample  rotation matrix.
         //std::cout << "RECHECK THAT COMPLEX DOES NOT SPAN SPHERE IN SUBROUTINE REFLECT_TRAJ_COMPLEX_RAD_ROT. Complex: "
         //          << targCom.index << " size:" << targCom.memberList.size() << '\n';
-        reflect_traj_check_span(params, targCom, moleculeList, membraneObject, RS3Dinput);
+        //reflect_traj_check_span(params, targCom, moleculeList, membraneObject, radius, RS3Dinput);
+        reflect_traj_check_span_sphere(params, targCom, moleculeList, membraneObject, radius, RS3Dinput);
     }
 }

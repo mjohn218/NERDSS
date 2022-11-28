@@ -36,18 +36,21 @@ void create_complex_propagation_vectors(const Parameters& params, Complex& targC
 
     //determine RS3Dinput
     double RS3Dinput { 0.0 };
-
-    for (auto& molIndex : targCom.memberList) {
+    if(membraneObject.implicitLipid){
+      for (auto& molIndex : targCom.memberList) {
         for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
-            if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
-                RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
-                break;
-            }
+	  if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - moleculeList[molIndex].molTypeIndex) < 1E-2) {
+	    RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+	    break;
+	  }
         }
+      }
     }
 
-    //  reflect the boundary and also check_if_span, but not necessary for complex on sphere surface
-    reflect_traj_complex_rad_rot(params, moleculeList, targCom, membraneObject, RS3Dinput);
+    //  reflect the boundary and also check_if_span, but not necessary for complex on sphere surfac
+    int index = moleculeList[targCom.memberList[0]].molTypeIndex;
+    bool isInsideCompartment = molTemplateList[index].insideCompartment;
+    reflect_traj_complex_rad_rot(params, moleculeList, targCom, membraneObject, RS3Dinput, isInsideCompartment);
 
     // // Create Gaussian distributed random translational motion
     // targCom.trajTrans.x = sqrt(2.0 * params.timeStep * targCom.D.x) * GaussV();

@@ -16,33 +16,33 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
 
     if (molTemplateList[createdMol.molTypeIndex].D.z == 0
         && std::abs(createdMol.comCoord.z) - std::abs((membraneObject.waterBox.z / 2)) > 1E-6) {
-        // std::cerr << "Molecule " << createdMol.index << " of type " << molTemplateList[createdMol.molTypeIndex].molName
-        //           << " is off the membrane. Writing coordinates and exiting.\n";
+        //std::cerr << "Molecule " << createdMol.index << " of type " << molTemplateList[createdMol.molTypeIndex].molName
+        //          << " is off the membrane. Writing coordinates and exiting.\n";
         return true;
     }
 
     // Now make sure the Molecule is still inside the box in all dimensions
     if (createdMol.comCoord.z > (membraneObject.waterBox.z / 2) || createdMol.comCoord.z + 1E-6 < -(membraneObject.waterBox.z / 2)) {
-        // std::cout << "Molecule " << createdMol.index
-        //           << " is outside simulation volume in the z-dimension, with center of mass coordinates ["
-        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        //std::cout << "Molecule " << createdMol.index
+        //          << " is outside simulation volume in the z-dimension, with center of mass coordinates ["
+        //          << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (createdMol.comCoord.y > (membraneObject.waterBox.y / 2)
         || createdMol.comCoord.y + 1E-6 < -(membraneObject.waterBox.y / 2)) {
-        // std::cout << "Molecule " << createdMol.index
-        //           << " is outside simulation volume in the y-dimension, with center of mass coordinates ["
-        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        //std::cout << "Molecule " << createdMol.index
+        //          << " is outside simulation volume in the y-dimension, with center of mass coordinates ["
+        //          << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (createdMol.comCoord.x > (membraneObject.waterBox.x / 2)
         || createdMol.comCoord.x + 1E-6 < -(membraneObject.waterBox.x / 2)) {
-        // std::cout << "Molecule " << createdMol.index
-        //           << " is outside simulation volume in the x-dimension, with center of mass coordinates ["
-        //           << createdMol.comCoord << "]. Attempting to fit back into box.\n";
+        //std::cout << "Molecule " << createdMol.index
+        //          << " is outside simulation volume in the x-dimension, with center of mass coordinates ["
+        //          << createdMol.comCoord << "]. Attempting to fit back into box.\n";
         return true;
     } else if (currBin > (simulVolume.numSubCells.tot) || currBin < 0) {
-        // std::cout << "Molecule " << createdMol.index
-        //           << " is outside simulation volume with center of mass coordinates [" << createdMol.comCoord
-        //           << "]. Attempting to fit back into box.\n";
+        //std::cout << "Molecule " << createdMol.index
+        //          << " is outside simulation volume with center of mass coordinates [" << createdMol.comCoord
+        //          << "]. Attempting to fit back into box.\n";
         return true;
     } else {
         // if it's inside the box, check if it overlaps with any molecule
@@ -72,8 +72,10 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
                                     - partMol.interfaceList[iface2Itr].coord };
                                 ifaceVec.calc_magnitude();
 
-                                if (ifaceVec.magnitude > oneRxn.bindRadius)
+                                if (ifaceVec.magnitude < oneRxn.bindRadius) {
+                                    //    std::cerr << "line 76 in overlap" << std::endl;
                                     return true;
+                                }
                             } else if (isReactant(
                                            createdMol.interfaceList[iface1Itr], createdMol, oneRxn.reactantListNew[1])
                                 && isReactant(partMol.interfaceList[iface2Itr], partMol, oneRxn.reactantListNew[0])) {
@@ -83,8 +85,10 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
                                     - partMol.interfaceList[iface2Itr].coord };
                                 ifaceVec.calc_magnitude();
 
-                                if (ifaceVec.magnitude > oneRxn.bindRadius)
+                                if (ifaceVec.magnitude < oneRxn.bindRadius) {
+                                    //    std::cerr << "line 89 in overlap" << std::endl;
                                     return true;
+                                }
                             } else {
                                 continue;
                             }

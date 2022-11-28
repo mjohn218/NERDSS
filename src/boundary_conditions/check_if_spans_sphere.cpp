@@ -9,14 +9,14 @@
 #include <iostream>
 
 void check_if_spans_sphere(bool& cancelAssoc, const Parameters& params, Complex& reactCom1, Complex& reactCom2,
-    std::vector<Molecule>& moleculeList, const Membrane& membraneObject)
+    std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double radius)
 {
     // TRACE();
     // Associating proteins have been moved to contact. Before assigning them to the complexsame complex,
     // test to see if the complex is too big to fit in the box.
 
     // declare the boundary side of the system;
-    double sphereR = membraneObject.sphereR; // no considering the reflecting-surface, because here we are checking whether to span the box
+    double sphereR = radius; // no considering the reflecting-surface, because here we are checking whether to span the box
 
     // find the new COM and new radius, to check whether the new radius is larger than the sphere radius
     Coord newCom;

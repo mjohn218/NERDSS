@@ -64,8 +64,15 @@ void SimulVolume::Dimensions::check_dimensions(const Parameters& params, const M
         else
             z = 1;
     }
+    /*HARD CODING TO LIMIT THE NUMBER OF SUBVOLUMES, TOO MANY CAN BE VERY SLOW!*/
+    if(x >20) x=20;
+    if(y >20) y=20;
+    if(z >20) z=20;
+
     tot = x * y * z;
 
+    
+    
     // Now make sure There aren't too many pairs of cells.
     //At the same time, if the numberOfMolecules changes throughout the simulation,
     //do not want the subvolumes to be too large.
@@ -292,11 +299,13 @@ void SimulVolume::update_memberMolLists(const Parameters& params, std::vector<Mo
                 //define RS3Dinput
                 double RS3Dinput { 0.0 };
 
-                for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
-                    if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - mol.molTypeIndex) < 1E-2) {
-                        RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
-                        //   std::cout << mol.molTypeIndex << "\t" << membraneObject.RS3Dvect[RS3Dindex + 400] << "\t" << RS3Dindex << "\n";
-                        break;
+                if(membraneObject.implicitLipid == true){
+                    for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
+                        if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - mol.molTypeIndex) < 1E-2) {
+                            RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+                            //   std::cout << mol.molTypeIndex << "\t" << membraneObject.RS3Dvect[RS3Dindex + 400] << "\t" << RS3Dindex << "\n";
+                            break;
+                        }
                     }
                 }
 

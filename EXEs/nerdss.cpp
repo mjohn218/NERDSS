@@ -1,194 +1,220 @@
-/* \file nerdss.cpp
- * \brief Main function for simulation.
- *
- * ## TODO:
- *  - Change freelist from unordered list of relative iface indices to ordered list of absolute indices.
- *    really speed up evaluate_binding_pair
- *  - Write species tracker (tracks connectivity)
- *  - Compress reflect_traj_complex_rad_rot, reflect_traj_check_span, reflect_traj_rad_rot_nocheck
- */
+ /* \file nerdss.cpp
+  * \brief Main function for simulation.
+  *
+  * ## TODO:
+  *  - Change freelist from unordered list of relative iface indices to ordered list of absolute indices.
+  *    really speed up evaluate_binding_pair
+  *  - Write species tracker (tracks connectivity)
+  *  - Compress reflect_traj_complex_rad_rot, reflect_traj_check_span, reflect_traj_rad_rot_nocheck
+  */
 
-#include "boundary_conditions/reflect_functions.hpp"
-#include "io/io.hpp"
-#include "math/constants.hpp"
-#include "math/matrix.hpp"
-#include "math/rand_gsl.hpp"
-#include "parser/parser_functions.hpp"
-#include "reactions/association/association.hpp"
-#include "reactions/bimolecular/bimolecular_reactions.hpp"
-#include "reactions/implicitlipid/implicitlipid_reactions.hpp"
-#include "reactions/shared_reaction_functions.hpp"
-#include "reactions/unimolecular/unimolecular_reactions.hpp"
-#include "system_setup/system_setup.hpp"
-#include "tracing.hpp"
-#include "trajectory_functions/trajectory_functions.hpp"
+ #include "boundary_conditions/reflect_functions.hpp"
+ #include "io/io.hpp"
+ #include "math/constants.hpp"
+ #include "math/matrix.hpp"
+ #include "math/rand_gsl.hpp"
+ #include "parser/parser_functions.hpp"
+ #include "reactions/association/association.hpp"
+ #include "reactions/bimolecular/bimolecular_reactions.hpp"
+ #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
+ #include "reactions/shared_reaction_functions.hpp"
+ #include "reactions/unimolecular/unimolecular_reactions.hpp"
+ #include "system_setup/system_setup.hpp"
+ #include "tracing.hpp"
+ #include "trajectory_functions/trajectory_functions.hpp"
+ #include <sys/stat.h>
+ #include <chrono>
+ #include <cstring>
+ #include <iomanip>
+ #include <random>
+ #include <sstream>
+ gsl_rng* r; /* global generator */
 
-#include <chrono>
-#include <cstring>
-#include <iomanip>
-#include <random>
-#include <sstream>
+ // easier to read timer
+ using MDTimer = std::chrono::system_clock;
+ using timeDuration = std::chrono::duration<double, std::chrono::seconds>;
+ /* INITIALIZE GLOBALS */
+ long long randNum = 0;
+ unsigned long totMatches = 0;
 
-gsl_rng* r; /* global generator */
+ int main(int argc, char* argv[])
+ {
+     /* SIMULATION SETUP */
+     // Get seed for random number generation
+     // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
+     std::random_device rd {};
+     unsigned seed { rd() };
+     // get time point for total simulation time
+     MDTimer::time_point totalTimeStart = MDTimer::now();
 
-// easier to read timer
-using MDTimer = std::chrono::system_clock;
-using timeDuration = std::chrono::duration<double, std::chrono::seconds>;
+     /* SET UP SIMULATION LISTS */
+     // Simulation species lists
+     std::vector<MolTemplate> molTemplateList {}; // list of provided molecule templates
 
-/* INITIALIZE GLOBALS */
-long long randNum = 0;
-unsigned long totMatches = 0;
+     // Reaction lists
+     std::vector<ForwardRxn> forwardRxns {}; // list of forward reactions
+     std::vector<BackRxn> backRxns {}; // list of back reactions (corresponding to forward reactions)
+     std::vector<CreateDestructRxn> createDestructRxns {}; // list of creation and destruction reactions
+     std::vector<TransmissionRxn> transmissionRxns {}; // list of transmission reactions
+     forwardRxns.reserve(10);
+     backRxns.reserve(10);
 
-int main(int argc, char* argv[])
-{
-    /* SIMULATION SETUP */
-    // Get seed for random number generation
-    // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
-    std::random_device rd {};
-    unsigned seed { rd() };
+     /* PARSE INPUT */
+     Parameters params {};
+     std::string paramFile {};
+     // set up some output files
+ 	// Creating a directory
+ 	mkdir("PDB", 0777);
+     mkdir("RESTARTS", 0777);
 
-    // get time point for total simulation time
-    MDTimer::time_point totalTimeStart = MDTimer::now();
+     // TODO: change these to open and close as needed
+     std::string observablesFileName { "observables_time.dat" };
+     std::string trajFileName { "trajectory.xyz" };
+     std::string transitionFileName { "transition_matrix_time.dat" };
+     std::string restartFileName { "restart.dat" };
+     std::string addFileNameInput {}; // this is for restart with changed params or adding molecules and reactions
+     std::string restartFileNameInput; //if you read it in, allow it to have its own name.
+     params.rank = -1; //for serial jobs, this impacts the name of the restart file.
 
-    /* SET UP SIMULATION LISTS */
-    // Simulation species lists
-    std::vector<MolTemplate> molTemplateList {}; // list of provided molecule templates
+     // command line flag parser
+     parse_command(argc, argv, params, paramFile, restartFileNameInput, addFileNameInput, seed);
 
-    // Reaction lists
-    std::vector<ForwardRxn> forwardRxns {}; // list of forward reactions
-    std::vector<BackRxn> backRxns {}; // list of back reactions (corresponding to forward reactions)
-    std::vector<CreateDestructRxn> createDestructRxns {}; // list of creation and destruction reactions
-    forwardRxns.reserve(10);
-    backRxns.reserve(10);
+     auto startTime = MDTimer::to_time_t(totalTimeStart);
+     char charTime[24];
+     std::cout << "\nStart date: ";
+     if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&startTime)))
+         std::cout << charTime << '\n';
+     std::cout << "RNG Seed: " << seed << std::endl;
 
-    /* PARSE INPUT */
-    Parameters params {};
-    std::string paramFile {};
+     //random generator
+     const gsl_rng_type* T;
+     T = gsl_rng_default;
+     r = gsl_rng_alloc(T);
+     gsl_rng_set(r, seed);
 
-    // set up some output files
-    // TODO: change these to open and close as needed
-    std::string observablesFileName { "observables_time.dat" };
-    std::string trajFileName { "trajectory.xyz" };
-    std::string transitionFileName { "transition_matrix_time.dat" };
-    std::string restartFileName { "restart.dat" };
-    std::string addFileNameInput {}; // this is for restart with changed params or adding molecules and reactions
-    std::string restartFileNameInput; //if you read it in, allow it to have its own name.
-    params.rank=-1;//for serial jobs, this impacts the name of the restart file.
+ 	bool debugRNG = false; //Normally we do not need to restart with the same rng sequence, set this true to print the rng_state so that restarts can be identical
+     /* SET UP SOME IMPORTANT VARIABLES */
+     // 2D reaction probability tables
+     std::vector<gsl_matrix*> survMatrices; // used in evaluate_binding_pair_com
+     std::vector<gsl_matrix*> normMatrices; // idem
+     std::vector<gsl_matrix*> pirMatrices; // idem
+     double* tableIDs = new double[params.max2DRxns * 2]; // TODO: Change this?
 
-    // command line flag parser
-    parse_command(argc, argv, params, paramFile, restartFileNameInput, addFileNameInput, seed);
+     /* SET UP SYSTEM */
+     std::map<std::string, int> observablesList;
+     SimulVolume simulVolume {};
+     std::vector<Molecule> moleculeList {}; // list of all molecules in the system
+     std::vector<Complex> complexList {}; // list of all complexes in the system
+     Membrane membraneObject; //class structure that contains boundary conditions, implicit lipid model.
+     copyCounters counterArrays; // contains arrays tracking bound molecule pairs, and species copy nums.
+     int implicitlipidIndex { 0 }; // implicit-lipid index, which is also stored in membraneObject.implicitlipidIndex.
+     long long int simItr { 0 };
+     // some variables used for parsing add.inp
 
-    auto startTime = MDTimer::to_time_t(totalTimeStart);
-    char charTime[24];
-    std::cout << "\nStart date: ";
-    if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&startTime)))
-        std::cout << charTime << '\n';
-    std::cout << "RNG Seed: " << seed << std::endl;
+     int numMolTemplateBeforeAdd { 0 }; // number of molTemp before add
+     int numDoubleBeforeAdd { 0 }; // number of double complex before add
+     int numForwardRxnBdeforeAdd { 0 }; //number of Forw React before add
+     int numBackRxnBdeforeAdd { 0 }; //number of Back React before add
+     int numCreatDestructRxnBdeforeAdd { 0 }; //num of creat and destruct react before add
+     int tempLastStateIndexBeforeAdd { 0 }; // the last state index before add
+     int tempLastStateIndexAfterAdd { 0 }; // the last state index after add
+     int numStateAdd { 0 }; // num of added states
+     int totalSpeciesNum { 0 }; //total species num after add
+     init_association_events(counterArrays); //initialize event counters to zero. Restart will update any non-zero values.
 
-    //random generator
-    const gsl_rng_type* T;
-    T = gsl_rng_default;
-    r = gsl_rng_alloc(T);
-    gsl_rng_set(r, seed);
+     std::cout << "\nParsing Input: " << std::endl;
+     if (!params.fromRestart && paramFile != "") {
+         std::cout << "This is a new simulation with input file: " << paramFile << std::endl;
+         // Parse the input files
+         parse_input(paramFile, params, observablesList, forwardRxns, backRxns, createDestructRxns, transmissionRxns, molTemplateList, membraneObject);
 
-    /* SET UP SOME IMPORTANT VARIABLES */
-    // 2D reaction probability tables
-    std::vector<gsl_matrix*> survMatrices; // used in evaluate_binding_pair_com
-    std::vector<gsl_matrix*> normMatrices; // idem
-    std::vector<gsl_matrix*> pirMatrices; // idem
-    double* tableIDs = new double[params.max2DRxns * 2]; // TODO: Change this?
+         // set the number of states of implicit lipid
+         for (auto& molTemplateTmp : molTemplateList) {
+             if (molTemplateTmp.isImplicitLipid == true) {
+                 membraneObject.nStates = static_cast<int>(molTemplateTmp.interfaceList[0].stateList.size());
+                 break;
+             }
+         }
+         // initialize numberOfFreeLipidsEachState & numberOfProteinEachState
+         for (int tmpStateIndex = 0; tmpStateIndex < membraneObject.nStates; tmpStateIndex++) {
+             membraneObject.numberOfFreeLipidsEachState.emplace_back(0);
+             membraneObject.numberOfProteinEachState.emplace_back(0);
+         }
 
-    /* SET UP SYSTEM */
-    std::map<std::string, int> observablesList;
-    SimulVolume simulVolume {};
-    std::vector<Molecule> moleculeList {}; // list of all molecules in the system
-    std::vector<Complex> complexList {}; // list of all complexes in the system
-    Membrane membraneObject; //class structure that contains boundary conditions, implicit lipid model.
-    copyCounters counterArrays; // contains arrays tracking bound molecule pairs, and species copy nums.
-    int implicitlipidIndex { 0 }; // implicit-lipid index, which is also stored in membraneObject.implicitlipidIndex.
+         // verify the implicit lipid is the first
+         for (auto& tempMolTemplate : molTemplateList) {
+             if (tempMolTemplate.isImplicitLipid == true && tempMolTemplate.molTypeIndex != 0) {
+                 std::cerr << "Error: implicit Lipid must be the first molecule type, exiting.\n";
+                 exit(1);
+             }
+         }
 
-    long long int simItr { 0 };
+         MolTemplate::numMolTypes = molTemplateList.size();
+         std::cout << "NUMBER OF MOLECULE TYPES: " << params.numMolTypes
+                   << "NUMBER OF INTERFACES PLUS STATES, including PRODUCTS: " << params.numTotalSpecies << std::endl;
 
-    // some variables used for parsing add.inp
+         // write the Observables file header and initial values
+         std::ofstream observablesFile { observablesFileName };
+         if (observablesList.size() == 1) {
+             observablesFile << "Time (s)," << observablesList.begin()->first << '\n';
+             observablesFile << "0,0\n";
+         } else if (observablesList.size() > 1) {
+             observablesFile << "Time (s)";
+             for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
+                 observablesFile << ',' << obsItr->first;
+             std::cout << "\n0";
+             for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
+                 std::cout << ',' << obsItr->second;
+             observablesFile << '\n'
+                             << std::flush;
+         }
 
-    int numMolTemplateBeforeAdd { 0 }; // number of molTemp before add
-    int numDoubleBeforeAdd { 0 }; // number of double complex before add
-    int numForwardRxnBdeforeAdd { 0 }; //number of Forw React before add
-    int numBackRxnBdeforeAdd { 0 }; //number of Back React before add
-    int numCreatDestructRxnBdeforeAdd { 0 }; //num of creat and destruct react before add
-    int tempLastStateIndexBeforeAdd { 0 }; // the last state index before add
-    int tempLastStateIndexAfterAdd { 0 }; // the last state index after add
-    int numStateAdd { 0 }; // num of added states
-    int totalSpeciesNum { 0 }; //total species num after add
-    init_association_events(counterArrays); //initialize event counters to zero. Restart will update any non-zero values.
+         observablesFile.close();
 
-    std::cout << "\nParsing Input: " << std::endl;
-    if (!params.fromRestart && paramFile != "") {
-        std::cout << "This is a new simulation with input file: " << paramFile << std::endl;
-        // Parse the input files
-        parse_input(paramFile, params, observablesList, forwardRxns, backRxns, createDestructRxns, molTemplateList, membraneObject);
+         unsigned long reservation {};
+         for (auto& molTemp : molTemplateList)
+             reservation += molTemp.copies;
+         moleculeList.reserve(reservation);
+         complexList.reserve(reservation);
 
-        // set the number of states of implicit lipid
-        for (auto& molTemplateTmp : molTemplateList) {
-            if (molTemplateTmp.isImplicitLipid == true) {
-                membraneObject.nStates = static_cast<int>(molTemplateTmp.interfaceList[0].stateList.size());
-                break;
+         //create water box for sphere boundary
+         if (membraneObject.isSphere) {
+             if (membraneObject.hasCompartment == true){
+                 std::cerr << "Compartment should not exist in a sphere system!"<<std::endl;
+                 exit(1);
+             }
+             membraneObject.create_water_box();
+             membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
+         }
+
+         //check the size of the compartment: make sure that the waterbox boundary to the
+         //compartment should be larger than the rMaxLimit
+         if (membraneObject.isSphere == false && membraneObject.hasCompartment == true){
+             bool tooSmallBox = false;
+            if (membraneObject.waterBox.x / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                std::cerr << "length of x dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                tooSmallBox = true;
             }
-        }
-        // initialize numberOfFreeLipidsEachState & numberOfProteinEachState
-        for (int tmpStateIndex = 0; tmpStateIndex < membraneObject.nStates; tmpStateIndex++) {
-            membraneObject.numberOfFreeLipidsEachState.emplace_back(0);
-            membraneObject.numberOfProteinEachState.emplace_back(0);
-        }
-
-        // verify the implicit lipid is the first
-        for (auto& tempMolTemplate : molTemplateList) {
-            if (tempMolTemplate.isImplicitLipid == true && tempMolTemplate.molTypeIndex != 0) {
-                std::cerr << "Error: implicit Lipid must be the first molecule type, exiting.\n";
+            if (membraneObject.waterBox.y / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                std::cerr << "length of y dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                tooSmallBox = true;
+            }
+            if (membraneObject.waterBox.z / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                std::cerr << "length of z dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                tooSmallBox = true;
+            }
+            if (tooSmallBox == true){
                 exit(1);
             }
         }
 
-        MolTemplate::numMolTypes = molTemplateList.size();
-        std::cout << "NUMBER OF MOLECULE TYPES: " << params.numMolTypes
-                  << "NUMBER OF INTERFACES PLUS STATES, including PRODUCTS: " << params.numTotalSpecies << std::endl;
-
-        // write the Observables file header and initial values
-        std::ofstream observablesFile { observablesFileName };
-        if (observablesList.size() == 1) {
-            observablesFile << "Time (s)," << observablesList.begin()->first << '\n';
-            observablesFile << "0,0\n";
-        } else if (observablesList.size() > 1) {
-            observablesFile << "Time (s)";
-            for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
-                observablesFile << ',' << obsItr->first;
-            std::cout << "\n0";
-            for (auto obsItr = observablesList.begin(); obsItr != observablesList.end(); ++obsItr)
-                std::cout << ',' << obsItr->second;
-            observablesFile << '\n'
-                            << std::flush;
-        }
-
-        observablesFile.close();
-
-        unsigned long reservation {};
-        for (auto& molTemp : molTemplateList)
-            reservation += molTemp.copies;
-        moleculeList.reserve(reservation);
-        complexList.reserve(reservation);
-
-        //create water box for sphere boundary
-        if (membraneObject.isSphere) {
-            membraneObject.create_water_box();
-            membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
-        }
-
         // generate the system coordinates, write out coordinate and topology files
-        generate_coordinates(params, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
+        //modify generate coordinates to keep molecules out of compartment initially.
+		generate_coordinates(params, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
         write_psf(params, moleculeList, molTemplateList);
 
         // set up some important parameters for implicit-lipid model;
-        initialize_paramters_for_implicitlipid_model(implicitlipidIndex, params, forwardRxns, backRxns,
+        initialize_paramters_for_implicitlipid_and_compartment_model(implicitlipidIndex, params, forwardRxns, backRxns, transmissionRxns,
             moleculeList, molTemplateList, complexList, membraneObject);
 
         // initialize the starting copy number for each state
@@ -207,8 +233,8 @@ int main(int argc, char* argv[])
         trajFile.close();
 
         // initialize transition matrix for each molType
-        for (auto& molTemp : molTemplateList){
-            if(molTemp.countTransition == true){
+        for (auto& molTemp : molTemplateList) {
+            if (molTemp.countTransition == true) {
                 molTemp.transitionMatrix.resize(molTemp.transitionMatrixSize);
                 molTemp.lifeTime.resize(molTemp.transitionMatrixSize);
                 for (int indexOne = 0; indexOne < molTemp.transitionMatrixSize; ++indexOne) {
@@ -243,7 +269,7 @@ int main(int argc, char* argv[])
 
         std::cout << "Reading restart file..." << std::endl;
         read_restart(simItr, restartFileInput, params, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns,
-            backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+            backRxns, createDestructRxns, transmissionRxns, observablesList, membraneObject, counterArrays);
         restartFileInput.close();
 
         // initialize numberOfProteinEachState
@@ -271,7 +297,7 @@ int main(int argc, char* argv[])
 
             tempLastStateIndexBeforeAdd = molTemplateList.back().interfaceList.back().stateList.back().index;
 
-            parse_input_for_add(addFileNameInput, params, observablesList, forwardRxns, backRxns, createDestructRxns, molTemplateList, membraneObject, numDoubleBeforeAdd);
+            parse_input_for_add(addFileNameInput, params, observablesList, forwardRxns, backRxns, createDestructRxns, transmissionRxns, molTemplateList, membraneObject, numDoubleBeforeAdd);
             //move the implicit lipid to the first, and unpdate mol.molTypeIndex
             for (auto& tempMolTemplate : molTemplateList) {
                 if (tempMolTemplate.isImplicitLipid == true && tempMolTemplate.molTypeIndex != 0) {
@@ -337,8 +363,33 @@ int main(int argc, char* argv[])
 
             //create water box for sphere boundary
             if (membraneObject.isSphere) {
+                if (membraneObject.hasCompartment == true){
+                    std::cerr << "Compartment should not exist in a sphere system!"<<std::endl;
+                    exit(1);
+                }
                 membraneObject.create_water_box();
                 membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
+            }
+
+            //check the size of the compartment: make sure that the waterbox boundary to the
+            //compartment should be larger than the rMaxLimit
+            if (membraneObject.isSphere == false && membraneObject.hasCompartment == true){
+                bool tooSmallBox = false;
+                if (membraneObject.waterBox.x / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                    std::cerr << "length of x dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                    tooSmallBox = true;
+                }
+                if (membraneObject.waterBox.y / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                    std::cerr << "length of y dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                    tooSmallBox = true;
+                }
+                if (membraneObject.waterBox.z / 2.0 - membraneObject.compartmentR < 2.0 * params.rMaxLimit){
+                    std::cerr << "length of z dimension of the water box is too small compared with the radius of compartment!"<<std::endl;
+                    tooSmallBox = true;
+                }
+                if (tooSmallBox == true){
+                    exit(1);
+                }
             }
 
             // generate the coordinates, write out coordinate and topology files for added molecules
@@ -355,13 +406,19 @@ int main(int argc, char* argv[])
             write_psf(params, moleculeList, molTemplateList);
         }
 
+        //create water box for sphere boundary
+        if (membraneObject.isSphere) {
+            membraneObject.create_water_box();
+            membraneObject.sphereVol = (4.0 * M_PI * pow(membraneObject.sphereR, 3.0)) / 3.0;
+        }
+
         std::cout << " Total number of states (reactant and product)  in the system " << RxnBase::totRxnSpecies << std::endl;
         params.numTotalSpecies = RxnBase::totRxnSpecies;
         std::cout << " Total number of molecules: " << Molecule::numberOfMolecules << " Size of molecule list : " << moleculeList.size() << std::endl;
         std::cout << "Total number of complexes: " << Complex::numberOfComplexes << " size of list: " << complexList.size() << std::endl;
 
         // set up some important parameters for implicit-lipid model;
-        initialize_paramters_for_implicitlipid_model(implicitlipidIndex, params, forwardRxns, backRxns,
+        initialize_paramters_for_implicitlipid_and_compartment_model(implicitlipidIndex, params, forwardRxns, backRxns, transmissionRxns,
             moleculeList, molTemplateList, complexList, membraneObject);
 
         // initialize the starting copy number for each state
@@ -414,7 +471,7 @@ int main(int argc, char* argv[])
         params.hasCreationDestruction = true;
         params.isNonEQ = true;
 
-        // set molTemp.canDestroy = ture
+        // set molTemp.canDestroy = true
         for (auto& oneReaction : createDestructRxns) {
             if (oneReaction.rxnType == ReactionType::destruction) {
                 molTemplateList[oneReaction.reactantMolList.at(0).molTypeIndex].canDestroy = true;
@@ -513,6 +570,7 @@ int main(int argc, char* argv[])
     std::cout << "\nReactions\n";
     display_all_reactions(forwardRxns, backRxns, createDestructRxns);
 
+    write_pdb(simItr, simItr, params, moleculeList, molTemplateList, membraneObject);
     std::cout << "*************** BEGIN SIMULATION **************** " << std::endl;
 
     // begin the timer
@@ -535,9 +593,10 @@ int main(int argc, char* argv[])
         // std::cout << "Writing restart file at iteration " << simItr << " ";
         // if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
         // std::cout << charTime << '\n';
-        write_rng_state(); // write the current RNG state
+        if(debugRNG ==true)//only do this if you need a rng sequence for debugging
+		  write_rng_state(); // write the current RNG state
         write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-            forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+            forwardRxns, backRxns, createDestructRxns, transmissionRxns, observablesList, membraneObject, counterArrays);
         restartFile.close();
     }
 
@@ -551,8 +610,12 @@ int main(int argc, char* argv[])
             simulVolume, forwardRxns, backRxns, createDestructRxns, molTemplateList, observablesList, counterArrays,
             membraneObject);
 
+        //check_for_unimolecular_reactions(simItr, params, moleculeList, complexList,
+        //    simulVolume, forwardRxns, backRxns, createDestructRxns, molTemplateList, observablesList, counterArrays,
+        //    membraneObject);
+
         // Update member lists after creation and destruction
-        simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
+	//        simulVolume.update_memberMolLists(params, moleculeList, complexList, molTemplateList, membraneObject, simItr);
 
         // Zeroth order reactions (creation)
         check_for_zeroth_order_creation(simItr, params, simulVolume, forwardRxns,
@@ -580,7 +643,7 @@ int main(int argc, char* argv[])
 
         // Measure separations between proteins in neighboring cells to identify all possible reactions.
         for (unsigned cellItr { 0 }; cellItr < simulVolume.subCellList.size(); ++cellItr) {
-            for (unsigned memItr { 0 }; memItr < simulVolume.subCellList[cellItr].memberMolList.size(); ++memItr) {
+	        for (unsigned memItr { 0 }; memItr < simulVolume.subCellList[cellItr].memberMolList.size(); ++memItr) {
                 int targMolIndex { simulVolume.subCellList[cellItr].memberMolList[memItr] };
                 if (moleculeList[targMolIndex].isImplicitLipid)
                     continue;
@@ -593,6 +656,13 @@ int main(int argc, char* argv[])
                         check_implicit_reactions(targMolIndex, implicitlipidIndex, simItr, params, moleculeList, complexList, molTemplateList,
                             forwardRxns, backRxns, counterArrays, membraneObject, IL2DbindingVec, IL2DUnbindingVec, ILTableIDs);
                     }
+					//Check for binding to the compartment in / or out. there must be a reaction type that involves binding/unbinding from the compartment surface. Implementation might be very similar to implicit lipid.
+					if(membraneObject.hasCompartment == true){
+                        // only consider single molecule
+                        if ( complexList[moleculeList[targMolIndex].myComIndex].memberList.size() == 1 ){
+					        check_compartment_reaction(targMolIndex,  -1, simItr, params, moleculeList,  complexList,  molTemplateList,  transmissionRxns, backRxns,  counterArrays,  membraneObject,  IL2DbindingVec, IL2DUnbindingVec,  ILTableIDs);
+                        }
+					}
                     // secondly, loop over proteins in your same cell.
                     for (unsigned memItr2 { memItr + 1 }; memItr2 < simulVolume.subCellList[cellItr].memberMolList.size(); ++memItr2) {
                         int partMolIndex { simulVolume.subCellList[cellItr].memberMolList[memItr2] };
@@ -620,6 +690,20 @@ int main(int argc, char* argv[])
             if (moleculeList[molItr].isEmpty || moleculeList[molItr].isImplicitLipid)
                 continue;
 
+            // only monomer is allowed to transmit!
+            if (moleculeList[molItr].transmissionProb > 0.0 && complexList[moleculeList[molItr].myComIndex].memberList.size() == 1 ) {
+                //Compare with rand num
+                double rand1 { rand_gsl() };
+                if (moleculeList[molItr].transmissionProb > rand1){
+                    moleculeList[molItr].transmissionProb = 1.0; // Setting transmissionProb to 1 to use as a flag in create_molecule_and_complex_from_rxn.cpp
+                    //physically move the molecule
+                    perform_transmission_reaction(molItr, moleculeList, complexList, molTemplateList, membraneObject, counterArrays,  params, transmissionRxns,  forwardRxns,  simulVolume);
+                    continue;
+                } else {
+                    //enforce boundary conditions
+                    moleculeList[molItr].enforceCompartmentBC = true;
+                }
+            }
             //Skip any proteins that just dissociated during this time step
             if (moleculeList[molItr].crossbase.size() > 0) {
                 /* Evaluate whether to perform a reaction with protein i, and with whom. Flag=1 means
@@ -630,6 +714,9 @@ int main(int argc, char* argv[])
                 // should it occur
                 int crossIndex1 { 0 };
                 int crossIndex2 { 0 };
+
+
+				/*determine if reaction occurs has to consider reactions across the compartment surface*/
                 bool willReact { determine_if_reaction_occurs(crossIndex1, crossIndex2, Constants::iRandMax, moleculeList[molItr], moleculeList, forwardRxns) };
                 if (params.debugParams.forceAssoc) {
                     willReact = false; // we chose an association reaction
@@ -678,7 +765,7 @@ int main(int argc, char* argv[])
                             // std::cout << " Complex 1 size: " << complexList[moleculeList[molItr].myComIndex].memberList.size() << "\n";
                             // std::cout << "Implicit lipid, my Com Index: " << moleculeList[molItr2].myComIndex << " size of memberlist: " << complexList[moleculeList[molItr2].myComIndex].memberList.size() << std::endl;
 
-                            if (moleculeList[molItr].interfaceList[ifaceIndex1].index == forwardRxns[rxnIndex[0]].reactantListNew[0].absIfaceIndex) { //IL is listed second as the reactant.
+                            if (molTemplateList[forwardRxns[rxnIndex[0]].reactantListNew[0].molTypeIndex].isImplicitLipid == false) { //IL is listed second as the reactant.
                                 associate_implicitlipid(ifaceIndex1, ifaceIndex2, moleculeList[molItr], moleculeList[molItr2],
                                     complexList[moleculeList[molItr].myComIndex], complexList[moleculeList[molItr2].myComIndex], params, forwardRxns[rxnIndex[0]],
                                     moleculeList, molTemplateList, observablesList, counterArrays, complexList, membraneObject, forwardRxns, backRxns);
@@ -818,12 +905,14 @@ int main(int argc, char* argv[])
 
             // determine RS3Dinput
             double RS3Dinput { 0.0 };
-            for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
-                if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - mol.molTypeIndex) < 1E-2) {
-                    RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
-                    break;
+	    if(membraneObject.implicitLipid){
+	      for (int RS3Dindex = 0; RS3Dindex < 100; RS3Dindex++) {
+		if (std::abs(membraneObject.RS3Dvect[RS3Dindex + 400] - mol.molTypeIndex) < 1E-2) {
+		  RS3Dinput = membraneObject.RS3Dvect[RS3Dindex + 300];
+		  break;
                 }
-            }
+	      }
+	    }
 
             if (complexList[mol.myComIndex].ncross > 0) {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
@@ -833,11 +922,10 @@ int main(int argc, char* argv[])
                     // TODO: Maybe do a boundary sphere overlap check first?
 
                     if (std::abs(complexList[mol.myComIndex].D.z) < 1E-10) {
-                        if(params.clusterOverlapCheck == false){
+                        if (params.clusterOverlapCheck == false) {
                             sweep_separation_complex_rot_memtest(
                                 simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
-                        }
-                        else{
+                        } else {
                             sweep_separation_complex_rot_memtest_cluster(
                                 simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
                         }
@@ -846,7 +934,7 @@ int main(int argc, char* argv[])
                             simItr, mol.index, params, moleculeList, complexList, forwardRxns, molTemplateList, membraneObject);
                     }
                     if (membraneObject.isSphere == true)
-                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput, false);
                 }
             } else {
                 if (mol.trajStatus == TrajStatus::none || mol.trajStatus == TrajStatus::canBeResampled) {
@@ -860,7 +948,7 @@ int main(int argc, char* argv[])
                                 moleculeList[memMol].trajStatus = TrajStatus::canBeResampled;
                         }
                         complexList[mol.myComIndex].propagate(moleculeList, membraneObject, molTemplateList);
-                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput);
+                        reflect_complex_rad_rot(membraneObject, complexList[mol.myComIndex], moleculeList, RS3Dinput, false);
                     } else {
                         // reflect_traj_complex_rad_rot(params, moleculeList, complexList[mol.myComIndex], membraneObject, RS3Dinput);
                         if (mol.trajStatus == TrajStatus::none) {
@@ -1049,6 +1137,7 @@ int main(int argc, char* argv[])
 
             clear_reweight_vecs(oneMol);
             oneMol.trajStatus = TrajStatus::none;
+            oneMol.isDissociated = false;
             oneMol.crossbase.clear();
             oneMol.mycrossint.clear();
             oneMol.crossrxn.clear();
@@ -1069,19 +1158,21 @@ int main(int argc, char* argv[])
             //                      << ", system time: " << std::put_time(std::localtime(&endTimeFormat), "%F %T") << '\n';
             // if (0 < strftime(charTime, sizeof(charTime), "%F %T", std::localtime(&endTimeFormat)))
             // std::cout << charTime << '\n';
-            write_rng_state(); // write the current RNG state
+            if(debugRNG ==true)//only do this if you need a rng sequence for debugging
+			  write_rng_state(); // write the current RNG state
             write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-                forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+                forwardRxns, backRxns, createDestructRxns, transmissionRxns, observablesList, membraneObject, counterArrays);
             restartFile.close();
         }
 
         //write check point
         if (simItr % params.checkPoint == 0) {
-            sprintf(fnameProXYZ, "restart%lld.dat", simItr);
+            sprintf(fnameProXYZ, "RESTARTS/restart%lld.dat", simItr);
             std::ofstream restartFile(fnameProXYZ);
-            write_rng_state_simItr(simItr); // write the current RNG state
+            if(debugRNG ==true)//only do this if you need a rng sequence for debugging
+			  write_rng_state_simItr(simItr); // write the current RNG state
             write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList,
-                forwardRxns, backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+                forwardRxns, backRxns, createDestructRxns, transmissionRxns, observablesList, membraneObject, counterArrays);
             restartFile.close();
         }
 
@@ -1157,9 +1248,10 @@ int main(int argc, char* argv[])
         simItr--;
         // std::cout << "Writing restart file at final iteration\n.";
         std::ofstream restartFile { restartFileName, std::ios::out }; // to show different from append
-        write_rng_state(); // write the current RNG state
+        if(debugRNG ==true)//only do this if you need a rng sequence for debugging
+		  write_rng_state(); // write the current RNG state
         write_restart(simItr, restartFile, params, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns,
-            backRxns, createDestructRxns, observablesList, membraneObject, counterArrays);
+            backRxns, createDestructRxns, transmissionRxns, observablesList, membraneObject, counterArrays);
         restartFile.close();
 
         // std::cout << "Writing trajectory..." << '\n';

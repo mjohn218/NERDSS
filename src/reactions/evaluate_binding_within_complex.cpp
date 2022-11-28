@@ -24,6 +24,7 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
     std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList, const ForwardRxn& oneRxn,
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, copyCounters& counterArrays)
 {
+  double probvec1;
     if (moleculeList[pro1Index].trajStatus != TrajStatus::propagated
         && moleculeList[pro2Index].trajStatus != TrajStatus::propagated) {
         if (oneRxn.rateList[rateIndex].rate > 0) {
@@ -55,43 +56,31 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
              */
             double coop = oneRxn.loopCoopFactor;
             if (withinRmax) {
-                int backIndex = oneRxn.conjBackRxnIndex;
+	      //int backIndex = oneRxn.conjBackRxnIndex;
 
                 double ka = oneRxn.rateList[rateIndex].rate; // units of nm^3/us
                 // this uses the rate corresponding to the same forward reaction rate.
-                double kb = backRxns[backIndex].rateList[rateIndex].rate; // units of per s
-                // copy numbers of the product state
-                // int Nc = counterArrays.copyNumSpecies[prod];
-
-                // double pdiss = 1 - exp(-params.timeStep * Nc * kb * 1E-6);
-                // If SELF, KD=kb*2/ka. Else, KD=kb/ka.
-                double self = 1.0;
-                // double Volume, Ka;
-                if (iface1Index == iface2Index)
+                //double kb = backRxns[backIndex].rateList[rateIndex].rate; // units of per s
+				/*Do not correct for self, as input ka3D values is only multiplied by 2 when probability is evaluated.
+				  double self = 1.0;
+				if (iface1Index == iface2Index)
                     self = 2.0;
-                // if (complexList[moleculeList[pro1Index].myComIndex].D.z == 0) { // This is a reaction on the membrane
-                //                     // here again, assuming the forward reaction has only 1 rate
-                //                     Keq = ka / (2.0 * oneRxn.bindRadius) / kb * 1E6 / self * coop;
-                //                     Volume = params.waterBox.area; // nm2
-                //                 } else {
-                //                     Keq = ka / kb / self * 1E6 * coop;
-                //                     Volume = params.waterBox.volume; // nm3
-                //                 }
-                /*Passoc needs to be
-                  pdiss=1-exp(-kb*dt*Nc)
-                  passoc=pdiss*ndiss*B(i)/C(i)*KaV
-                  KaV=ka/kb/V;
-                  ndiss max(1, Nevents_last_step). So either 1 or >1.
-                  If you do this for each A molecule, then multiple by Nb. If you do it for each B molecule, multiply by
-                  Na. Here we need copy numbers of each reactant.
-                */
+				*/
+                
                 double c0_nm3 = 0.602; // standard state 1M in units of /nm^3
                 //double m = kb / (ka * 1E6 * c0_nm3) * 2.0; // 1E6 is to convert ka to units of /s
-                double rateClose = ka * c0_nm3 * coop / self; //(1.0 + m); // ka*c0/(1+m) where m is defined above
+                double rateClose = ka * c0_nm3 * coop; //(1.0 + m); // ka*c0/(1+m) where m is defined above
 
                 // rateClose will be in units of /us (due to ka units), so no need for 1E-6 factor, since timeStep has
                 // units of us!!!!!
-                double probvec1 = 1 - exp(-params.timeStep * rateClose);
+
+		double poisson = params.timeStep * rateClose;
+		
+		if(poisson < 1)
+		  probvec1=poisson;
+		else
+		  probvec1 = 1 - exp(-poisson);
+
                 if (oneRxn.irrevRingClosure) {
                     // std::cout << "Ring closure reaction probability for species " << pro1Index << " and " << pro2Index
                     //           << " in complex " << moleculeList[pro1Index].myComIndex << " is set to 1.0.\n";

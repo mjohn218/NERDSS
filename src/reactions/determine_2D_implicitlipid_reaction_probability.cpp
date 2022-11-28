@@ -62,7 +62,7 @@ void determine_2D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     moleculeList[biMolData.pro1Index].probvec.push_back(0);
     //moleculeList[biMolData.pro2Index].probvec.push_back(0);
 
-    if (moleculeList[biMolData.pro1Index].trajStatus != TrajStatus::propagated) {
+    if (!moleculeList[biMolData.pro1Index].isDissociated) {
         // This movestat check is if you allow just dissociated proteins to avoid overlap
         if (forwardRxns[rxnIndex].rateList[rateIndex].rate > 0) {
             bool probValExists { false };
@@ -119,7 +119,7 @@ void determine_2D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
             double rxnProb = rho * IL2DbindingVec[probMatrixIndex];
             if (rxnProb > 1.000001) {
                 std::cerr << "Error: prob of reaction is: " << rxnProb << " > 1. Avoid this using a smaller time step." << std::endl;
-                exit(1);
+                //exit(1);
             }
             if (rxnProb > 0.5) {
                 // std::cout << "WARNING: prob of reaction > 0.5. If this is a reaction for a bimolecular binding with multiple binding sites, please use a smaller time step." << std::endl;

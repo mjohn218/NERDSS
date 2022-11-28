@@ -31,11 +31,12 @@ void write_traj(long long int iter, std::ofstream& trajFile, const Parameters& p
             trajFile << std::flush;
         }
     }
-
+    /*
     while (numWritten < params.numTotalUnits) {
         trajFile << std::setw(4) << "EMTY" << ' ' << std::fixed << membraneObject.waterBox.x / 2.0 << std::fixed
                  << membraneObject.waterBox.y / 2.0 << std::fixed << membraneObject.waterBox.z / 2.0 << '\n';
         ++numWritten;
         trajFile << std::flush;
     }
+    */
 }

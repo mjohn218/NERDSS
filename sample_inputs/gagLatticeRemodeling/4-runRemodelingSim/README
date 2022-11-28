@@ -1,0 +1,11 @@
+restart1.dat is one initial file for the moderately stable dynamics. DeltaG_hex=-9.62kBT. k_a^2D=2.5*10^-2 nm2/us.
+
+restart2.dat is the same initial structure but with an unstable reaction rates. DeltaG_hex=-5.62kBT. k_a^2D=2.5*10^-2 nm2/us.
+
+restart3.dat is the same initial structure but with a more stable reaction rates. DeltaG_hex=-11.62kBT. k_a^2D=2.5*10^-3 nm2/us.
+
+To start the remodeling simulation: ./nerdss -r restart1.dat
+
+To start the remodeling simulation with different reaction rates: ./nerdss -r -a newRates.inp, where newRates.inp provides the new reaction rates. A sample newRates.inp is provided here.
+
+Note: To generate the trace with the length 20s will take about 40 days in the HPC node Intel Cascade Lake 6428R, 3.0GHz

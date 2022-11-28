@@ -1,5 +1,5 @@
 /*! \file class_Membrane.hpp
- * 
+ *
  */
 
 #pragma once
@@ -20,19 +20,31 @@ enum class BoundaryKeyword : int {
     yBCtype = 3, //!< reflecting or periodic?
     zBCtype = 4, //!< reflecting or periodic?
     isSphere = 5, //!< use a sphere boundary, if provide sphereR, this will be set to true.
-    sphereR = 6, //!< sphere radius
+	sphereR = 6, //!< sphere radius
+	hasCompartment = 7, //!< Include a compartment centered at the origin
+    compartmentR = 8, //!< Radius of the compartment
+    compartmentSiteD = 9, //!< The diffusion constant of the surface binding sites
+    compartmentSiteRho = 10, //!< The density of the surface binding sites
 };
 
 struct Membrane {
-    //public:
-    struct WaterBox {
-        /*!
-         * \brief Just a container for the water box dimensions
-         * Only cubic at the moment. Not a Coord because then it'll be a circular include (since Coord needs Parameters)
-         */
+  //public:
 
-        double x { 0 };
-        double y { 0 };
+  struct Droplet {
+    double D {0};
+    double rho {0};
+
+    Droplet() = default;
+  };
+
+  struct WaterBox {
+	/*!
+	 * \brief Just a container for the water box dimensions
+	 * Only cubic at the moment. Not a Coord because then it'll be a circular include (since Coord needs Parameters)
+	 */
+
+	double x { 0 };
+	double y { 0 };
         double z { 0 };
         double volume { 0 };
         WaterBox() = default;
@@ -44,6 +56,7 @@ struct Membrane {
             volume = x * y * z;
         }
     };
+    Droplet droplet;
     WaterBox waterBox; //!< water box x, y, z. used to be xboxl, yboxl, zboxl
     double sphereR = 0; //!< for sphere, value of radius in nm.
     double sphereVol = 0;
@@ -74,15 +87,18 @@ struct Membrane {
     std::string yBCtype;
     std::string zBCtype;
 
-    /*set_value_BC is defined in src/parser/parse_input.cpp 
+    bool hasCompartment = false;
+    double compartmentR = 0.0;
+
+  /*set_value_BC is defined in src/parser/parse_input.cpp
       And the map to BoundaryKeyword keywords is also defined in that file.
       BoundaryKeyword keywords are defined above.
       ParameterKeywords are in include/classes/class_Parameters.hpp
      */
 
     void set_value_BC(std::string value, BoundaryKeyword keywords);
-    /*In here, we could also store coordinate vector                                                                                                       
-      for a single representative lipid                                                                                                                    
+    /*In here, we could also store coordinate vector
+      for a single representative lipid
     */
 
     void display(); // display the information for the boundary, define in the src/parse/parse_input.cpp

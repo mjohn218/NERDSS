@@ -14,7 +14,7 @@
 #include "math/rand_gsl.hpp"
 #include "tracing.hpp"
 
-void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double RS3Dinput)
+void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, std::vector<Molecule>& moleculeList, const Membrane& membraneObject, double radius, double RS3Dinput)
 {
     // TRACE();
     bool needsRecheck { true };
@@ -27,7 +27,8 @@ void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, 
     } else {
         RS3D = RS3Dinput;
     }
-    double sphereR = membraneObject.sphereR - RS3D;
+    //double sphereR = membraneObject.sphereR - RS3D;
+    double sphereR = radius - RS3D;
 
     std::array<double, 9> M;
     M = create_euler_rotation_matrix(targCom.trajRot);

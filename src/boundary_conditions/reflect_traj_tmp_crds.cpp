@@ -2,18 +2,31 @@
 #include "math/matrix.hpp"
 
 /*evaluates reflection out of box based on tmpCoords of all proteins. targCOM tmpCOM coords also must be consistent-updated.
- *Does not update molecule traj vectors, just updates the passed in vector traj, to collect for both complexes. 
+ *Does not update molecule traj vectors, just updates the passed in vector traj, to collect for both complexes.
  *
 */
-void reflect_traj_tmp_crds(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput)
+void reflect_traj_tmp_crds(const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput, bool isInsideCompartment)
 {
     /*This routine updated February 2020 to test if a large complex that spans the box or sphere could extend out in both directions
     if so, it attempts to correct for this by resampling the complex's translational and rotational updates.
     */
-    if (membraneObject.isSphere == true)
-        reflect_traj_tmp_crds_sphere(params, moleculeList, targCom, traj, membraneObject, RS3Dinput);
-    else
-        reflect_traj_tmp_crds_box(params, moleculeList, targCom, traj, membraneObject, RS3Dinput);
+    if ( isInsideCompartment == false ){
+        // first check the box conditions
+        if (membraneObject.isSphere == true)
+            reflect_traj_tmp_crds_sphere(params, moleculeList, targCom, traj, membraneObject, membraneObject.sphereR, RS3Dinput);
+        else
+            reflect_traj_tmp_crds_box(params, moleculeList, targCom, traj, membraneObject, RS3Dinput);
+
+        // then check the comparmtent
+        if ( moleculeList[targCom.memberList[0]].enforceCompartmentBC == true ){
+            // a new reflect function for out-side compartment
+            reflect_traj_tmp_crds_compartment(params, moleculeList, targCom, traj, membraneObject, RS3Dinput);
+        }
+    }else{
+        // inside the compartment
+        reflect_traj_tmp_crds_sphere(params, moleculeList, targCom, traj, membraneObject, membraneObject.compartmentR, RS3Dinput);
+    }
+
 }
 
 // #include "boundary_conditions/reflect_functions.hpp"

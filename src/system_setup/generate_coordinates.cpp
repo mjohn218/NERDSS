@@ -9,12 +9,15 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
     // First create all the molecules and their corresponding complexes, with random center of mass coordinates
     for (auto& oneTemp : molTemplateList) {
         if (oneTemp.isImplicitLipid == false) {
-            for (unsigned itr { 0 }; itr < oneTemp.copies; ++itr) {
-                moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
-                complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
-                oneTemp.monomerList.emplace_back(moleculeList.back().index);
-            }
+		  //no implicit lipids
+		  for (unsigned itr { 0 }; itr < oneTemp.copies; ++itr) {
+			moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
+			complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
+			oneTemp.monomerList.emplace_back(moleculeList.back().index);
+		  }
+		  
         } else {
+
             moleculeList.emplace_back(initialize_molecule(Complex::numberOfComplexes, params, oneTemp, membraneObject));
             complexList.emplace_back(initialize_complex(moleculeList.back(), molTemplateList[moleculeList.back().molTypeIndex]));
         }

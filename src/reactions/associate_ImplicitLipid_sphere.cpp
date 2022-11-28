@@ -170,7 +170,7 @@ void associate_implicitlipid_sphere(
   */
     update_complex_tmp_com_crds(reactCom1, moleculeList);
     reactCom1.tmpOnSurface = true;
-    reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, RS3D); // uses tmpCoords to calculate traj.
+    reflect_traj_tmp_crds(params, moleculeList, reactCom1, traj, membraneObject, RS3D, false); // uses tmpCoords to calculate traj.
 
     if (std::abs(traj[0] + traj[1] + traj[2]) > 1E-14) {
         // update the temporary coordinates for both complexes
@@ -185,7 +185,7 @@ void associate_implicitlipid_sphere(
     /* CHECKS */
     bool cancelAssoc { false };
 
-    check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
+    check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject, membraneObject.sphereR);
     if (cancelAssoc == true)
         counterArrays.nCancelSpanBox++;
     if (cancelAssoc == false) {
@@ -250,7 +250,7 @@ void associate_implicitlipid_sphere(
 
         // Enforce boundary conditions
         // For the sphere system, many times of reflections may need to move the complex back inside the sphere!!
-        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, RS3D);
+        reflect_complex_rad_rot(membraneObject, reactCom1, moleculeList, RS3D, false);
         //------------------------START UPDATE MONOMERLIST-------------------------
         // update oneTemp.monomerList when oneTemp.canDestroy is true and mol is monomer
         // reactMol1

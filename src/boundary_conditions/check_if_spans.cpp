@@ -11,7 +11,7 @@ void check_if_spans(bool& cancelAssoc, const Parameters& params, Complex& reactC
     // Associating proteins have been moved to contact. Before assigning them to the complexsame complex,
     // test to see if the complex is too big to fit in the box.
     if (membraneObject.isSphere == true)
-        check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
+        check_if_spans_sphere(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject, membraneObject.sphereR);
     else
         check_if_spans_box(cancelAssoc, params, reactCom1, reactCom2, moleculeList, membraneObject);
 }

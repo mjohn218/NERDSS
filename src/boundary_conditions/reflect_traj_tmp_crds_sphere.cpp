@@ -4,11 +4,11 @@
 #include "tracing.hpp"
 
 /*evaluates reflection out of box based on tmpCoords of all proteins. targCOM tmpCOM coords also must be consistent-updated.
- *Does not update molecule traj vectors, just updates the passed in vector traj, to collect for both complexes. 
+ *Does not update molecule traj vectors, just updates the passed in vector traj, to collect for both complexes.
  *
 */
 void reflect_traj_tmp_crds_sphere(
-    const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double RS3Dinput)
+    const Parameters& params, std::vector<Molecule>& moleculeList, Complex& targCom, std::array<double, 3>& traj, const Membrane& membraneObject, double radius, double RS3Dinput)
 {
     // TRACE();
     /*This routine updated April 2020 to test if a large complex that spans the sphere could extend out in both directions
@@ -23,7 +23,7 @@ void reflect_traj_tmp_crds_sphere(
     } else {
         RS3D = RS3Dinput;
     }
-    double sphereR = membraneObject.sphereR - RS3D;
+    double sphereR = radius - RS3D;
     Coord curr;
     curr.x = targCom.tmpComCoord.x + traj[0];
     curr.y = targCom.tmpComCoord.y + traj[1];

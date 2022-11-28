@@ -134,7 +134,7 @@ void sweep_separation_complex_rot_memtest_cluster_box(int simItr, int pro1Index,
                             complexList[k].trajRot.z = sqrt(2.0 * params.timeStep * complexList[k].Dr.z) * GaussV();
                         }
 
-                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[k], membraneObject, RS3Dinput);
+                        reflect_traj_complex_rad_rot(params, moleculeList, complexList[k], membraneObject, RS3Dinput, false);
 
                         didMove.push_back(k);
                     }
@@ -338,7 +338,7 @@ void sweep_separation_complex_rot_memtest_cluster_box(int simItr, int pro1Index,
                                 complexList[k].trajRot.z = sqrt(2.0 * params.timeStep * complexList[k].Dr.z) * GaussV();
                             }
 
-                            reflect_traj_complex_rad_rot(params, moleculeList, complexList[k], membraneObject, RS3Dinput);
+                            reflect_traj_complex_rad_rot(params, moleculeList, complexList[k], membraneObject, RS3Dinput, false);
 
                             didMove.push_back(k);
                         }
