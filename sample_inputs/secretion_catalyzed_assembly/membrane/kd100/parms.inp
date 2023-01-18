@@ -1,0 +1,80 @@
+start parameters
+    nItr = 10000000000
+    timeStep = 0.1
+    timeWrite = 100000
+    trajWrite = 500000000
+    pdbWrite = 100000
+    transitionWrite = 500000000
+    restartWrite = 1000000
+    checkPoint = 500000000
+    scaleMaxDisplace = 10.0
+    overlapSepLimit = 2.0
+    clusterOverlapCheck = false
+end parameters
+
+start boundaries
+    WaterBox = [332, 332, 30]
+    xBCtype = reflect
+    yBCtype = reflect
+    zBCtype = reflect
+end boundaries
+
+start molecules
+    l: 5000
+    s: 200
+end molecules
+
+start reactions
+    l(bm) + s(m) <-> l(bm!1).s(m!1)
+    onRate3DMacro = 1
+    offRateMacro = 0
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 20
+    assocAngles = [0, 0, nan, nan, pi]
+
+    s(a) + s(a) <-> s(a!1).s(a!1)
+    onRate3DMacro = 1
+    offRateMacro = 100
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 20
+    assocAngles = [1.3102, 1.3102, 1.5708, 1.5708, 0]
+
+    s(b) + s(b) <-> s(b!1).s(b!1)
+    onRate3DMacro = 1
+    offRateMacro = 100
+    sigma = 1.0
+    norm1 = [0,1,0]
+    norm2 = [0,1,0]
+    length3Dto2D = 20
+    assocAngles = [0.8961, 0.8961, 1.5708, 1.5708, 0]
+
+    s(c) + s(c) <-> s(c!1).s(c!1)
+    onRate3DMacro = 1
+    offRateMacro = 100
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    length3Dto2D = 20
+    assocAngles = [0.8961, 0.8961, 1.5708, 1.5708, 0]
+
+    s(d) + s(d) <-> s(d!1).s(d!1)
+    onRate3DMacro = 1
+    offRateMacro = 100
+    sigma = 1.0
+    norm1 = [0,1,0]
+    norm2 = [0,1,0]
+    length3Dto2D = 20
+    assocAngles = [1.3102, 1.3102, 1.5708, 1.5708, 0]
+
+    s(n) + s(n) <-> s(n!1).s(n!1)
+    onRate3DMacro = 0
+    offRateMacro = 0
+    sigma = 1.0
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [1.5708, 1.5708, 1.5708, 1.5708, 0]
+end reactions

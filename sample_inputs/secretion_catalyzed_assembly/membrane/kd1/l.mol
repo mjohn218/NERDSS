@@ -1,0 +1,9 @@
+Name = l
+isImplicitLipid = true
+checkOverlap = false
+
+D = [0.02, 0.02, 0]
+Dr = [0, 0, 0.01]
+
+COM     0.0     0.0     0.0
+bm      0.0     0.0     4.0

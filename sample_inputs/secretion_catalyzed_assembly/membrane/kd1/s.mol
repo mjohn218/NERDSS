@@ -1,0 +1,15 @@
+Name = s
+checkOverlap = true
+countTransition = true
+transitionMatrixSize = 500
+
+D = [10.0, 10.0, 10.0]
+Dr = [0.02, 0.02, 0.02]
+
+COM     0.0     0.0     0.0
+a       -7.5    2.0     0.0
+b       -2.5    0.0     -2.0
+c       2.5     -2.0    0.0
+d       7.5     0.0     2.0
+m       -10.0   0.0     0.0
+n       10.0    0.0     0.0
