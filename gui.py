@@ -327,7 +327,7 @@ def gui():
 
             # get omega
             if not np.isclose(np.linalg.norm(v1), 0) and not np.isclose(np.linalg.norm(v2), 0):
-                if not np.isclose(np.dot(v1, sigma1), 0) and not np.isclose(np.dot(v2, sigma2), 0):
+                if not np.isclose(np.linalg.norm(np.cross(v1, sigma1)), 0) and not np.isclose(np.linalg.norm(np.cross(v2, sigma2)), 0):
                     t1 = np.cross(sigma1, v1)
                     t2 = np.cross(sigma1, v2)
                 else:
@@ -404,8 +404,8 @@ def gui():
             if length3dto2d_str != '':
                 react_str += f'    length3Dto2D = {length3dto2d_str}\n'
 
-            react_str += f'    norm1 = {str(n1)}\n'
-            react_str += f'    norm2 = {str(n2)}\n'
+            react_str += f'    norm1 = {str(list(n1))}\n'
+            react_str += f'    norm2 = {str(list(n2))}\n'
             react_str += '    assocAngles = [' + str(theta1) + ',' + str(theta2) + ',' + str(phi1) + ',' + str(phi2) + ',' + str(omega) + ']\n'
 
             if l != '':
@@ -523,7 +523,7 @@ def gui():
 
             # get omega
             if not np.isclose(np.linalg.norm(v1), 0) and not np.isclose(np.linalg.norm(v2), 0):
-                if not np.isclose(np.dot(v1, sigma1), 0) and not np.isclose(np.dot(v2, sigma2), 0):
+                if not np.isclose(np.linalg.norm(np.cross(v1, sigma1)), 0) and not np.isclose(np.linalg.norm(np.cross(v2, sigma2)), 0):
                     t1 = np.cross(sigma1, v1)
                     t2 = np.cross(sigma1, v2)
                 else:
@@ -603,8 +603,8 @@ def gui():
             if length3dto2d_str != '':
                 react_str += f'    length3Dto2D = {length3dto2d_str}\n'
 
-            react_str += f'    norm1 = {str(n1)}\n'
-            react_str += f'    norm2 = {str(n2)}\n'
+            react_str += f'    norm1 = {str(list(n1))}\n'
+            react_str += f'    norm2 = {str(list(n2))}\n'
             react_str += '    assocAngles = [' + str(theta1) + ',' + str(theta2) + ',' + str(phi1) + ',' + str(phi2) + ',' + str(omega) + ']\n'
 
             if l != '':
@@ -727,7 +727,7 @@ def gui():
 
             # get omega
             if not np.isclose(np.linalg.norm(v1), 0) and not np.isclose(np.linalg.norm(v2), 0):
-                if not np.isclose(np.dot(v1, sigma1), 0) and not np.isclose(np.dot(v2, sigma2), 0):
+                if not np.isclose(np.linalg.norm(np.cross(v1, sigma1)), 0) and not np.isclose(np.linalg.norm(np.cross(v2, sigma2)), 0):
                     t1 = np.cross(sigma1, v1)
                     t2 = np.cross(sigma1, v2)
                 else:
@@ -815,8 +815,8 @@ def gui():
             if length3dto2d_str != '':
                 react_str += f'    length3Dto2D = {length3dto2d_str}\n'
 
-            react_str += f'    norm1 = {str(n1)}\n'
-            react_str += f'    norm2 = {str(n2)}\n'
+            react_str += f'    norm1 = {str(list(n1))}\n'
+            react_str += f'    norm2 = {str(list(n2))}\n'
             react_str += '    assocAngles = [' + str(theta1) + ',' + str(theta2) + ',' + str(phi1) + ',' + str(phi2) + ',' + str(omega) + ']\n'
 
             if l != '':
@@ -1124,7 +1124,7 @@ def gui():
     rate_entry = create_labeled_entry_with_hint(reactions_tab, "Enter rate for creation / destruction / uni statechange \n/ uni creation (M s^-1 / s^-1 / s^-1 / s^-1):", "", 12, 0, width=10)
     length3dto2d_entry = create_labeled_entry_with_hint(reactions_tab, "Enter length scale to convert 3D rate to 2D rate\n for bimolecular association (nm):", "10", 13, 0, width=10)
     bindRadSameCom_entry = create_labeled_entry_with_hint(reactions_tab, "Enter distance betweeen two reactants to force reaction \nwithinin the same complex for bimolecular association (sigma):", "1.1", 13, 2, width=10)
-    loopCoopFactor_entry = create_labeled_entry_with_hint(reactions_tab, "Enter scale factor of rate when closing loops \nfor bimolecular association (sigma):", "1", 14, 0, width=10)
+    loopCoopFactor_entry = create_labeled_entry_with_hint(reactions_tab, "Enter scale factor of rate when closing loops \nfor bimolecular association (ka):", "1", 14, 0, width=10)
     label_entry = create_labeled_entry_with_hint(reactions_tab, "Enter reaction label, used if you want to couple a \ndifferent reaction to this one:", "", 14, 2, width=10)
     coupledLabel_entry = create_labeled_entry_with_hint(reactions_tab, "Enter coupled reaction label, used if you allow \nthe completion of this reaction to cause another reaction:", "", 15, 0, width=10)
     kcat_entry = create_labeled_entry_with_hint(reactions_tab, "Enter rate of the coupled reaction (s^-1):", "", 15, 2, width=10)
