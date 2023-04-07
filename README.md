@@ -19,7 +19,7 @@ To build NERDSS, you need:
 
 ### Running Simulations
 
-1. Example input files are located in the subdirectories within the *sample_inputs* folder.
+1. Example input files are located in the subdirectories within the *sample_inputs* folder. They can also be generated using the [python GUI program](./gui.py), which is also included in the ioNERDSS tool.
 
 2. To start the simulation, use the command *./nerdss -f parms.inp*.
 
