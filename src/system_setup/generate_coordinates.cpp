@@ -44,7 +44,7 @@ void generate_coordinates(const Parameters& params, std::vector<Molecule>& molec
                 auto& mol2 = moleculeList[mol2Itr];
                 const MolTemplate& mol2Temp { molTemplateList[mol2.molTypeIndex] };
 
-                if ((mol1Itr != mol2Itr) && areInVicinity(mol1, mol2, molTemplateList)) {
+                if ((mol1Itr != mol2Itr) && are_molecules_in_vicinity(mol1, mol2, molTemplateList)) {
                     for (unsigned int iface1Itr { 0 }; iface1Itr < mol1.interfaceList.size(); ++iface1Itr) {
                         auto& iface1 = mol1.interfaceList[iface1Itr];
                         for (unsigned int iface2Itr { 0 }; iface2Itr < mol2.interfaceList.size(); ++iface2Itr) {

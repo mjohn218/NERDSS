@@ -8,21 +8,16 @@
 #include "classes/class_Molecule_Complex.hpp"
 #include "classes/class_Rxns.hpp"
 
-/*! \defgroup SystemSetup SystemSetup
- */
-
-/*!
- * \ingroup SystemSetup
- * \brief Check for overlap of two molecules' bounding spheres.
- * \param[in] mol1 Molecule 1 in the pairwise check.
- * \param[in] mol2 Molecule 2 in the pairwise check.
- * \param[in] molTemplateList List of provided MolTemplates.
- * \param[out] Boolean for if the bounding spheres overlap.
+/**
+ * Determines whether two molecules are in the vicinity of each other.
  *
- * Returns boolean for if the mol1 COM - mol2 COM vector is shorter than the combined radii of the two
- * molecules before spending the time determining if their interfaces ovelap.
+ * @param mol1         The first molecule to check.
+ * @param mol2         The second molecule to check.
+ * @param molTemplates A vector of MolTemplate objects specifying the binding radii of each molecule type.
+ *
+ * @return             True if the distance between the two molecules is less than the sum of their radii plus a safety margin of 2.
  */
-bool areInVicinity(const Molecule& mol1, const Molecule& mol2, const std::vector<MolTemplate>& molTemplateList);
+bool are_molecules_in_vicinity(const Molecule& mol1, const Molecule& mol2, const std::vector<MolTemplate>& molTemplates);
 
 /*!
  * \ingroup SystemSetup

@@ -8,6 +8,12 @@
   *  - Compress reflect_traj_complex_rad_rot, reflect_traj_check_span, reflect_traj_rad_rot_nocheck
   */
 
+//  #define PROFILE true
+
+//  #ifdef PROFILE
+//     #include <gperftools/profiler.h>
+//  #endif
+
  #include "boundary_conditions/reflect_functions.hpp"
  #include "io/io.hpp"
  #include "math/constants.hpp"
@@ -39,6 +45,7 @@
 
  int main(int argc, char* argv[])
  {
+    //  if(PROFILE) {ProfilerStart("profile_output.prof");}
      /* SIMULATION SETUP */
      // Get seed for random number generation
      // use random_device instead of time so that multiple jobs started at the same time have more unique seeds
@@ -1321,5 +1328,6 @@
 
     delete[] tableIDs;
     gsl_rng_free(r);
+    // if(PROFILE) {ProfilerStop();}
     return 0;
 } // end main
