@@ -12,8 +12,6 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays,
   // TRACE();
   int nSpecies = 0;
   speciesFile << "Time (s)";
-  // clear counterArrays.bindPairList
-  counterArrays.bindPairList.clear();
   for (const auto& oneTemp : molTemplateList) {
     for (auto& iface : oneTemp.interfaceList) {
       if (iface.stateList.size() == 1) {
@@ -25,8 +23,6 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays,
           counterArrays.bindPairList.emplace_back();
           // counterArrays.bindPairListIL2D.emplace_back();
           // counterArrays.bindPairListIL3D.emplace_back();
-        } else {
-          counterArrays.bindPairList.emplace_back();
         }
         nSpecies++;
       } else {
@@ -40,8 +36,6 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays,
             counterArrays.bindPairList.emplace_back();
             // counterArrays.bindPairListIL2D.emplace_back();
             // counterArrays.bindPairListIL3D.emplace_back();
-          } else {
-            counterArrays.bindPairList.emplace_back();
           }
           nSpecies++;
         }
@@ -69,8 +63,6 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays,
         counterArrays.bindPairList.emplace_back();
         // counterArrays.bindPairListIL2D.emplace_back();
         // counterArrays.bindPairListIL3D.emplace_back();
-      } else {
-        counterArrays.bindPairList.emplace_back();
       }
       nSpecies++;
     }

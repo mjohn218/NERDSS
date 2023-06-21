@@ -137,6 +137,8 @@ int main(int argc, char* argv[]) {
 
   int numMolTemplateBeforeAdd{0};  // number of molTemp before add
   int numDoubleBeforeAdd{0};       // number of double complex before add
+  int numDoubleAfterAdd{0};       // number of double complex after add
+  int numDoubleAdd{0};       // number of double complex add
   int numForwardRxnBdeforeAdd{0};  // number of Forw React before add
   int numBackRxnBdeforeAdd{0};     // number of Back React before add
   int numCreatDestructRxnBdeforeAdd{
@@ -377,6 +379,18 @@ int main(int argc, char* argv[]) {
         }
       }
 
+      if (numMolTemplateBeforeAdd > 0) {
+        for (int forwardRxnIndex{0}; forwardRxnIndex < forwardRxns.size();
+             forwardRxnIndex++) {
+          ForwardRxn oneRxn{};
+          oneRxn = forwardRxns[forwardRxnIndex];
+          if (oneRxn.rxnType == ReactionType::bimolecular) {
+            numDoubleAfterAdd++;
+          }
+        }
+        numDoubleAdd = numDoubleAfterAdd - numDoubleBeforeAdd;
+      }
+
       tempLastStateIndexAfterAdd =
           molTemplateList.back().interfaceList.back().stateList.back().index;
 
@@ -447,6 +461,11 @@ int main(int argc, char* argv[]) {
       }
 
       // update the counterArrays.bindPairList
+      std::cout << "num of added states: " << numStateAdd << std::endl;
+      std::cout << "num of added double: " << numDoubleAdd << std::endl;
+      
+      counterArrays.bindPairList.insert(counterArrays.bindPairList.begin(), numStateAdd, std::vector<int>());
+      counterArrays.bindPairList.insert(counterArrays.bindPairList.end(), numDoubleAdd, std::vector<int>());
 
       // create water box for sphere boundary
       if (membraneObject.isSphere) {

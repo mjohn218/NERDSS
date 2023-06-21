@@ -37,8 +37,7 @@ void init_counterCopyNums(copyCounters& counterArrays,
       index = moleculeList[p1].interfaceList[j].index;
       if (moleculeList[p1].isImplicitLipid == false) {
         counterArrays.copyNumSpecies[index]++;
-        if (1) {
-          // if (params.fromRestart == false) {
+        if (params.fromRestart == false) {
           if (counterArrays.canDissociate[index] == true) {
             // add the mol index to the bindPairList
             // if (complexList[moleculeList[p1].myComIndex].linksToSurface > 1)
