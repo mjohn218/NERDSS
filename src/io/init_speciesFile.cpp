@@ -40,6 +40,8 @@ int init_speciesFile(ofstream& speciesFile, copyCounters& counterArrays,
             counterArrays.bindPairList.emplace_back();
             // counterArrays.bindPairListIL2D.emplace_back();
             // counterArrays.bindPairListIL3D.emplace_back();
+          } else {
+            counterArrays.bindPairList.emplace_back();
           }
           nSpecies++;
         }

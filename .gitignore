@@ -2,6 +2,7 @@ cmake-build-debug/
 cmake-build-release/
 bin/
 build/
+debug/
 .idea
 vec_vers/sub_tests/new_inp/tests
 new_version/to_convert
