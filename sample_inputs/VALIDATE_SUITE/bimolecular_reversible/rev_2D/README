@@ -1,3 +1,0 @@
-the theory is the solution to the reversible ODE with constant rates, using the kon(rho1) value= 10 um2/s.
-
-Not showing the MRE (modified rate equation) solution, which uses the Smoluchowski time-dependent rate, and agrees closely with the NERDSS. Agreement is not perfect because the theory is approx, not the simulations. 
