@@ -1,0 +1,232 @@
+
+
+<html>
+	<head>
+		<title>NERDSS - basic usage</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="icon" type="image/png" href="images/NERDSSicon.png">
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HWZ9W3CM4J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HWZ9W3CM4J');
+</script>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+							<a href="index.html" class="logo">
+								<span class="symbol"><img src="images/logo_design.png" alt="" /></span>
+							</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li><a href="about.html">About</a></li>
+							<li><a href="introductory_tutorial.html">Tutorials</a></li>
+							<li><a href="user_guide.html">User Guides</a></li>
+							<li><a href="#">Articles</a></li>
+							<li><a href="#">News</a></li>
+							<li><a href="#">For Developers</a></li>
+							<li><a href="https://github.com/mjohn218/NERDSS/discussions">User Forum</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<h1>Running a Basic NERDSS Simulation</h1>
+							<p>After installing NERDSS, let's run a basic simulation to understand its philosophy. 
+                                We will simulate the reversible reaction A(a) + R(r) <-> A(a!1).R(r!1) in a 3D solution. 
+                                For a comprehensive guide to using NERDSS, please refer to <a href="user_guide.html">user guide</a> in the NERDSS repository. </p>
+							<p><b>1. Prepare the .inp file for the simulation</b></p>
+                            <p>Following is the content of the .inp file that we will use in the simulaiton. 
+                                Please refer to <a href="user_guide.html">user guide</a> in the NERDSS repository for the explanation of each parameter.</p>
+                            <p>Download <a href="files/tutorial_sample_files/basic.inp"><b>basic.inp</b></a></p>
+                            <pre><code>start parameters
+    nItr = 700000 # steps
+    timeStep = 0.1 # us
+    timeWrite = 200 # steps
+    pdbWrite = 10000 # steps
+    checkPoint = 70000 # steps
+    restartWrite = 10000 # steps
+end parameters
+                            
+start boundaries
+    WaterBox = [939.993,939.993,939.993] # nm
+end boundaries
+                            
+start molecules
+    A : 1000
+    R : 1000
+end molecules
+                        
+start reactions
+    A(a) + R(r) <-> A(a!1).R(r!1)
+        onRate3Dka = 988.19 # 3D microscopic binding rate, nm^2/us
+        offRatekb = 99.15 # microscopic dissociation rate, s^-1
+        norm1 = [0,0,1]
+        norm2 = [0,0,1]
+        sigma = 2.0
+        assocAngles = [nan,nan,nan,nan,nan]
+        bindRadSameCom = 1.1
+end reactions</code></pre>
+                            <p><b>2. Prepare the .mol files for the molecule types in the simulation</b></p>
+                            <p><a href="files/tutorial_sample_files/basic.inp"><b>A.mol</b></a></p>
+                            <pre><code>name    = A
+
+# translational diffusion constants
+D       = [20.0,20.0,20.0]
+                                
+# rotational diffusion constants
+Dr      = [0.0,0.0,0.0]
+                                
+# Coordinates
+COM     0.0000    0.0000    0.0000
+a       0.0000    0.0000    0.0000</code></pre>
+                            <p><a href="files/tutorial_sample_files/basic.inp"><b>R.mol</b></a></p>
+                            <pre><code>name    = R
+# translational diffusion constants
+D       = [20.0,20.0,20.0]
+
+# rotational diffusion constants
+Dr      = [0.0,0.0,0.0]
+
+# Coordinates
+COM     0.0000    0.0000    0.0000
+r       0.0000    0.0000    0.0000</code></pre>
+                            <p><b>3. Use the GUI provided in the ioNERDSS library to generate the .inp and .mol files (optional)</b></p>
+                                <p>You can generate input files using the GUI provided by the ioNERDSS library. After installing 
+                                    ioNERDSS using pip, start a Python interpreter and run the following command to start the GUI:</p>
+                                <pre><code>import ioNERDSS as ion
+ion.gui()</code></pre>
+                                <p>Fill out the parameters in the different sections, add each molecule one by one, followed by each 
+                                    reaction. Finally, click on the "Generate" button. Below are some snapshots.</p>
+                                <span class="image main"><img src="images/gui1.png" alt="" /></span>
+                                <span class="image main"><img src="images/gui2.png" alt="" /></span>
+                                <span class="image main"><img src="images/gui3.png" alt="" /></span>
+                                <span class="image main"><img src="images/gui4.png" alt="" /></span>
+                                <span class="image main"><img src="images/gui5.png" alt="" /></span>
+                            <p><b>4. Run the simulation</b></p>
+                            <p>Make sure your .inp and .mol files are in the same folder. Navigate to that folder.</p>
+                            <p><b>- Run the simulation in the local environment (Generally faster)</b><br>
+                                If you want to run NERDSS locally, add it to your PATH and start the simulation by running:</p>
+                                <pre><code>./nerdss -f basic.inp > log.txt</code></pre>
+                            <p><b>- Run the simulation using Docker</b><br>
+                                If you are using Docker, start the simulation by running:</p>
+                                <pre><code>docker run -e RUN_NERDSS=true -e ANALYZE_OUTPUT=true -p 8888:8888 -v $(pwd):/SIMULATION -it "path-to-input-files":latest</code></pre>
+                                <p>In running with Docker, the simulation will then begin. The standard output is written to output.log. Once it is done, 
+                                    a Jupyter environment with ioNERDSS installed will be ready for use.</p>
+                            <p><b>5. Outputs of the simulation</b></p>
+                            <p>The file <a href="files/tutorial_sample_files/copy_numbers_time.dat"><b>copy_numbers_time.dat</b></a> stores the 
+                                time dependence of the copy numbers
+                                 of all species in the system. Below are the first five lines of this file.</p>
+                            <pre><code>Time (s),A(a),R(r),A(a!1).R(r!1)
+0,1000,1000,0
+2e-05,990,990,10
+4e-05,980,980,20
+6e-05,966,966,34</code></pre>
+                            <p>The file <a href="files/tutorial_sample_files/copy_numbers_time.dat"><b>histogram_complexes_time.dat</b></a> 
+                                contains the time dependence of the complex components. 
+                                The first ten lines of this file are shown below.</p>
+                            <pre><code>Time (s): 0
+1000    A: 1.
+1000    R: 1.
+Time (s): 2e-05
+990 A: 1.
+10  A: 1. R: 1.
+990 R: 1.
+Time (s): 4e-05
+980 A: 1.
+20  A: 1. R: 1.
+980 R: 1.</code></pre>
+                            <p>The simulation snapshots are stored in the <code>PDB/</code> folder and are in the PDB format.</p>
+                            <p><b>Anaylze the output</b></p>
+                            <p>We will create a plot of monomer A(a) vs Time (s) and compare the simulation result 
+                                with the <a href="files/tutorial_sample_files/theoryODE.dat"><b>ODE theory.</b></a>.</p>
+                            <pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read the simulation data from the file
+sim_df = pd.read_csv('copy_numbers_time.dat', sep=',')
+
+# Read the ODE theory data from the file
+# Using regex to handle one or more spaces as the separator
+ode_df = pd.read_csv('theoryODE.dat', sep=r'\s+', skipinitialspace=True)
+
+# Plotting
+plt.figure(figsize=(6, 4))  # Adjust the figure size (width, height) in inches
+plt.plot(sim_df['Time (s)'], sim_df['A(a)'], 'o-', label='Simulation')
+plt.plot(ode_df['time(s)'], ode_df['A(t)'], 's-', label='ODE Theory')
+
+plt.xlabel('Time (s)', fontsize=14)
+plt.ylabel('A(a)', fontsize=14)
+plt.title('Monomer A(a) vs Time (s)', fontsize=16)
+plt.legend(fontsize=12)
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.tight_layout()
+
+# Save the figure in PNG format with a resolution of 300 dpi
+plt.savefig('comparison_plot.png', dpi=300, bbox_inches='tight')
+
+plt.show()</code></pre>
+                            <span class="image main"><img src="images/comparison_plot.png" alt="" /></span>
+                            <p><b>Render movies for the trajectory</b></p>
+                            <p>You can also generate movies of the simulation using the outputted PDB files and OVITO.</p>
+                            <span class="image main"><img src="images/mov.gif" alt="" /></span>
+						</div>
+						
+							
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+                    <div class="inner">
+                        <section>
+                            <h2>Get in touch</h2>
+                            <p>email: margaret.johnson@jhu.edu</p>
+                            <p>lab website: <a href = "https://sites.krieger.jhu.edu/johnson-lab/">https://sites.krieger.jhu.edu/johnson-lab/</a></p>
+                        </section>
+                        <section>
+                            <h2>Follow</h2>
+                            <ul class="icons">
+                                <li><a href="https://github.com/mjohn218/NERDSS" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
+                            </ul>
+                    </div>
+                </footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

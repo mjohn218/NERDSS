@@ -1,0 +1,11 @@
+name    = A
+
+# translational diffusion constants
+D       = [20.0,20.0,20.0]
+
+# rotational diffusion constants
+Dr      = [0.0,0.0,0.0]
+
+# Coordinates
+COM     0.0000    0.0000    0.0000
+a       0.0000    0.0000    0.0000

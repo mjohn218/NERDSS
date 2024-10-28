@@ -1,0 +1,22 @@
+##
+# A molecule information file
+##
+
+Name = A
+checkOverlap = true
+
+# translational diffusion constants
+D = [10.0, 10.0, 10.0]
+
+# rotational diffusion constants
+Dr = [0.02, 0.02, 0.02]
+
+# Coordinates
+COM    0.0000    0.0000    0.0000
+AC    -0.1880    0.4150    1.4460
+AB     1.3200   -0.9000    1.1410
+
+# bonds for visualization only.
+bonds = 2
+com AC
+com AB

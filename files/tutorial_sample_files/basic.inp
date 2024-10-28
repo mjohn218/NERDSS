@@ -1,0 +1,28 @@
+start parameters
+    nItr = 700000 # steps
+    timeStep = 0.1 # us
+    timeWrite = 200 # steps
+    pdbWrite = 10000 # steps
+	checkPoint = 70000 # steps
+    restartWrite = 10000 # steps
+end parameters
+
+start boundaries
+    WaterBox = [939.993,939.993,939.993] # nm
+end boundaries
+
+start molecules
+    A : 1000
+    R : 1000
+end molecules
+
+start reactions
+    A(a) + R(r) <-> A(a!1).R(r!1)
+        onRate3Dka = 988.19 # 3D microscopic binding rate, nm^2/us
+        offRatekb = 99.15 # microscopic dissociation rate, s^-1
+        norm1 = [0,0,1]
+        norm2 = [0,0,1]
+        sigma = 2.0
+        assocAngles = [nan,nan,nan,nan,nan]
+        bindRadSameCom = 1.1
+end reactions

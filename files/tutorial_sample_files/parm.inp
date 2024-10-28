@@ -1,0 +1,55 @@
+# Input file
+
+start parameters
+    nItr = 10000000
+    timeStep = 0.1
+
+    timeWrite = 1000
+    trajWrite = 10000000
+    pdbWrite = 100000
+    restartWrite = 100000
+    scaleMaxDisplace = 100.0
+    overlapSepLimit = 2.0
+end parameters
+
+start boundaries
+    WaterBox = [200,200,200]
+end boundaries
+
+start molecules
+    A : 50
+    B : 50
+    C : 50
+end molecules
+
+start reactions
+    #### A - C ####
+    A(AC) + C(CA) <-> A(AC!1).C(CA!1)
+    onRate3Dka = 0.91
+    offRatekb = 0.1
+    sigma = 0.156
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [2.563, 2.548, 1.886, -0.749, 0.808]
+    excludeVolumeBound = True
+
+    #### A - B ####
+    A(AB) + B(BA) <-> A(AB!1).B(BA!1)
+    onRate3Dka = 0.61
+    offRatekb = 0.1
+    sigma = 0.218
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [2.327, 2.797, -3.097, 0.218, 2.128]
+    excludeVolumeBound = True
+
+    #### B - C ####
+    B(BC) + C(CB) <-> B(BC!1).C(CB!1)
+    onRate3Dka = 1
+    offRatekb = 0.1
+    sigma = 0.122
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    assocAngles = [2.205, 2.496, -0.047, 2.351, -1.672]
+    excludeVolumeBound = True
+end reactions

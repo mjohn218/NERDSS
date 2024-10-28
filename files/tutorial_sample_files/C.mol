@@ -1,0 +1,22 @@
+##
+# C molecule information file
+##
+
+Name = C
+checkOverlap = true
+
+# translational diffusion constants
+D = [10.0, 10.0, 10.0]
+
+# rotational diffusion constants
+Dr = [0.02, 0.02, 0.02]
+
+# Coordinates
+COM    0.0000    0.0000    0.0000
+CA     0.3760    0.6690   -0.6540
+CB     0.2670   -0.7330    0.5600
+
+# bonds for visualization only.
+bonds = 2
+com CA
+com CB
