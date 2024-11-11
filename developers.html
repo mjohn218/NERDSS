@@ -1,0 +1,143 @@
+
+
+<html>
+	<head>
+		<title>NERDSS -for developers</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="icon" type="image/png" href="images/NERDSSicon.png">
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HWZ9W3CM4J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HWZ9W3CM4J');
+</script>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+							<a href="index.html" class="logo">
+								<span class="symbol"><img src="images/logo_design.png" alt="" /></span>
+							</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li><a href="about.html">About</a></li>
+							<li><a href="introductory_tutorial.html">Tutorials</a></li>
+							<li><a href="user_guide.html">User Guides</a></li>
+							<li><a href="articles.html">Articles</a></li>
+							<li><a href="developers.html">For Developers</a></li>
+							<li><a href="https://github.com/mjohn218/NERDSS/discussions">User Forum</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<h1>For developers</h1>
+							<p><b>For developers on NERDSS: to be decided</b></p>
+							<p><b>We welcome users to develop ioNERDSS with us! If you created functions that you find useful in asisting NERDSS simulation, it is our pleasure 
+								to include your functions in ioNERDSS. Just follow the instructions in the ioNERDSS Developer's Guide below to get started: 
+							</b></p>
+							<p><strong>1. Sign up on Pypi and Join as Collaborators</strong></p>
+    						<p>For the first-time user, register an account on Pypi (<a href="https://pypi.org" target="_blank">https://pypi.org</a>), search for the <strong>ioNERDSS</strong> library, and request to join as a collaborator. This will usually require authorization from the ioNERDSS library owner Margaret Johnson (margaret.johnson@jhu.edu).</p>
+
+    						<p><strong>2. Update Files for ioNERDSS Library</strong></p>
+    						<p>All files of the ioNERDSS library are stored in the <strong>io_nerdss</strong> repository on Github (<a href="https://github.com/mjohn218/io_nerdss" target="_blank">https://github.com/mjohn218/io_nerdss</a>) under the <code>ioNERDSSLibrary</code> folder. To update the ioNERDSS library, three main files will be modified:</p>
+    
+    						<p><strong>2.1 Modify init.py</strong></p>
+    						<p>Located at <code>/GitHub/io_nerdss/ioNERDSSLibrary/ioNERDSS/init.py</code>, this file stores all the functions included in ioNERDSS. Modify this file if more features need to be added or if existing functions need changes. The file should only contain function definitions, without running code.</p>
+
+    						<p><strong>2.2 Modify CHANGELOG.txt</strong></p>
+    						<p>Located at <code>/GitHub/io_nerdss/ioNERDSSLibrary/CHANGELOG.txt</code>, this file records the changes in each version update along with the version number. Record change information and the version number here in a contextual format.</p>
+
+    						<p><strong>2.3 Modify setup.py</strong></p>
+    						<p>Located at <code>/GitHub/io_nerdss/ioNERDSSLibrary/setup.py</code>. Update the <code>version</code> variable in the <code>setup</code> function to the new version number.</p>
+
+    						<p><strong>3. Generate Distribution Files</strong></p>
+    						<p>First-time users should ensure that the latest versions of <code>setuptools</code> and <code>wheel</code> are installed. Run the following command in the system command line:</p>
+    						<pre><code>python3 -m pip install --user --upgrade setuptools wheel</code></pre>
+
+    						<p>To check <code>setup.py</code> for errors, use this command:</p>
+    						<pre><code>python setup.py check</code></pre>
+
+    						<p>If no errors are found, pack the library’s source code by running this command in the <code>ioNERDSSLibrary</code> folder:</p>
+    						<pre><code>python setup.py sdist build</code></pre>
+
+    						<p>A <code>.tar.gz</code> file of the current version will be added to the <code>dist</code> folder.</p>
+
+    						<p><strong>4. Update Package to Pypi</strong></p>
+    						<p>First-time users need to install <code>twine</code> by running:</p>
+    						<pre><code>pip install twine</code></pre>
+
+    						<p>After installation, run this command in the <code>ioNERDSSLibrary</code> folder to upload the library. You will be prompted for your registered Pypi username and password:</p>
+    						<pre><code>twine upload dist/*</code></pre>
+
+    						<p>After upload, the new version of the ioNERDSS library will appear on the Pypi website for a final check: <a href="https://pypi.org/project/ioNERDSS/" target="_blank">https://pypi.org/project/ioNERDSS/</a>.</p>
+
+    						<p>Once updated, remember to push the latest original files into the <code>io_nerdss</code> repository on Github.</p>
+							<p><b>We kindly ask you to follow the best practices while developing your functions:</b></p>
+							<ul>
+								<li>Use docstrings to document your code. Sphinx can extract docstrings from your code to create documentation, so it's important to write clear and concise docstrings that describe the purpose and functionality of your code.</li>
+								<li>Use reStructuredText (reST) markup in your docstrings.</li>
+								<li>Follow the Google-style docstring conventions. This is a popular convention for writing docstrings that is widely used in the Python community. It consists of a one-line summary, followed by a more detailed description, and optional sections for parameters, returns, and other details. You can find more information on this convention in the Sphinx documentation.</li>
+								<li>Organize your code into modules and packages.</li>
+								<li>Use meaningful names for modules, classes, functions, and variables.</li>
+								<li>Include examples and usage instructions in documentation. Sphinx can include examples and usage instructions in your documentation, which can help users understand how to use your code.</li>
+								<li>Use Sphinx to generate documentation.</li>
+								<li>Add tests for each function using unittest.</li>
+							</ul>
+						</div>
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+					<div class="inner">
+						<section>
+							<h2>Get in touch</h2>
+							<p>email: margaret.johnson@jhu.edu</p>
+							<p>lab website: <a href = "https://sites.krieger.jhu.edu/johnson-lab/" target="_blank">https://sites.krieger.jhu.edu/johnson-lab/</a></p>
+						</section>
+						<section>
+							<h2>Follow</h2>
+							<ul class="icons">
+								<li><a href="https://github.com/mjohn218/NERDSS" class="icon brands style2 fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+							</ul>
+					</div>
+				</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
