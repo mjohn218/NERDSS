@@ -9,6 +9,7 @@
 	var	$window = $(window),
 		$body = $('body');
 
+
 	// Breakpoints.
 		breakpoints({
 			xlarge:   [ '1281px',  '1680px' ],
@@ -140,6 +141,7 @@
 			.on('click', 'a', function(event) {
 
 				var href = $(this).attr('href');
+				var target = $(this).attr('target');
 
 				event.preventDefault();
 				event.stopPropagation();
@@ -152,7 +154,11 @@
 						return;
 
 					window.setTimeout(function() {
-						window.location.href = href;
+						if (target === '_blank') {
+							window.open(href, '_blank');
+						} else {
+							window.location.href = href;
+						}
 					}, 350);
 
 			})
