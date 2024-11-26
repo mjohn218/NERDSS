@@ -1,0 +1,35 @@
+*.o
+*.dat
+*.xyz
+*.pdb
+*.dat
+*.out
+*.log
+*tags
+*tags\ 2
+*.icloud
+*.cpp~
+*.hpp~
+tmp*
+*.psf
+cmake-build-debug/
+cmake-build-release/
+bin/
+build/
+scratch/
+.idea
+vec_vers/sub_tests/new_inp/tests
+new_version/to_convert
+new_version/test.nosync
+.DS_Store
+*.collapsed
+.vscode/
+rng_state*
+#  by Kent 2021 07 01  (avoid anything ending in ~, .# (0-9), .bak or .swp
+*~
+*.[0-9]
+*.bak
+*.swp
+*.txt
+sample_inputs/clathrin/
+CMakeFiles/

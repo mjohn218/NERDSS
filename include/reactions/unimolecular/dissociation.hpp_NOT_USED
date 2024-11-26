@@ -1,0 +1,34 @@
+/*! \file dissociation.hpp
+
+ * ### Created on 10/25/18 by Matthew Varga
+ * ### Purpose
+ * ***
+ *
+ * ### Notes
+ * ***
+ *
+ * ### TODO List
+ * ***
+ */
+#pragma once
+
+#include <classes/class_SimulVolume.hpp>
+#include "classes/class_Rxns.hpp"
+
+/*! \ingroup Reactions
+ * \brief Perform dissociation of previously associated Molecules.
+ */
+
+void check_for_dissociation(unsigned simItr, const Parameters& params, std::vector<Molecule>& moleculeList,
+                            std::vector<int>& emptyComList, std::vector<Complex>& complexList,
+                            const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns,
+                            const std::vector<CreateDestructRxn>& createDestructRxn,
+                            const std::vector<MolTemplate>& molTemplateList, std::vector<int>& emptyMolList,
+                            SimulVolume& simulVolume);
+
+bool break_interaction(size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
+    const BackRxn& currRxn, std::vector<int>& emptyComList, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList);
+
+bool determine_parent_complex(int pro1Index, int pro2Index, int newComIndex, std::vector<Molecule>& moleculeList,
+                              std::vector<Complex>& complexList);
