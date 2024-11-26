@@ -93,6 +93,7 @@ Molecule initialize_molecule_for_restart(
     tmp.molTypeIndex = molTemplate.molTypeIndex;
     tmp.mass = molTemplate.mass;
     tmp.isLipid = molTemplate.isLipid;
+    tmp.isPromoter = molTemplate.isPromoter;
 
     // Set up interface state vectors
     tmp.freelist = std::vector<int>(molTemplate.interfaceList.size());

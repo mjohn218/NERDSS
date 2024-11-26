@@ -59,10 +59,12 @@ void cluster_one_complex(int k1, std::vector<Molecule>& moleculeList, std::vecto
                 }
                 if (flag == 0) {
                     newPair.priority = 1;
-                    if (complexList[k1].D.z < 1E-15 || complexList[k2].D.z < 1E-15)
+                    // if (complexList[k1].D.z < 1E-15 || complexList[k2].D.z < 1E-15)
+                    if (complexList[k1].OnSurface || complexList[k2].OnSurface)
                         newPair.priority = 0; //low prioirity to solve versus lipid, since no structure
 
-                    if (complexList[k2].D.z < 1E-15 && complexList[k1].D.z < 1E-15) {
+                    // if (complexList[k2].D.z < 1E-15 && complexList[k1].D.z < 1E-15) {
+                    if (complexList[k2].OnSurface && complexList[k1].OnSurface) {
                         newPair.memtest = 1;
                     } else
                         newPair.memtest = 0;
@@ -128,7 +130,8 @@ void resample_traj(int currStop, std::vector<ClusterPair>& pairList, std::vector
             }
             if (flag == 0) {
 
-                if (membraneObject.isSphere == true && complexList[k1].D.z < 1E-15) { // complex on sphere surface
+                // if (membraneObject.isSphere == true && complexList[k1].D.z < 1E-15) { // complex on sphere surface
+                if (membraneObject.isSphere == true && complexList[k1].OnSurface) { // complex on sphere surface
                     Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[k1]);
                     complexList[k1].trajTrans.x = targTrans.x;
                     complexList[k1].trajTrans.y = targTrans.y;
@@ -158,7 +161,8 @@ void resample_traj(int currStop, std::vector<ClusterPair>& pairList, std::vector
             }
             if (flag == 0) {
 
-                if (membraneObject.isSphere == true && complexList[k2].D.z < 1E-15) { // complex on sphere surface
+                // if (membraneObject.isSphere == true && complexList[k2].D.z < 1E-15) { // complex on sphere surface
+                if (membraneObject.isSphere == true && complexList[k2].OnSurface){
                     Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[k2]);
                     complexList[k2].trajTrans.x = targTrans.x;
                     complexList[k2].trajTrans.y = targTrans.y;

@@ -50,7 +50,8 @@ void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, Paramet
         for (int i { 0 }; i < moleculeList[pro1Index].crossbase.size(); ++i) {
             int p2 { moleculeList[pro1Index].crossbase[i] };
             int k2 { moleculeList[p2].myComIndex };
-            if (complexList[k2].D.z < 1E-15) {
+            // if (complexList[k2].D.z < 1E-15) {
+            if (complexList[k2].OnSurface) {
                 memCheckList[maxRows * c + i] = 1;
             } else
                 memCheckList[maxRows * c + i] = 0;
@@ -176,7 +177,8 @@ void sweep_separation_complex_rot_memtest_box(int simItr, int pro1Index, Paramet
 
                 // avoid repeated resample
                 if (resampleList[comIndex2] == 0) {
-                    if (p2 > startProIndex && (moleculeList[p2].trajStatus == TrajStatus::none || moleculeList[p2].trajStatus == TrajStatus::canBeResampled)) {
+                    // if (p2 > startProIndex && (moleculeList[p2].trajStatus == TrajStatus::none || moleculeList[p2].trajStatus == TrajStatus::canBeResampled)) {
+                    if ((moleculeList[p2].trajStatus == TrajStatus::none || moleculeList[p2].trajStatus == TrajStatus::canBeResampled)) {
                         /*
                      We loop over proteins sequentially, so earlier proteins have already moved and avoided
                      their neighbors and should not be moved again.

@@ -19,7 +19,7 @@ Molecule initialize_molecule_after_zeroth_reaction(
     tmp.molTypeIndex = molTemplate.molTypeIndex;
     tmp.mass = molTemplate.mass;
     tmp.isLipid = molTemplate.isLipid;
-
+    tmp.isPromoter = molTemplate.isPromoter;
     // Set up interface state vectors
     tmp.freelist = std::vector<int>(molTemplate.interfaceList.size());
     std::iota(tmp.freelist.begin(), tmp.freelist.end(), 0);
@@ -52,6 +52,8 @@ Molecule initialize_molecule_after_zeroth_reaction(
     ++Molecule::numberOfMolecules;
     params.numTotalUnits = params.numTotalUnits + molTemplate.interfaceList.size() + 1;
 
+    tmp.id = Molecule::maxID++;
+
     // keep track of molecule types
     ++MolTemplate::numEachMolType[molTemplate.molTypeIndex];
 
@@ -67,6 +69,7 @@ Molecule initialize_molecule_after_uni_reaction(int index, const Molecule& paren
     tmp.molTypeIndex = molTemplate.molTypeIndex;
     tmp.mass = molTemplate.mass;
     tmp.isLipid = molTemplate.isLipid;
+    tmp.isPromoter = molTemplate.isPromoter;
 
     // Set up interface state vectors
     tmp.freelist = std::vector<int>(molTemplate.interfaceList.size());
@@ -117,6 +120,8 @@ Molecule initialize_molecule_after_uni_reaction(int index, const Molecule& paren
     tmp.index = index;
     ++Molecule::numberOfMolecules;
     params.numTotalUnits = params.numTotalUnits + molTemplate.interfaceList.size() + 1;
+
+    tmp.id = Molecule::maxID++;
 
     // keep track of molecule types
     ++MolTemplate::numEachMolType[molTemplate.molTypeIndex];

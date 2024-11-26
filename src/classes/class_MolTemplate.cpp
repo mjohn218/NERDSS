@@ -99,6 +99,7 @@ void MolTemplate::display() const
         else
             std::cout << "Is a lipid: " << std::boolalpha << isLipid << '\n';
     }
+    std::cout << "Is a promoter: " << std::boolalpha << isPromoter << '\n';
     std::cout << "Is a rod: " << std::boolalpha << isRod << '\n';
     std::cout << "Is a point: " << std::boolalpha << isPoint << '\n';
     std::cout << "Radius: " << radius << '\n';
@@ -276,6 +277,11 @@ void MolTemplate::set_value(std::string& line, MolKeyword molKeyword)
         if (insideCompartment == true) {
             crossesCompartment = true;
         }
+        break;
+    }
+    case 17: {
+        isPromoter = read_boolean(line);
+        std::cout << "Read in isPromoter: " << std::boolalpha << isPromoter << std::endl;
         break;
     }
     default: {

@@ -25,12 +25,14 @@ std::map<const std::string, ParamKeyword> parmKeywords = {
     { "nitr", ParamKeyword::nItr },
     { "fromrestart", ParamKeyword::fromRestart }, { "timewrite", ParamKeyword::timeWrite },
     { "trajwrite", ParamKeyword::trajWrite }, { "timestep", ParamKeyword::timeStep },
+    { "assocdissocwrite", ParamKeyword::assocDissocWrite},
     { "numtotalcomplex", ParamKeyword::numTotalComplex },
     { "mass", ParamKeyword::mass }, { "restartwrite", ParamKeyword::restartWrite },
     { "pdbwrite", ParamKeyword::pdbWrite },
     { "overlapseplimit", ParamKeyword::overlapSepLimit }, { "name", ParamKeyword::name },
     { "checkpoint", ParamKeyword::checkPoint }, { "scalemaxdisplace", ParamKeyword::scaleMaxDisplace },
-    { "transitionwrite", ParamKeyword::transitionWrite }, { "clusteroverlapcheck", ParamKeyword::clusterOverlapCheck }
+    { "transitionwrite", ParamKeyword::transitionWrite }, 
+    { "clusteroverlapcheck", ParamKeyword::clusterOverlapCheck }
 };
 
 void Parameters::set_value(std::string value, ParamKeyword keywords)
@@ -40,7 +42,7 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
      * @param value value of the parameter as a string
      * @param keywords the keyword parsed from the input file to match to the enumeration Keywords
      */
-    double nit, checkit, transitionit, temp;
+    double temp, checkit, transitionit;
     try {
         auto key = static_cast<std::underlying_type<ParamKeyword>::type>(keywords);
         switch (key) {
@@ -53,8 +55,8 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
             std::cout << "Read in numTotalSpecies: " << this->numTotalSpecies << std::endl;
             break;
         case 2:
-            nit = std::stod(value);
-            this->nItr = (long long)(nit); // std::stoi(value);
+            temp = std::stod(value);
+            this->nItr = (long long)(temp); // std::stoi(value);
             std::cout << "Read in nItr: " << this->nItr << " timeSteps" << std::endl;
             break;
         case 3:
@@ -118,6 +120,10 @@ void Parameters::set_value(std::string value, ParamKeyword keywords)
         case 17:
             this->clusterOverlapCheck = read_boolean(value);
             std::cout << "Read in clusterOverlapCheck: " << std::boolalpha << this->clusterOverlapCheck << std::endl;
+            break;
+        case 18:
+            this->assocDissocWrite = read_boolean(value);
+            std::cout << "Read in assocDissocWrite: " << std::boolalpha << this->assocDissocWrite << std::endl;
             break;
         default:
             throw std::invalid_argument("Not a valid keyword.");

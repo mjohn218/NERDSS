@@ -12,13 +12,13 @@
 // only works for sphere system, and reactCom1 binds to surface by 3D->2D or 2D->2D.
 //
 void associate_implicitlipid_sphere(
-    int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
+    long long int iter, int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
     Complex& reactCom1, Complex& reactCom2, const Parameters& params,
     ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList,
     copyCounters& counterArrays, std::vector<Complex>& complexList,
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns)
+    const std::vector<BackRxn>& backRxns, std::ofstream& assocDissocFile)
 {
     // TRACE();
     double RS3D { -1.0 };
@@ -57,7 +57,8 @@ void associate_implicitlipid_sphere(
         double displaceFrac {};
         double sigmaMag;
         // if both in 2D, ignore the z-component
-        if (reactCom1.D.z < 1E-14) {
+        // if (reactCom1.D.z < 1E-14) {
+        if (reactCom1.OnSurface) {
             isOnMembrane = true;
         } else { // note not on the membrane
             transitionToSurface = true;
@@ -278,7 +279,11 @@ void associate_implicitlipid_sphere(
 
         reactMol1.interfaceList[ifaceIndex1].isBound = true;
         reactMol1.interfaceList[ifaceIndex1].index = currRxn.productListNew[0].absIfaceIndex;
-
+        if (assocDissocFile.is_open()) {
+            assocDissocFile << "ITR:" << iter << "," << "BOND," 
+            << molTemplateList[reactMol1.molTypeIndex].molName << "," << reactMol1.index << "," << ifaceIndex1 << "," 
+            << molTemplateList[reactMol2.molTypeIndex].molName << "," << reactMol2.index << "," << ifaceIndex2 << std::endl;
+        }
         // add to the list of bound interfaces and remove from the list of free interfaces
         reactMol1.bndlist.push_back(ifaceIndex1);
         reactMol1.bndpartner.push_back(reactMol2.index);

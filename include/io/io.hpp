@@ -33,8 +33,7 @@ std::ostream& llinebreak(std::ostream& os);
 void write_psf(const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList);
 void write_crds(std::string name, const std::vector<Complex>& Complexlist, const std::vector<Molecule>& bases);
-void write_crds(const std::vector<Complex>& Complexlist,
-    const std::vector<Molecule>& bases); // overloaded crd dump for errors
+void write_crds(const std::vector<Complex>& Complexlist, const std::vector<Molecule>& bases); // overloaded crd dump for errors
 
 /*!
  * \brief Writes the coordinates of all Molecules in the system to an XYZ coordinate file.
@@ -123,6 +122,10 @@ void write_observables(
 void write_pdb(long long int simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
     const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
 
+void write_pdb(long long int simItr, unsigned frameNum, const Parameters& params, const std::vector<Molecule>& moleculeList,
+               const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject, int rank, MpiContext& mpiContext,
+               SimulVolume& simulVolume); // for mpi version
+
 /*! \ingroup IO
  * \brief first line description of the MONODIMER output file.
  */
@@ -147,7 +150,11 @@ void write_NboundPairs(copyCounters& counterArrays, std::ofstream& outfile, int 
  * \brief print calculated histogram of distinct types of complexes, based on protein/lipid composition.
  */
 double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
-    std::vector<MolTemplate>& molTemplateList, int nImplicitLipids);
+    std::vector<MolTemplate>& molTemplateList, std::vector<Molecule>& moleculeList, int nImplicitLipids);
+
+double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
+    std::vector<MolTemplate>& molTemplateList, std::vector<Molecule>& moleculeList, int nImplicitLipids, 
+    MpiContext& mpiContext, SimulVolume& simulVolume); // for mpi version
 
 /*! \ingroup IO
  * \brief initialize array of counterArrays.copyNumSpecies, based on the initial molecule Species and their interface
@@ -165,8 +172,26 @@ int init_speciesFile(std::ofstream& speciesFile, copyCounters& counterArrays, st
  */
 void write_all_species(double simTime, std::ofstream& speciesFile, const copyCounters& counterArray);
 
+void write_all_species(double simTime, std::vector<Molecule>& moleculeList, std::ofstream& speciesFile, copyCounters& counterArray,
+    const Membrane& membraneObject, MpiContext& mpiContext, SimulVolume& simulVolume); // for mpi version
+
+/*! \ingroup IO
+ * \brief Find all molecules whose partners change in this time interval. 
+ */
+void write_single_molecule_rxn(double simTime, std::ofstream &smtRxnFile, const std::vector<Molecule> &moleculeList, const std::vector<Molecule> &snapshot, const std::vector<MolTemplate> &molTemplateList);
+
 /*! \ingroup IO
  * \brief Prints out information about all species in the system (Molecules and Complexes)
  */
 void print_system_information(long long int simItr, std::ofstream& systemFile, const std::vector<Molecule>& moleculeList,
     const std::vector<Complex>& complexList, const std::vector<MolTemplate>& molTemplateList);
+
+using MDTimer = std::chrono::system_clock;
+void write_output(long long int simItr, Parameters& params,std::string trajFileName, std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject, MpiContext& mpiContext, std::string transitionFileName, 
+    copyCounters& counterArrays, std::ofstream& speciesFile1, std::ofstream& debugFile, std::string debugFileName, std::string restartFileName,
+    std::vector<Complex>& complexList, SimulVolume& simulVolume, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns, std::vector<std::chrono::duration<double>>& durationList, MDTimer::time_point& startStep,
+    MDTimer::time_point& totalTimeStart, std::map<std::string, int>& observablesList, std::ofstream& assemblyfile); // for mpi version
+
+void merge_outputs(int totalrank, int molTemplateNum); // for mpi version

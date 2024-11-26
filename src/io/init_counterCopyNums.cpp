@@ -30,6 +30,7 @@ void init_counterCopyNums(copyCounters& counterArrays,
   for (i = 0; i < totalSpecies; i++) counterArrays.copyNumSpecies.push_back(0);
 
   for (p1 = 0; p1 < moleculeList.size(); p1++) {
+    if (moleculeList[p1].isGhosted == true) continue;
     int numIfaces = moleculeList[p1].interfaceList.size();
     for (j = 0; j < numIfaces; j++) {
       // find out which state each interface on the molecule is in, and

@@ -25,8 +25,8 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
     const std::vector<BackRxn>& backRxns, Membrane& membraneObject, copyCounters& counterArrays)
 {
   double probvec1;
-    if (moleculeList[pro1Index].trajStatus != TrajStatus::propagated
-        && moleculeList[pro2Index].trajStatus != TrajStatus::propagated) {
+    if (moleculeList[pro1Index].isDissociated != true
+        && moleculeList[pro2Index].isDissociated != true) {
         if (oneRxn.rateList[rateIndex].rate > 0) {
 
             /*Don't use Rmax, because it is based on diffusion*/
@@ -37,7 +37,7 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
             double R1 { 0 };
             double bindSep { oneRxn.bindRadSameCom * oneRxn.bindRadius };
             withinRmax = get_distance(pro1Index, pro2Index, iface1Index, iface2Index, rxnIndex, rateIndex,
-                isBiMolStateChange, sep, R1, bindSep, complexList, oneRxn, moleculeList, membraneObject);
+                isBiMolStateChange, sep, R1, bindSep, complexList, oneRxn, moleculeList, membraneObject.isSphere);
             /*Proteins are in the same complex!*/
             /*If these proteins are at contact (sep=0) or close to at contact (<bindrad) then
             they will associate.
@@ -56,17 +56,32 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
              */
             double coop = oneRxn.loopCoopFactor;
             if (withinRmax) {
-	      //int backIndex = oneRxn.conjBackRxnIndex;
-
-                double ka = oneRxn.rateList[rateIndex].rate; // units of nm^3/us
-                // this uses the rate corresponding to the same forward reaction rate.
-                //double kb = backRxns[backIndex].rateList[rateIndex].rate; // units of per s
+			  //int backIndex = oneRxn.conjBackRxnIndex;
+			  
+			  double ka = oneRxn.rateList[rateIndex].rate; // units of nm^3/us
+			  // this uses the rate corresponding to the same forward reaction rate.
+                
+                // for 1d reactions, ka is 1/2
+                if (complexList[moleculeList[pro1Index].myComIndex].onFiber &&
+                    complexList[moleculeList[pro2Index].myComIndex].onFiber)
+                  ka = ka/2.0;
+                
+                // if (complexList[moleculeList[pro1Index].myComIndex].D.z == 0) { // This is a reaction on the membrane
+                //                     // here again, assuming the forward reaction has only 1 rate
+                //                     Keq = ka / (2.0 * oneRxn.bindRadius) / kb * 1E6 / self * coop;
+                //                     Volume = params.waterBox.area; // nm2
+                //                 } else {
+                //                     Keq = ka / kb / self * 1E6 * coop;
+                //                     Volume = params.waterBox.volume; // nm3
+                //                 }
+                
 				/*Do not correct for self, as input ka3D values is only multiplied by 2 when probability is evaluated.
 				  double self = 1.0;
 				if (iface1Index == iface2Index)
                     self = 2.0;
 				*/
                 
+
                 double c0_nm3 = 0.602; // standard state 1M in units of /nm^3
                 //double m = kb / (ka * 1E6 * c0_nm3) * 2.0; // 1E6 is to convert ka to units of /s
                 double rateClose = ka * c0_nm3 * coop; //(1.0 + m); // ka*c0/(1+m) where m is defined above

@@ -2,6 +2,8 @@
 #include "reactions/bimolecular/2D_reaction_table_functions.hpp"
 #include "reactions/shared_reaction_functions.hpp"
 #include "tracing.hpp"
+#include <iostream>
+#include <ostream>
 
 bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const double maxRandInt, Molecule& mol,
     std::vector<Molecule>& moleculeList, const std::vector<ForwardRxn>& forwardRxns)
@@ -20,6 +22,7 @@ bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const doub
         // }
 
         double rand1 { rand_gsl64() };
+        // std::cout << mol.probvec[crossMolItr] << std::endl;
         if (rand1 < mol.probvec[crossMolItr]) {
 
             crossIndex1 = crossMolItr;
@@ -29,6 +32,7 @@ bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const doub
             /*Find the index on the partner protein's list of reactions that matches mol's.*/
             if (moleculeList[mol2Index].isImplicitLipid == true) {
                 crossIndex2 = 0;
+                return true;
                 // std::cout << "DETERMINED REACTION TO OCCUR TO IL: " << mol.crossrxn[crossIndex1][0] << " prob: " << mol.probvec[crossMolItr] << " involving protein: " << mol.index << " on complex: " << mol.myComIndex << std::endl;
             } else {
                 for (unsigned crossMolItr2 { 0 }; crossMolItr2 < moleculeList[mol2Index].crossbase.size();
@@ -60,13 +64,13 @@ bool determine_if_reaction_occurs(int& crossIndex1, int& crossIndex2, const doub
                             if (rxnMatches == true) {
                                 // std::cout << " DETERMINED WHICH REACTION OCCURED. "
                                 //           << "Prbability: " << pMatch << " crossindex1: " << crossIndex1 << " crossindex2: " << crossIndex2 << " protein1: " << mol.index << " protein2: " << mol2Index << " check, protein2's partner: " << moleculeList[mol2Index].crossbase[crossIndex2] << " isStateChangeBackRxn? 1 is true " << mol.crossrxn[crossIndex1][2] << std::endl;
-                                break;
+                                return true;
                             }
                         }
                     }
                 }
+                return false;
             }
-            return true;
         }
     }
     return false;

@@ -13,13 +13,14 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+
 //#include "classes/class_coord.hpp"
 #include "classes/class_Molecule_Complex.hpp"
 #include "classes/class_Parameters.hpp"
 #include "classes/class_Membrane.hpp"
-
-#include <algorithm>
-#include <cmath>
+#include "split.cpp"
 
 /*! \ingroup SimulClasses
  * \brief Wrapper for arrays representing the simulation box
@@ -34,11 +35,33 @@ struct SimulVolume {
         int yIndex{}; //!< index of the SubBox in the y dimension
         int zIndex{}; //!< index of the SubBox in the z dimension
 
-        std::vector<int>
-            memberMolList; //!< list of Molecule indices in moleculeList which currently reside in the SubBox
+        std::vector<int> memberMolList; //!< list of Molecule indices in moleculeList which currently reside in the SubBox
         std::vector<int> neighborList; //!< list of SubBox absolute indices which are neighbors of this SubBox.
 
         void display();
+
+        /*
+        Function serialize serializes the SubVolume into array of bytes.
+        */
+        void serialize(unsigned char *arrayRank, int &nArrayRank) {
+            PUSH(absIndex);
+            PUSH(xIndex);
+            PUSH(yIndex);
+            PUSH(zIndex);
+            serialize_primitive_vector<int>(memberMolList, arrayRank, nArrayRank);
+            serialize_primitive_vector<int>(neighborList, arrayRank, nArrayRank);
+        }
+        /*
+        Function deserialize deserializes the SubVolume from arrayRank of bytes.
+        */
+        void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+            POP(absIndex);
+            POP(xIndex);
+            POP(yIndex);
+            POP(zIndex);
+            deserialize_primitive_vector<int>(memberMolList, arrayRank, nArrayRank);
+            deserialize_primitive_vector<int>(neighborList, arrayRank, nArrayRank);
+        }
     };
 
     struct Dimensions {
@@ -54,6 +77,25 @@ struct SimulVolume {
 
         Dimensions() = default;
         explicit Dimensions(const Parameters& params, const Membrane &membraneObject);
+
+        /*
+        Function serialize serializes the SubVolume into arrayRank of bytes.
+        */
+        void serialize(unsigned char *arrayRank, int &nArrayRank) {
+            PUSH(x);
+            PUSH(y);
+            PUSH(z);
+            PUSH(tot);
+        }
+        /*
+        Function deserialize deserializes the SubVolume from arrayRank of bytes.
+        */
+        void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+            POP(x);
+            POP(y);
+            POP(z);
+            POP(tot);
+        }
     };
 
     int maxNeighbors{ 13 }; //!< maximum number of neighbors a SubBox can have. Currently set to cubic
@@ -88,7 +130,30 @@ struct SimulVolume {
      * Molecule doesn't fit.
      */
     void update_memberMolLists(const Parameters& params, std::vector<Molecule>& moleculeList,
-			       std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject, int simItr);
+			        std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, const Membrane &membraneObject, int simItr);
+
+    void update_memberMolLists(const Parameters &params, std::vector<Molecule> &moleculeList,
+                    std::vector<Complex> &complexList, std::vector<MolTemplate> &molTemplateList, const Membrane &membraneObject, int simItr,
+                    MpiContext &mpiContext);  // For parallel programming
 
     void display();
+
+    /*
+    Function serialize serializes the Vector into arrayRank of bytes.
+    */
+    void serialize(unsigned char *arrayRank, int &nArrayRank) {
+        PUSH(maxNeighbors);
+        numSubCells.serialize(arrayRank, nArrayRank);
+        subCellSize.serialize(arrayRank, nArrayRank);
+        serialize_abstract_vector<SubVolume>(subCellList, arrayRank, nArrayRank);
+    }
+    /*
+    Function deserialize deserializes the Vector from arrayRank of bytes.
+    */
+    void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+        POP(maxNeighbors);
+        numSubCells.deserialize(arrayRank, nArrayRank);
+        subCellSize.deserialize(arrayRank, nArrayRank);
+        deserialize_abstract_vector<SubVolume>(subCellList, arrayRank, nArrayRank);
+    }
 };

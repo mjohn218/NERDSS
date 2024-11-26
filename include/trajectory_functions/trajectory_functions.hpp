@@ -55,6 +55,20 @@ void reflect_complex(Vector& transVec, const Parameters& params, Complex& targCo
 void clear_reweight_vecs(Molecule& oneMol);
 
 /*!
+ * \brief Checks for overlap of proteins on fiber.
+ *
+ * Fiber (1D) version of sweep_separation_complex_rot
+ */
+void sweep_separation_complex_rot_fiber(int simItr, int pro1Index, Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+void sweep_separation_complex_rot_fiber_box(int simItr, int pro1Index, Parameters& params,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    const std::vector<ForwardRxn>& forwardRxns,
+    const std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject);
+
+/*!
  * \brief Checks for overlap of proteins on the membrane.
  *
  * Membrane version of sweep_separation_complex_rot

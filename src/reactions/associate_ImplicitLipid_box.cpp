@@ -8,10 +8,11 @@
 #include <iomanip>
 
 /*Either 1 or 2 is implicit lipid*/
-void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
+void associate_implicitlipid_box(long long int iter, int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2, Complex& reactCom1,
     Complex& reactCom2, const Parameters& params, ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList,
-    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns)
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays, std::vector<Complex>& complexList, Membrane& membraneObject, 
+    const std::vector<ForwardRxn>& forwardRxns, const std::vector<BackRxn>& backRxns, std::ofstream& assocDissocFile)
 {
     double RS3D { -1.0 };
     for (int RS3Di = 0; RS3Di < 100; RS3Di++) {
@@ -38,7 +39,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         moleculeList[mol].set_tmp_association_coords();
 
     bool isOnMembrane = false;
-    if (reactCom1.D.z < 1E-15 && reactCom2.D.z < 1E-15) {
+    if (reactCom1.OnSurface && reactCom2.OnSurface) {
         isOnMembrane = true;
         // std::cout << " IMPLICIT LIPID 2D CASE" << std::endl;
     }
@@ -52,7 +53,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
       Perform reorientaion for 3D->2D case,
       and for 2D case, to correct for proteins that have dropped below their
       need orientation corrections for implicit model
-    */
+        */
         // std::cout << "Before operate: " << std::endl;
         // write_xyz_assoc_cout(reactCom1, reactCom2, moleculeList);
 
@@ -70,8 +71,9 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         }
 
         double tol = 1E-14;
-        /* Calculate COM of the two complexes pre-association. The COM of the new complex after should be close to this
-         * Here, we will force it back, as rotation can cause large displacements
+        /* Calculate COM of the two complexes pre-association. The COM of the
+         * new complex after should be close to this. Here, we will force it
+         * back, as rotation can cause large displacements
          * */
         Coord startCOM;
         com_of_two_tmp_complexes(reactCom1, reactCom2, startCOM, moleculeList);
@@ -94,6 +96,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
             //     std::cout << " transVec2 to sigma: " << transVec2.x << ' ' << transVec2.y << ' ' << transVec2.z << std::endl;
 
             // update the temporary coordinates
+            // keep the membrane protein fix, and move the other one
             for (auto& mp : reactCom1.memberList)
                 moleculeList[mp].update_association_coords(transVec1);
             for (auto& mp : reactCom2.memberList)
@@ -321,6 +324,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
                 moleculeList[memMol].interfaceList[i].coord = moleculeList[memMol].tmpICoords[i];
             moleculeList[memMol].clear_tmp_association_coords();
             moleculeList[memMol].trajStatus = TrajStatus::propagated;
+            moleculeList[memMol].need_to_send = true;
         }
         //add link to surface for the molecule
         moleculeList[reactMol1.index].linksToSurface++;
@@ -405,6 +409,7 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
                 moleculeList[memMol].interfaceList[i].coord = moleculeList[memMol].tmpICoords[i];
             moleculeList[memMol].clear_tmp_association_coords();
             moleculeList[memMol].trajStatus = TrajStatus::propagated;
+            moleculeList[memMol].need_to_send = true;
         }
         //add link to surface for the molecule
         moleculeList[reactMol2.index].linksToSurface++;
@@ -451,7 +456,11 @@ void associate_implicitlipid_box(int ifaceIndex1, int ifaceIndex2, Molecule& rea
         //**************************************************
         //**************************************************
         reactMol2.interfaceList[ifaceIndex2].index = currRxn.productListNew[0].absIfaceIndex;
-
+        if (assocDissocFile.is_open()) {
+            assocDissocFile << "ITR:" << iter << "," << "BOND," 
+            << molTemplateList[reactMol1.molTypeIndex].molName << "," << reactMol1.index << "," << ifaceIndex1 << "," 
+            << molTemplateList[reactMol2.molTypeIndex].molName << "," << reactMol2.index << "," << ifaceIndex2 << std::endl;
+        }
         // add to the list of bound interfaces and remove from the list of free interfaces
         reactMol2.bndlist.push_back(ifaceIndex2);
         reactMol2.bndpartner.push_back(reactMol1.index);

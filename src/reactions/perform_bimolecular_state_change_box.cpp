@@ -102,17 +102,21 @@ void perform_bimolecular_state_change_box(int stateChangeIface, int facilitatorI
         } else {
             sigma.calc_magnitude();
             displaceFrac = (sigma.magnitude - bindRadius) / sigma.magnitude;
-            if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
-	      transitionToSurface = true; //both can't be less than tol, or would not be in this loop.
-	      if (stateChangeCom.D.z < facilitatorCom.D.z) {
+            // if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
+            if (stateChangeCom.OnSurface || facilitatorCom.OnSurface) {
+              transitionToSurface = true; // both can't be less than tol, or
+                                          // would not be in this loop.
+              if (stateChangeCom.D.z < facilitatorCom.D.z) {
                 slowPro = stateChangeMol.index;
-                memProtein = stateChangeMol; //rotate relative to the slower protein.
-	      } else {
+                memProtein =
+                    stateChangeMol; // rotate relative to the slower protein.
+              } else {
                 slowPro = facilitatorMol.index;
                 memProtein = facilitatorMol;
-	      }
 
-	      // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
+              }
+
+              // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
             }
         }
 

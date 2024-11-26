@@ -430,6 +430,11 @@ void ParsedRxn::set_value(std::string& line, RxnKeyword rxnKeyword)
             excludeVolumeBound = read_boolean(line);
             break;
         }
+        case 22: {
+            area3Dto1D = std::stod(line);
+            std::cout << "Read in value of area3Dto1D: " << area3Dto1D << "nm^2\n";
+            break;
+        }
         default: {
             throw std::invalid_argument("Not a valid keyword.");
         }
@@ -472,6 +477,7 @@ void ParsedRxn::display() const
     std::cout << "bindRadSameCom " << bindRadSameCom << '\n';
     std::cout << "loopCoopFactor " << loopCoopFactor << '\n';
     std::cout << "length3Dto2D " << length3Dto2D << '\n';
+    std::cout << "area3Dto1D " << area3Dto1D << '\n';
     std::cout << "isCoupled? " << isCoupled << '\n';
     if (isCoupled)
         std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << '\n';

@@ -14,7 +14,9 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
     int currBin
         = xItr + (yItr * simulVolume.numSubCells.x) + (zItr * simulVolume.numSubCells.x * simulVolume.numSubCells.y);
 
-    if (molTemplateList[createdMol.molTypeIndex].D.z == 0
+    // if (molTemplateList[createdMol.molTypeIndex].D.z == 0
+    if ((molTemplateList[createdMol.molTypeIndex].isImplicitLipid || 
+        molTemplateList[createdMol.molTypeIndex].isLipid)
         && std::abs(createdMol.comCoord.z) - std::abs((membraneObject.waterBox.z / 2)) > 1E-6) {
         //std::cerr << "Molecule " << createdMol.index << " of type " << molTemplateList[createdMol.molTypeIndex].molName
         //          << " is off the membrane. Writing coordinates and exiting.\n";
@@ -48,6 +50,8 @@ bool moleculeOverlaps(const Parameters& params, SimulVolume& simulVolume, Molecu
         // if it's inside the box, check if it overlaps with any molecule
         std::vector<unsigned> checkedMols {};
         for (auto memMol : simulVolume.subCellList[currBin].memberMolList) {
+            if (moleculeList[memMol].myComIndex == -1) continue;
+            if (moleculeList[memMol].myComIndex >= complexList.size()) continue;
             const Complex& oneCom = complexList[moleculeList[memMol].myComIndex]; // legibility
 
             // check bounding sphere
@@ -130,24 +134,26 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
         moleculeList.emplace_back(); // create new empty Molecule spot
     }
 
-    if (Complex::emptyComList.size() > 0) {
-        // Check to make sure the object pointed to by the last element in the each list is actually empty
-        // If it isn't delete it from the list and move on until you find one that is
-        try {
-            while (!complexList[Complex::emptyComList.back()].isEmpty)
-                Complex::emptyComList.pop_back();
-            // if there's an available empty Complex spot, make the new Complex in place
-            newComIndex = Complex::emptyComList.back();
-            Complex::emptyComList.pop_back(); // remove the empty Complex spot index from the list
-        } catch (std::out_of_range) {
-            newComIndex = complexList.size();
-            complexList.emplace_back(); // create new empty Complex spot
-        }
+    // if (Complex::emptyComList.size() > 0) {
+    //     // Check to make sure the object pointed to by the last element in the each list is actually empty
+    //     // If it isn't delete it from the list and move on until you find one that is
+    //     try {
+    //         while (!complexList[Complex::emptyComList.back()].isEmpty)
+    //             Complex::emptyComList.pop_back();
+    //         // if there's an available empty Complex spot, make the new Complex in place
+    //         newComIndex = Complex::emptyComList.back();
+    //         Complex::emptyComList.pop_back(); // remove the empty Complex spot index from the list
+    //     } catch (std::out_of_range) {
+    //         newComIndex = complexList.size();
+    //         complexList.emplace_back(); // create new empty Complex spot
+    //     }
 
-    } else {
-        newComIndex = complexList.size();
-        complexList.emplace_back(); // create new empty Complex spot
-    }
+    // } else {
+    //     newComIndex = complexList.size();
+    //     complexList.emplace_back(); // create new empty Complex spot
+    // }
+    newComIndex = complexList.size();
+    complexList.emplace_back();  // create new empty Complex spot
 
     // Now create the new species
     if (createInVicinity) {
@@ -170,8 +176,10 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
 
     moleculeList[newMolIndex].myComIndex = newComIndex;
     moleculeList[newMolIndex].trajStatus = TrajStatus::propagated;
+    moleculeList[newMolIndex].isGhosted = false;
     complexList[newComIndex] = Complex { newComIndex, moleculeList.at(newMolIndex), createdMolTemp };
     complexList[newComIndex].trajStatus = TrajStatus::propagated;
+    moleculeList[newMolIndex].complexId = complexList[newComIndex].id;
     ++Complex::numberOfComplexes;
 
     // add to monomerList if canDestroy = true
@@ -182,4 +190,73 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
             oneTemp.monomerList.emplace_back(oneMol.index);
         }
     }
+}
+
+void MPI_create_molecule_and_complex_on_rank(
+    Molecule& mol, int& newMolIndex, int& newComIndex,
+    MolTemplate& createdMolTemp, SimulVolume& simulVolume,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    std::vector<MolTemplate>& molTemplateList, const Membrane& membraneObject) {
+  newMolIndex = 0;
+  newComIndex = 0;
+  if (Molecule::emptyMolList.size() > 0) {
+    // Check to make sure the object pointed to by the last element in the each
+    // list is actually empty If it isn't delete it from the list and move on
+    // until you find one that is
+    // TODO: OPTIMIZE AT THE END: no need to try-catch, but rather loop while
+    // there are elements, and after check wheter empty
+    try {
+      while (!moleculeList[Molecule::emptyMolList.back()].isEmpty)
+        Molecule::emptyMolList.pop_back();
+
+      // if there's an available empty Molecule spot, make the new Molecule in
+      // place
+      newMolIndex = Molecule::emptyMolList.back();
+      Molecule::emptyMolList
+          .pop_back();  // remove the empty Molecule spot index from the list
+    } catch (std::out_of_range& e) {
+      newMolIndex = moleculeList.size();
+      moleculeList.emplace_back();  // create new empty Molecule spot
+    }
+  } else {
+    newMolIndex = moleculeList.size();
+    moleculeList.emplace_back();  // create new empty Molecule spot
+  }
+
+  if (Complex::emptyComList.size() > 0) {
+    // Check to make sure the object pointed to by the last element in the each
+    // list is actually empty If it isn't delete it from the list and move on
+    // until you find one that is
+    // TODO: OPTIMIZE AT THE END: no need to try-catch, but rather loop while
+    // there are elements, and after check wheter empty
+    try {
+      while (!complexList[Complex::emptyComList.back()].isEmpty)
+        Complex::emptyComList.pop_back();
+      // if there's an available empty Complex spot, make the new Complex in
+      // place
+      newComIndex = Complex::emptyComList.back();
+      Complex::emptyComList
+          .pop_back();  // remove the empty Complex spot index from the list
+    } catch (std::out_of_range) {
+      newComIndex = complexList.size();
+      complexList.emplace_back();  // create new empty Complex spot
+    }
+
+  } else {
+    newComIndex = complexList.size();
+    complexList.emplace_back();  // create new empty Complex spot
+  }
+
+  moleculeList[newMolIndex].myComIndex = newComIndex;
+  moleculeList[newMolIndex].trajStatus = TrajStatus::propagated;
+
+  moleculeList[newMolIndex].isGhosted = false;
+  // moleculeList[newMolIndex].id = Molecule::maxID++;
+
+  complexList[newComIndex] =
+      Complex{newComIndex, moleculeList.at(newMolIndex), createdMolTemp};
+  complexList[newComIndex].trajStatus = TrajStatus::propagated;
+
+  moleculeList[newMolIndex].complexId = complexList[newComIndex].id;
+  ++Complex::numberOfComplexes;
 }

@@ -76,7 +76,10 @@
 #include "classes/class_Observable.hpp"
 #include "classes/class_Quat.hpp"
 #include "classes/class_Rxns.hpp"
+#include "classes/class_SimulVolume.hpp"
 #include "classes/class_bngl_parser.hpp"
+#include "classes/class_copyCounters.hpp"
+#include "split.cpp"
 #include <algorithm>
 
 /* MAIN */
@@ -103,7 +106,7 @@ void parse_input_for_add(std::string& fileName, Parameters& params, std::map<std
  *
  * TODO: 
  */
-void parse_command(int argc, char* argv[], Parameters& params, std::string& paramFileName, std::string& restartFileName, std::string& addFileName, unsigned int& seed);
+void parse_command(int argc, char* argv[], Parameters& params, std::string& paramFileName, std::string& restartFileName, std::string& addFileName, std::string &coordinateFileName, unsigned int& seed);
 
 /* INDEX DETERMINATION FUNCTIONS */
 
@@ -229,6 +232,8 @@ void read_internal_coordinates(std::ifstream& molFile, MolTemplate& molTemplate)
  */
 void remove_comment(std::string& line);
 
+std::string create_tmp_line(const std::string &line);
+
 /*!\ingroup Parser
  * \brief This function reads an unformatted (other than the internal coordinates) molecule information file.
  *
@@ -288,3 +293,97 @@ void display_all_reactions(const std::vector<ForwardRxn>& forwardRxns, const std
     const std::vector<CreateDestructRxn>& createDestructRxns);
 void display_all_MolTemplates(const std::vector<MolTemplate>& molTemplates);
 /*******************/
+
+/**
+ * Parses input files and initializes simulation parameters for a new
+ * simulation.
+ *
+ * @param paramFile Name of the parameter file.
+ * @param params Simulation parameters.
+ * @param observablesList Map of observables to track during simulation.
+ * @param forwardRxns List of forward reactions.
+ * @param backRxns List of backward reactions.
+ * @param createDestructRxns List of create/destruct reactions.
+ * @param molTemplateList List of molecular templates.
+ * @param membraneObject Membrane object.
+ * @param moleculeList List of individual molecules.
+ * @param complexList List of complexes.
+ * @param simulVolume Simulation volume object.
+ * @param observablesFileName Name of the file to write observables data.
+ * @param implicitlipidIndex Index of the implicit lipid.
+ * @param simItr Current simulation iteration.
+ * @param mpiContext MPI context.
+ * @param trajFileName Name of the file to write trajectory data.
+ * @param transitionFileName Name of the file to write transition matrix data.
+ */
+void parse_input_for_a_new_simulation(
+    std::string paramFile, Parameters& params,
+    std::map<std::string, int>& observablesList,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    SimulVolume& simulVolume, std::string observablesFileName,
+    int implicitlipidIndex, long long int simItr, MpiContext& mpiContext,
+    std::string trajFileName, std::string transitionFileName);
+
+/**
+ * Parses input files and initializes simulation parameters for a restart
+ * simulation.
+ *
+ * @param paramFile Name of the parameter file.
+ * @param params Simulation parameters.
+ * @param observablesList Map of observables to track during simulation.
+ * @param forwardRxns List of forward reactions.
+ * @param backRxns List of backward reactions.
+ * @param createDestructRxns List of create/destruct reactions.
+ * @param molTemplateList List of molecular templates.
+ * @param membraneObject Membrane object.
+ * @param moleculeList List of individual molecules.
+ * @param complexList List of complexes.
+ * @param simulVolume Simulation volume object.
+ * @param observablesFileName Name of the file to write observables data.
+ * @param implicitlipidIndex Index of the implicit lipid.
+ * @param simItr Current simulation iteration.
+ * @param mpiContext MPI context.
+ * @param trajFileName Name of the file to write trajectory data.
+ * @param transitionFileName Name of the file to write transition matrix data.
+ * @param seed Random number generator seed.
+ * @param counterArrays Object storing the species information.
+ */
+void parse_input_for_a_restart_simulation(
+    std::string paramFile, std::string addFileNameInput, Parameters& params,
+    std::map<std::string, int>& observablesList,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    SimulVolume& simulVolume, std::string observablesFileName,
+    int implicitlipidIndex, long long int simItr, MpiContext& mpiContext,
+    std::string trajFileName, std::string transitionFileName, unsigned seed,
+    copyCounters& counterArrays);
+
+/**
+ * Parses add parameters file for a restart simulation.
+ *
+ * @param addFileNameInput Name of the add.inp file.
+ * @param params Simulation parameters.
+ * @param observablesList Map of observables to track during simulation.
+ * @param forwardRxns List of forward reactions.
+ * @param backRxns List of backward reactions.
+ * @param createDestructRxns List of create/destruct reactions.
+ * @param molTemplateList List of molecular templates.
+ * @param membraneObject Membrane object.
+ * @param moleculeList List of individual molecules.
+ * @param complexList List of complexes.
+ * @param numMolTemplateBeforeAdd Number of template before adding.
+ * @param numDoubleBeforeAdd Number of bimolecular species before adding.
+ */
+void parse_input_for_add_file(
+    std::string addFileNameInput, Parameters& params,
+    std::map<std::string, int>& observablesList,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject,
+    std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList,
+    int& numMolTemplateBeforeAdd, int& numDoubleBeforeAdd);

@@ -1,0 +1,178 @@
+#include "debug/debug.hpp"
+#include "io/io.hpp"
+#include "mpi/mpi_function.hpp"
+#include "tracing.hpp"
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+
+// void write_pdb(long long int simItr, unsigned frameNum,
+//                const Parameters& params,
+//                const std::vector<Molecule>& moleculeList,
+//                const std::vector<MolTemplate>& molTemplateList,
+//                const Membrane& membraneObject, int rank, MpiContext& mpiContext,
+//                SimulVolume& simulVolume) {
+//   long long int totFrames{params.nItr / params.trajWrite};
+//   std::ofstream pdbFile{"PDB/" + std::to_string(rank) + "_" +
+//                         std::to_string(frameNum) + ".pdb"};
+//   auto printTime =
+//       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+//   pdbFile << std::left << std::setw(6) << "TITLE" << ' ' << std::left
+//           << std::setw(70) << "PDB TIMESTEP " << simItr << " CREATED "
+//           << std::ctime(&printTime);
+//   pdbFile << std::left << std::setw(6) << "CRYST1  " << std::setw(9)
+//           << membraneObject.waterBox.x << std::setw(9)
+//           << membraneObject.waterBox.y << std::setw(9)
+//           << membraneObject.waterBox.z << std::setw(7) << 90 << std::setw(7)
+//           << 90 << std::setw(7) << 90 << ' ' << 'P' << std::setw(4) << 1
+//           << std::endl;
+
+//   int i{0};
+//   for (const auto& oneTemp : molTemplateList) {
+//     // this is just so visualization software reads species in at the same color
+//     // whether or not they're in the system
+//     if (oneTemp.isImplicitLipid) continue;
+//     pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' '
+//             << std::setw(4) << " COM" << ' ' << std::setw(3)
+//             << molTemplateList[i].molName.substr(0, 3) << ' ' << std::right
+//             << std::setw(4) << i << "     " << std::setw(8)
+//             << membraneObject.waterBox.x << std::setw(8)
+//             << membraneObject.waterBox.y << std::setw(8)
+//             << membraneObject.waterBox.z << std::setw(6) << 0.00 << std::setw(6)
+//             << 0.00 << std::left << std::setw(2) << "CL" << std::endl;
+//     ++i;
+//   }
+//   int molCounter{0};
+//   for (auto& mol : moleculeList) {
+//     if (is_ghosted(const_cast<Molecule&>(mol), mpiContext, simulVolume))
+//       continue;
+//     if (mol.isImplicitLipid) continue;
+
+//     if (!mol.isEmpty) {
+//       const MolTemplate& oneTemp = molTemplateList[mol.molTypeIndex];
+//       pdbFile << std::right << "ATOM  " << std::setw(5) << i << ' '
+//               << std::setw(4) << " COM" << ' ' << std::setw(3)
+//               << oneTemp.molName.substr(0, 3) << ' ' << std::right
+//               << std::setw(4) << mol.id << "     " << std::setw(8) << std::fixed
+//               << std::setprecision(1)
+//               << (mol.comCoord.x + membraneObject.waterBox.x / 2)
+//               << std::setw(8)
+//               << (mol.comCoord.y + membraneObject.waterBox.y / 2)
+//               << std::setw(8)
+//               << (mol.comCoord.z + membraneObject.waterBox.z / 2);
+//       pdbFile.unsetf(std::ios_base::fixed);
+//       pdbFile << std::setw(6) << 0.00 << std::setw(6) << 0.00 << std::left
+//               << std::setw(2) << "CL" << std::endl;
+//       ++i;
+
+//       for (unsigned j{0}; j < mol.interfaceList.size(); ++j) {
+//         pdbFile
+//             << std::right << "ATOM  " << std::setw(5) << i << ' '
+//             << std::setw(4)  // << ' '
+//             << oneTemp.interfaceList[j].name.substr(0, 3) << ' ' << std::setw(3)
+//             << oneTemp.molName.substr(0, 3) << ' ' << std::right << std::setw(4)
+//             << mol.id << "     " << std::setw(8) << std::fixed
+//             << std::setprecision(1)
+//             << (mol.interfaceList[j].coord.x + membraneObject.waterBox.x / 2)
+//             << std::setw(8)
+//             << (mol.interfaceList[j].coord.y + membraneObject.waterBox.y / 2)
+//             << std::setw(8)
+//             << (mol.interfaceList[j].coord.z + membraneObject.waterBox.z / 2);
+//         pdbFile.unsetf(std::ios_base::fixed);
+//         pdbFile << std::setw(6) << 0.00 << std::setw(6) << 0.00 << std::left
+//                 << std::setw(2) << "CL" << std::endl;
+//         ++i;
+//       }
+//       ++molCounter;
+//     }
+//   }
+// }
+
+void write_pdb(long long int simItr, unsigned frameNum,
+                const Parameters& params,
+                const std::vector<Molecule>& moleculeList,
+                const std::vector<MolTemplate>& molTemplateList,
+                const Membrane& membraneObject, int rank, MpiContext& mpiContext,
+                SimulVolume& simulVolume) {
+    long long int totFrames{params.nItr / params.trajWrite};
+    std::ofstream cifFile{"PDB/" + std::to_string(rank) + "_" +
+                          std::to_string(frameNum) + ".cif"};
+    auto printTime =
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    // Write data block header
+    cifFile << "data_" << rank << "_" << frameNum << "\n#\n";
+
+    // Write cell parameters
+    cifFile << "_cell.length_a " << membraneObject.waterBox.x << "\n";
+    cifFile << "_cell.length_b " << membraneObject.waterBox.y << "\n";
+    cifFile << "_cell.length_c " << membraneObject.waterBox.z << "\n";
+    cifFile << "_cell.angle_alpha 90\n";
+    cifFile << "_cell.angle_beta 90\n";
+    cifFile << "_cell.angle_gamma 90\n";
+    cifFile << "_cell.entry_id " << rank << "_" << frameNum << "\n";
+    cifFile << "#\n";
+
+    // Write atom site loop
+    cifFile << "loop_\n";
+    cifFile << "_atom_site.group_PDB\n";
+    cifFile << "_atom_site.id\n";
+    cifFile << "_atom_site.type_symbol\n";
+    cifFile << "_atom_site.label_atom_id\n";
+    cifFile << "_atom_site.label_comp_id\n";
+    cifFile << "_atom_site.label_entity_id\n";
+    cifFile << "_atom_site.label_seq_id\n";
+    cifFile << "_atom_site.Cartn_x\n";
+    cifFile << "_atom_site.Cartn_y\n";
+    cifFile << "_atom_site.Cartn_z\n";
+    cifFile << "_atom_site.occupancy\n";
+    cifFile << "_atom_site.B_iso_or_equiv\n";
+
+    int i{0};
+    int molCounter{0};
+
+    // Write template molecules
+//     for (const auto& oneTemp : molTemplateList) {
+//         if (oneTemp.isImplicitLipid) continue;
+//         cifFile << "ATOM " << i + 1 << " CL COM " << oneTemp.molName.substr(0, 3) 
+//                 << " " << i + 1 << " ? " << std::fixed << std::setprecision(3)
+//                 << membraneObject.waterBox.x << " " 
+//                 << membraneObject.waterBox.y << " " 
+//                 << membraneObject.waterBox.z << " 0.00 0.00\n";
+//         ++i;
+//     }
+
+    // Write actual molecules
+    for (auto& mol : moleculeList) {
+        if (is_ghosted(const_cast<Molecule&>(mol), mpiContext, simulVolume))
+            continue;
+        if (mol.isImplicitLipid) continue;
+        if (!mol.isEmpty) {
+            const MolTemplate& oneTemp = molTemplateList[mol.molTypeIndex];
+            
+            // Write COM
+            cifFile << "ATOM " << i + 1 << " CL COM " << oneTemp.molName.substr(0, 3) 
+                    << " " << mol.id << " ? " << std::fixed << std::setprecision(3)
+                    << (mol.comCoord.x + membraneObject.waterBox.x / 2) << " "
+                    << (mol.comCoord.y + membraneObject.waterBox.y / 2) << " "
+                    << (mol.comCoord.z + membraneObject.waterBox.z / 2)
+                    << " 0.00 0.00\n";
+            ++i;
+
+            // Write interfaces
+            for (unsigned j{0}; j < mol.interfaceList.size(); ++j) {
+                cifFile << "ATOM " << i + 1 << " CL " 
+                        << oneTemp.interfaceList[j].name.substr(0, 3) << " "
+                        << oneTemp.molName.substr(0, 3) << " " << mol.id << " ? "
+                        << std::fixed << std::setprecision(3)
+                        << (mol.interfaceList[j].coord.x + membraneObject.waterBox.x / 2) << " "
+                        << (mol.interfaceList[j].coord.y + membraneObject.waterBox.y / 2) << " "
+                        << (mol.interfaceList[j].coord.z + membraneObject.waterBox.z / 2)
+                        << " 0.00 0.00\n";
+                ++i;
+            }
+            ++molCounter;
+        }
+    }
+    cifFile << "#\n";
+}

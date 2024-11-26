@@ -14,15 +14,15 @@ void associate(long long int iter,
     std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList,
     copyCounters& counterArrays, std::vector<Complex>& complexList,
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns)
+    const std::vector<BackRxn>& backRxns, std::ofstream& assocDissocFile)
 {
     if (membraneObject.isSphere == true) {
         associate_sphere(iter, ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
             currRxn, moleculeList, molTemplateList, observablesList,
-            counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+            counterArrays, complexList, membraneObject, forwardRxns, backRxns, assocDissocFile);
     } else {
         associate_box(iter, ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
             currRxn, moleculeList, molTemplateList, observablesList,
-            counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+            counterArrays, complexList, membraneObject, forwardRxns, backRxns, assocDissocFile);
     }
 }

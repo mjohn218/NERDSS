@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "classes/class_Membrane.hpp"
-
 #include <string>
 #include <vector>
+
+#include "classes/mpi_functions.hpp"
 
 /*! \enum BoundaryKeywords
  * \ingroup Parser
@@ -35,6 +35,22 @@ struct Membrane {
     double rho {0};
 
     Droplet() = default;
+    /*
+    Function serialize serializes the Droplet
+    into array of bytes.
+    */
+    void serialize(unsigned char *arrayRank, int &nArrayRank) {
+      PUSH(D);
+      PUSH(rho);
+    }
+    /*
+    Function deserialize deserializes the Droplet
+    from array of bytes.
+    */
+    void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+      POP(D);
+      POP(rho);
+    }
   };
 
   struct WaterBox {
@@ -43,9 +59,11 @@ struct Membrane {
 	 * Only cubic at the moment. Not a Coord because then it'll be a circular include (since Coord needs Parameters)
 	 */
 
-	double x { 0 };
-	double y { 0 };
+	      double x { 0 };
+	      double y { 0 };
         double z { 0 };
+        double xLeft{0.0};   // left bound of the rank
+        double xRight{0.0};  // right bound of the rank
         double volume { 0 };
         WaterBox() = default;
         explicit WaterBox(std::vector<double> vals)
@@ -54,6 +72,32 @@ struct Membrane {
             , z(vals[2])
         {
             volume = x * y * z;
+            xLeft = -x / 2.0;
+            xRight = x / 2.0;
+        }
+        /*
+        Function serialize serializes the WaterBox
+        into array of bytes.
+        */
+        void serialize(unsigned char *arrayRank, int &nArrayRank) {
+          PUSH(x);
+          PUSH(y);
+          PUSH(z);
+          PUSH(xLeft);
+          PUSH(xRight);
+          PUSH(volume);
+        }
+        /*
+        Function deserialize deserializes the WaterBox
+        from array of bytes.
+        */
+        void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+          POP(x);
+          POP(y);
+          POP(z);
+          POP(xLeft);
+          POP(xRight);
+          POP(volume);
         }
     };
     Droplet droplet;
@@ -104,4 +148,82 @@ struct Membrane {
     void display(); // display the information for the boundary, define in the src/parse/parse_input.cpp
 
     void create_water_box(); // create box for sphere boundary, define in the src/parse/parse_input.cpp
+
+    /*
+  Function serialize serializes the Molecule
+  into array of bytes.
+  */
+  void serialize(unsigned char *arrayRank, int &nArrayRank) {
+    // std::cout << "+Membrane serialization starts here..." << std::endl;
+    droplet.serialize(arrayRank, nArrayRank);
+    waterBox.serialize(arrayRank, nArrayRank);  // serialize starting
+    // from beginning of arrayRank
+    // increased by the number of bytes already serialized
+    PUSH(sphereR);
+    PUSH(sphereVol);
+    PUSH(nSites);
+    PUSH(nStates);
+    PUSH(No_free_lipids);
+    serialize_primitive_vector<int>(numberOfFreeLipidsEachState, arrayRank,
+                                    nArrayRank);
+    PUSH(No_protein);
+    serialize_primitive_vector<int>(numberOfProteinEachState, arrayRank,
+                                    nArrayRank);
+    PUSH(implicitlipidIndex);
+    serialize_primitive_vector<double>(RS3Dvect, arrayRank, nArrayRank);
+    //    double RD2D = 0; // block-distance for 2D->2D reaction of
+    //    implicit-lipid case
+    PUSH(totalSA);
+    PUSH(Dx);
+    PUSH(Dy);
+    PUSH(Dz);
+    PUSH(Drx);
+    PUSH(Dry);
+    PUSH(Drz);
+    PUSH(offset);
+    PUSH(lipidLength);
+    PUSH(implicitLipid);
+    PUSH(TwoD);
+    PUSH(isBox);
+    PUSH(isSphere);
+    serialize_string(xBCtype, arrayRank, nArrayRank);
+    serialize_string(yBCtype, arrayRank, nArrayRank);
+    serialize_string(zBCtype, arrayRank, nArrayRank);
+    // std::cout << "+Total Membrane size in bytes: " << nArrayRank <<
+    // std::endl;
+  }
+  void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+    droplet.deserialize(arrayRank, nArrayRank);
+    waterBox.deserialize(arrayRank, nArrayRank);
+    POP(sphereR);
+    POP(sphereVol);
+    POP(nSites);
+    POP(nStates);
+    POP(No_free_lipids);
+    deserialize_primitive_vector<int>(numberOfFreeLipidsEachState, arrayRank,
+                                      nArrayRank);
+    POP(No_protein);
+    deserialize_primitive_vector<int>(numberOfProteinEachState, arrayRank,
+                                      nArrayRank);
+    POP(implicitlipidIndex);
+    deserialize_primitive_vector<double>(RS3Dvect, arrayRank, nArrayRank);
+    //    double RD2D = 0; // block-distance for 2D->2D reaction of
+    //    implicit-lipid case
+    POP(totalSA);
+    POP(Dx);
+    POP(Dy);
+    POP(Dz);
+    POP(Drx);
+    POP(Dry);
+    POP(Drz);
+    POP(offset);
+    POP(lipidLength);
+    POP(implicitLipid);
+    POP(TwoD);
+    POP(isBox);
+    POP(isSphere);
+    deserialize_string(xBCtype, arrayRank, nArrayRank);
+    deserialize_string(yBCtype, arrayRank, nArrayRank);
+    deserialize_string(zBCtype, arrayRank, nArrayRank);
+  }
 };

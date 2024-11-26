@@ -2,6 +2,15 @@
 
 Structure-Resolved Reaction-Diffusion Simulation Software by Johnson Lab, JHU
 
+### Version Information
+
+- Current Version: 1.2.0
+    - This version includes the latest stable features
+    - For release notes and changes, see the [Changelog](./Changelog.md)
+
+- Parallel NERDSS
+    - A parallelized version of NERDSS is in the [mpi](https://github.com/mjohn218/NERDSS/tree/mpi) branch.
+
 ### Installation
 
 To build NERDSS, you need:

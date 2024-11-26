@@ -12,8 +12,8 @@ void check_for_unimolstatechange_reactions(unsigned simItr, Parameters& params, 
 {
     for (unsigned molItr { 0 }; molItr < moleculeList.size(); ++molItr) {
         // only do checks if the Molecule exists
-        if (moleculeList[molItr].isEmpty)
-            continue;
+        if (moleculeList[molItr].isEmpty) continue;
+        if (moleculeList[molItr].isGhosted) continue;
 
         //check for state changes
         if (params.hasUniMolStateChange == true) {

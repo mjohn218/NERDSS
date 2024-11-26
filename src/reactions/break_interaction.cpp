@@ -4,8 +4,10 @@
 
 bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, int ILindexMol, const ForwardRxn& conjForwardRxn, bool& breakLinkComplex, double timeStep)
+    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, int ILindexMol, 
+    const ForwardRxn& conjForwardRxn, bool& breakLinkComplex, double timeStep, std::ofstream& assocDissocFile)
 {
+    // const std::vector<ForwardRxn> &forwardRxns?
 
     bool cancelDissociation = false; // this can be true during loop breaking due to correction term.
     breakLinkComplex = false; // default is full dissociation
@@ -43,6 +45,95 @@ bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, M
         complexList.emplace_back();
     }
     // std::cout << "New Com Index: " << newComIndex << '\n';
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // This is commented out when merging
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    /*assign each protein in original complex c1 to one of the two new
+     complexes, if the complex forms a loop, they will be put back together in
+     c1, and the individual interfaces that dissociated freed.
+     */
+    // find the new absolute interfaces
+    // int absIface1 { -1 };
+    // int absIface2 { -1 };
+    // if (currRxn.isSymmetric) {
+    //     absIface1 = currRxn.productListNew[0].absIfaceIndex;
+    //     absIface2 = currRxn.productListNew[1].absIfaceIndex;
+    // } else {
+    //     /*Here, if both proteins are the same protein, same interface, but distinct states, need to correct for that.*/
+    //     // std::cout << "State of mol1: " << reactMol1.interfaceList[relIface1].stateIden << " of mol2: " << reactMol2.interfaceList[relIface2].stateIden << "\n";
+    //     // std::cout << " Product requires state: " << currRxn.productListNew[0].requiresState << " " << currRxn.productListNew[1].requiresState << std::endl;
+    //     if (reactMol1.molTypeIndex == currRxn.productListNew[0].molTypeIndex
+    //         && relIface1 == currRxn.productListNew[0].relIfaceIndex && currRxn.productListNew[0].requiresState == reactMol1.interfaceList[relIface1].stateIden) {
+    //         //matched protein, interface, and state of product[0] to mol1
+    //         absIface1 = currRxn.productListNew[0].absIfaceIndex;
+    //         absIface2 = currRxn.productListNew[1].absIfaceIndex;
+
+    //     } else if (reactMol1.molTypeIndex == currRxn.productListNew[1].molTypeIndex
+    //         && relIface1 == currRxn.productListNew[1].relIfaceIndex && currRxn.productListNew[1].requiresState == reactMol1.interfaceList[relIface1].stateIden) {
+    //         //matched protein, interface and state of product[1] to mol1
+    //         absIface2 = currRxn.productListNew[0].absIfaceIndex;
+    //         absIface1 = currRxn.productListNew[1].absIfaceIndex;
+    //     } else {
+    //         std::cout << " IN BREAK INTERACTION, DID NOT MATCH protein, interface, and state of a product to Mol1 " << reactMol1.index << std::endl;
+    //         std::cout << "reactMol1.molTypeIndex: " << reactMol1.molTypeIndex << std::endl;
+    //         std::cout << "currRxn.productListNew[0].molTypeIndex: " << currRxn.productListNew[0].molTypeIndex << std::endl;
+    //         std::cout << "currRxn.productListNew[1].molTypeIndex: " << currRxn.productListNew[1].molTypeIndex << std::endl;
+    //         std::cout << "reactMol1.molTypeIndex == currRxn.productListNew[0].molTypeIndex: " << (reactMol1.molTypeIndex == currRxn.productListNew[0].molTypeIndex) << std::endl;
+    //         std::cout << "reactMol1.molTypeIndex == currRxn.productListNew[1].molTypeIndex: " << (reactMol1.molTypeIndex == currRxn.productListNew[1].molTypeIndex) << std::endl;
+    //         std::cout << "relIface1: " << relIface1 << std::endl;
+    //         std::cout << "currRxn.productListNew[0].relIfaceIndex: " << currRxn.productListNew[0].relIfaceIndex << std::endl;
+    //         std::cout << "currRxn.productListNew[1].relIfaceIndex: " << currRxn.productListNew[1].relIfaceIndex << std::endl;
+    //         std::cout << "relIface1 == currRxn.productListNew[0].relIfaceIndex: " << (relIface1 == currRxn.productListNew[0].relIfaceIndex) << std::endl;
+    //         std::cout << "relIface1 == currRxn.productListNew[1].relIfaceIndex: " << (relIface1 == currRxn.productListNew[1].relIfaceIndex) << std::endl;
+    //         std::cout << "currRxn.productListNew[0].requiresState: " << currRxn.productListNew[0].requiresState << std::endl;
+    //         std::cout << "currRxn.productListNew[1].requiresState: " << currRxn.productListNew[1].requiresState << std::endl;
+    //         std::cout << "reactMol1.interfaceList[relIface1].stateIden: " << reactMol1.interfaceList[relIface1].stateIden << std::endl;
+    //         std::cout << "currRxn.productListNew[0].requiresState == reactMol1.interfaceList[relIface1].stateIden: " << (currRxn.productListNew[0].requiresState == reactMol1.interfaceList[relIface1].stateIden) << std::endl;
+    //         std::cout << "currRxn.productListNew[1].requiresState == reactMol1.interfaceList[relIface1].stateIden: " << (currRxn.productListNew[1].requiresState == reactMol1.interfaceList[relIface1].stateIden) << std::endl;
+    //         exit(1);
+    //     }
+    // }
+
+    // reactMol1.interfaceList[relIface1].index = absIface1;
+    // reactMol1.interfaceList[relIface1].interaction.clear();
+    // reactMol1.interfaceList[relIface1].isBound = false;
+    // if (reactMol2.isImplicitLipid == false) {
+    //     reactMol2.interfaceList[relIface2].index = absIface2;
+    //     reactMol2.interfaceList[relIface2].interaction.clear();
+    //     reactMol2.interfaceList[relIface2].isBound = false;
+    // }
+
+    // //Add these protein into the bimolecular association list
+    // reactMol1.freelist.push_back(relIface1);
+    // //2023-01-04
+    // //Also erase the corresponding element in bndRxnList
+    // //For the sake of safty, all indeces are found according to bndlist
+    // (unique elements) auto it = std::find_if(reactMol1.bndlist.begin(),
+    // reactMol1.bndlist.end(), [&](const size_t& iface) { return iface ==
+    // relIface1; }); int eraseIndex1 = std::distance(reactMol1.bndlist.begin(),
+    // it); reactMol1.bndlist.erase(it);
+    // // reactMol1.bndpartner.erase(std::find_if(reactMol1.bndpartner.begin(),
+    // reactMol1.bndpartner.end(), [&](const size_t& mol) { return mol ==
+    // reactMol2.index; }));
+    // reactMol1.bndpartner.erase(reactMol1.bndpartner.begin() + eraseIndex1);
+    // reactMol1.bndRxnList.erase(reactMol1.bndRxnList.begin() + eraseIndex1);
+    // if (reactMol2.isImplicitLipid == false) {
+    //     reactMol2.freelist.push_back(relIface2);
+    //     auto it = std::find_if(reactMol2.bndlist.begin(),
+    //     reactMol2.bndlist.end(), [&](const size_t& iface) { return iface ==
+    //     relIface2; }); reactMol2.bndlist.erase(it); int eraseIndex2 =
+    //     std::distance(reactMol2.bndlist.begin(), it);
+    //     reactMol2.bndpartner.erase(reactMol2.bndpartner.begin() +
+    //     eraseIndex2); reactMol2.bndRxnList.erase(reactMol2.bndRxnList.begin()
+    //     + eraseIndex2);
+    // }
+    // // check if they'll still be in the same complex after dissociation,
+    // // if not, move them slightly apart
+    // // if so, change complex identities back and don't move
+    // bool keepSameComplex;
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     if (reactMol2.isImplicitLipid == false)
         keepSameComplex = determine_parent_complex_IL(reactMol1.index, reactMol2.index, newComIndex, moleculeList, complexList, ILindexMol);
     else
@@ -112,7 +203,28 @@ bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, M
          if the complex forms a loop, they will be put back together in c1, and the
          individual interfaces that dissociated freed.
          */
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // This is commented out when merging
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // // complexList[reactMol1.myComIndex].translate(chg1, moleculeList);
+        // // correct structure if the complex is one protein + one promoter
+        // if (complexList[reactMol1.myComIndex].onFiber &&
+        // complexList[reactMol1.myComIndex].memberList.size()==2){
+        //   correct_structure(moleculeList, complexList[reactMol1.myComIndex],
+        //   forwardRxns);
+        // }
+        // complexList[reactMol1.myComIndex].update_properties(moleculeList,
+        // molTemplateList); if (reactMol2.isImplicitLipid == false) {
+        //     if (complexList[reactMol2.myComIndex].onFiber &&
+        //     complexList[reactMol2.myComIndex].memberList.size() == 2) {
+        //         correct_structure(moleculeList,
+        //         complexList[reactMol2.myComIndex], forwardRxns);
+        //     }
+        //     complexList[reactMol2.myComIndex].update_properties(moleculeList,
+        //     molTemplateList);
         // find the new absolute interfaces
+        // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         int absIface1 { -1 };
         int absIface2 { -1 };
         if (currRxn.isSymmetric) {
@@ -162,7 +274,11 @@ bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, M
             reactMol2.interfaceList[relIface2].interaction.clear();
             reactMol2.interfaceList[relIface2].isBound = false;
         }
-
+        if (assocDissocFile.is_open()) {
+            assocDissocFile << "ITR:" << iter << "," << "BREAK," 
+            << molTemplateList[reactMol1.molTypeIndex].molName << "," << reactMol1.index << "," << relIface1 << "," 
+            << molTemplateList[reactMol2.molTypeIndex].molName << "," << reactMol2.index << "," << relIface2 << std::endl;
+        }
         // Add these protein into the bimolecular association list
         reactMol1.freelist.push_back(relIface1);
         reactMol1.bndlist.erase(remove(reactMol1.bndlist.begin(), reactMol1.bndlist.end(), relIface1), reactMol1.bndlist.end());
@@ -243,6 +359,10 @@ bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, M
             }
 
             ++Complex::numberOfComplexes;
+            complexList[newComIndex].id = Complex::maxID++;
+            for (auto i : complexList[newComIndex].memberList) {
+                moleculeList[i].complexId = complexList[newComIndex].id;
+            }
             // std::cout << "new number of complexes: " << Complex::numberOfComplexes << '\n';
             // std::cout << "New Complexes:\n";
             // std::cout << "\tComplex " << reactMol1.myComIndex << " of " << complexList[reactMol1.myComIndex].memberList.size() << " molecules.\n";

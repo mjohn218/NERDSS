@@ -3,10 +3,9 @@
 #include "tracing.hpp"
 
 void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
-    unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
+    BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
-    std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices)
+    const std::vector<BackRxn>& backRxns)
 {
     // TRACE();
     /*3D reaction*/
@@ -37,7 +36,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     double sep {};
     double R1 {};
     bool withinRmax = get_distance(biMolData.pro1Index, biMolData.pro2Index, biMolData.relIface1, biMolData.relIface2,
-        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, Rmax, complexList, forwardRxns[rxnIndex], moleculeList, membraneObject);
+        rxnIndex, rateIndex, isStateChangeBackRxn, sep, R1, Rmax, complexList, forwardRxns[rxnIndex], moleculeList, false);
     //     if(biMolData.pro1Index == 64)
     // 	std::cout <<"IN DETERMINE 3D, TRACKING 64 and 65! "<<biMolData.pro1Index<<" Rmax "<<Rmax<<" is within Rmax? "<<withinRmax<<" partner: "<<biMolData.pro2Index<<" sep "<<R1<<std::endl;
 
@@ -94,8 +93,12 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             double kdiff { 4 * M_PI * biMolData.Dtot * forwardRxns[rxnIndex].bindRadius };
             double kact { forwardRxns[rxnIndex].rateList[rateIndex].rate };
 
-            if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10 || std::abs(complexList[biMolData.com2Index].D.z - 0) < 1E-10)
+            // if (std::abs(complexList[biMolData.com1Index].D.z - 0) < 1E-10 || std::abs(complexList[biMolData.com2Index].D.z - 0) < 1E-10) {
+            if (complexList[biMolData.com1Index].OnSurface || complexList[biMolData.com2Index].OnSurface) {
+              if (complexList[biMolData.com1Index].onFiber == false && complexList[biMolData.com2Index].onFiber == false){
                 kact *= 2.0;
+              }
+            }
 
             if (forwardRxns[rxnIndex].isSymmetric == true)
                 kact *= 2.0; // for A(a)+A(a)->A(a!).A(a!) case
@@ -127,31 +130,44 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
             were stored from previous step (inside reaction zone).
             */
             double rxnProb {};
-            if (biMolData.com1Index != biMolData.com2Index) {
-                /*don't renormalize if their positions are fixed by being in the same
-                 * complex!*/
-                for (int s { 0 }; s < moleculeList[proA].prevlist.size(); ++s) {
-                    if (moleculeList[proA].prevlist[s] == proB && moleculeList[proA].prevmyface[s] == ifaceA
-                        && moleculeList[proA].prevpface[s] == ifaceB) {
-                        p0_ratio
-                            = pirr_pfree_ratio_psF(R1, moleculeList[proA].prevsep[s], params.timeStep, biMolData.Dtot,
-                                forwardRxns[rxnIndex].bindRadius, alpha, moleculeList[proA].ps_prev[s], 1E-10);
-                        currnorm = moleculeList[proA].prevnorm[s] * p0_ratio;
-                        s = moleculeList[proA].prevlist.size();
-                    }
-                }
-                // std::cout << "calculating probvec1 for pros " << pro1 << ' ' << pro2
-                // <<
-                // '\n';
-                rxnProb = passocF(R1, params.timeStep, biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha, kact / (kact + kdiff));
-            } else {
-                /*Proteins are in the same complex!*/
-                /*If these proteins are at contact (sep=0) or close to at contact
-                (<bindrad) then they will associate
-                */
-                if (sep < forwardRxns[rxnIndex].bindRadius)
-                    rxnProb = 1.0;
+            // if (biMolData.com1Index != biMolData.com2Index) {
+            //     /*don't renormalize if their positions are fixed by being in the same
+            //      * complex!*/
+            //     for (int s { 0 }; s < moleculeList[proA].prevlist.size(); ++s) {
+            //         if (moleculeList[proA].prevlist[s] == proB && moleculeList[proA].prevmyface[s] == ifaceA
+            //             && moleculeList[proA].prevpface[s] == ifaceB) {
+            //             p0_ratio
+            //                 = pirr_pfree_ratio_psF(R1, moleculeList[proA].prevsep[s], params.timeStep, biMolData.Dtot,
+            //                     forwardRxns[rxnIndex].bindRadius, alpha, moleculeList[proA].ps_prev[s], 1E-10);
+            //             currnorm = moleculeList[proA].prevnorm[s] * p0_ratio;
+            //             s = moleculeList[proA].prevlist.size();
+            //         }
+            //     }
+            //     // std::cout << "calculating probvec1 for pros " << pro1 << ' ' << pro2
+            //     // <<
+            //     // '\n';
+            //     rxnProb = passocF(R1, params.timeStep, biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha, kact / (kact + kdiff));
+            // } else {
+            //     /*Proteins are in the same complex!*/
+            //     /*If these proteins are at contact (sep=0) or close to at contact
+            //     (<bindrad) then they will associate
+            //     */
+            //     // if (sep < forwardRxns[rxnIndex].bindRadius)
+            //     //     rxnProb = 1.0;
+            // }
+            for (int s{0}; s < moleculeList[proA].prevlist.size(); ++s) {
+              if (moleculeList[proA].prevlist[s] == proB &&
+                  moleculeList[proA].prevmyface[s] == ifaceA &&
+                  moleculeList[proA].prevpface[s] == ifaceB) {
+                p0_ratio = pirr_pfree_ratio_psF(
+                    R1, moleculeList[proA].prevsep[s], params.timeStep,
+                    biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha,
+                    moleculeList[proA].ps_prev[s], 1E-10);
+                currnorm = moleculeList[proA].prevnorm[s] * p0_ratio;
+                s = moleculeList[proA].prevlist.size();
+              }
             }
+            rxnProb = passocF(R1, params.timeStep, biMolData.Dtot, forwardRxns[rxnIndex].bindRadius, alpha, kact / (kact + kdiff));
             if (rxnProb > 1.000001) {
                 std::cerr << "WARNING: prob of reaction is: " << rxnProb << " > 1. Avoid this using a smaller time step." << std::endl;
                 //exit(1);

@@ -1,9 +1,9 @@
 #include "reactions/implicitlipid/implicitlipid_reactions.hpp"
 #include "tracing.hpp"
 
-void break_interaction_implicitlipid(size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
+void break_interaction_implicitlipid(long long int iter, size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList)
+    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, std::ofstream& assocDissocFile)
 {
     // TRACE();
     /*Find the new absIface for mol1*/
@@ -36,7 +36,11 @@ void break_interaction_implicitlipid(size_t relIface1, size_t relIface2, Molecul
     reactMol1.interfaceList[relIface1].interaction.clear();
     reactMol1.interfaceList[relIface1].isBound = false;
     reactMol1.interfaceList[relIface1].index = absIface1;
-
+    if (assocDissocFile.is_open()) {
+        assocDissocFile << "ITR:" << iter << "," << "BREAK," 
+        << molTemplateList[reactMol1.molTypeIndex].molName << "," << reactMol1.index << "," << relIface1 << "," 
+        << molTemplateList[reactMol2.molTypeIndex].molName << "," << reactMol2.index << "," << relIface2 << std::endl;
+    }
     //Add these protein into the bimolecular association list
     reactMol1.freelist.push_back(relIface1);
     reactMol1.bndlist.erase(std::find_if(reactMol1.bndlist.begin(), reactMol1.bndlist.end(), [&](const size_t& iface) { return iface == relIface1; }));

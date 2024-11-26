@@ -37,10 +37,30 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
     const ForwardRxn& currRxn = forwardRxns[forwardRxnIndex];
     double RS3D { -1.0 };
     for (int RS3Di = 0; RS3Di < 100; RS3Di++) {
-        if ((std::abs(membraneObject.RS3Dvect[RS3Di] - currRxn.bindRadius) < 1E-15) && (std::abs(membraneObject.RS3Dvect[RS3Di + 100] - currRxn.rateList[0].rate) < 1E-15) && std::abs(membraneObject.RS3Dvect[RS3Di + 200] - (1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.x + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.x) + 1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.y + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.y) + 1.0 / 3.0 * (molTemplateList[currRxn.reactantListNew[0].molTypeIndex].D.z + molTemplateList[currRxn.reactantListNew[1].molTypeIndex].D.z))) < 1E-15) {
-            RS3D = membraneObject.RS3Dvect[RS3Di + 300];
-            break;
-        }
+      if ((std::abs(membraneObject.RS3Dvect[RS3Di] - currRxn.bindRadius) <
+           1E-15) &&
+          (std::abs(membraneObject.RS3Dvect[RS3Di + 100] -
+                    currRxn.rateList[0].rate) < 1E-15) &&
+          std::abs(
+              membraneObject.RS3Dvect[RS3Di + 200] -
+              (1.0 / 3.0 *
+                   (molTemplateList[currRxn.reactantListNew[0].molTypeIndex]
+                        .D.x +
+                    molTemplateList[currRxn.reactantListNew[1].molTypeIndex]
+                        .D.x) +
+               1.0 / 3.0 *
+                   (molTemplateList[currRxn.reactantListNew[0].molTypeIndex]
+                        .D.y +
+                    molTemplateList[currRxn.reactantListNew[1].molTypeIndex]
+                        .D.y) +
+               1.0 / 3.0 *
+                   (molTemplateList[currRxn.reactantListNew[0].molTypeIndex]
+                        .D.z +
+                    molTemplateList[currRxn.reactantListNew[1].molTypeIndex]
+                        .D.z))) < 1E-15) {
+        RS3D = membraneObject.RS3Dvect[RS3Di + 300];
+        break;
+      }
     }
     // stateChangeMol is implicit-lipid, then we need to set its temporary position according to facilitatorMol.
     // Coord displace = stateChangeMol.interfaceList[stateChangeIface].coord - stateChangeMol.comCoord;
@@ -81,68 +101,6 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
     Coord startCOM; //=new double[3];
 
     com_of_two_tmp_complexes(facilitatorCom, stateChangeCom, startCOM, moleculeList); //com of c1+c2 (original coordinates).
-    //    std::cout <<"INITIAL COMPLEX PAIR COM: "<<startCOM.x<<' '<<startCOM.y<<' '<<startCOM.z<<std::endl;
-    //orientation corrections for membrane bound components
-    // bool isOnMembrane = false;
-    // bool transitionToSurface = false;
-    // Molecule memProtein;
-    // double tol = 1E-14;
-    // int slowPro;
-    // /* MOVE PROTEIN (ENZYME) TO MEMBRANE, and place implicitlipid at sigma */
-    // {
-    //     double DxSum { facilitatorCom.D.x + stateChangeCom.D.x };
-    //     double DySum { facilitatorCom.D.y + stateChangeCom.D.y };
-    //     double DzSum { facilitatorCom.D.z + stateChangeCom.D.z };
-    //     Vector sigma { reactIface1 - reactIface2 };
-    //     //        std::cout<<" sigma: "<<sigma.x<<' '<<sigma.y<<' '<<sigma.z<<std::endl;
-    //     //std::cout <<" Dsum and components: "<<DxSum<<' '<<DySum<<' '<<DzSum<<std::endl;
-
-    //     Vector transVec1 {};
-    //     Vector transVec2 {};
-    //     double displaceFrac {};
-    //     // if both in 2D, ignore the z-component
-    //     if (DzSum < 1E-14) {
-    //         isOnMembrane = true;
-    //         /*Store coordinates of one protein to recover membrane-bound orientation*/
-
-    //         if (stateChangeCom.D.x < facilitatorCom.D.x) {
-    //             slowPro = stateChangeMol.index;
-    //             memProtein = stateChangeMol; //rotate relative to the slower protein.
-    //         } else {
-    //             slowPro = facilitatorMol.index;
-    //             memProtein = facilitatorMol;
-    //         }
-    //         DzSum = 1; // to prevent divide by 0
-    //         if (std::abs(std::abs(sigma.z) - bindRadius) < 1E-3) {
-    //             // if entirety of sigma is in z-component, ignore x and y
-    //             displaceFrac = 1;
-    //         } else {
-    //             double sigmaMag = sqrt((sigma.x * sigma.x) + (sigma.y * sigma.y));
-    //             displaceFrac = (sigmaMag - bindRadius) / sigmaMag;
-    //         }
-    //     } else {
-    //         sigma.calc_magnitude();
-    //         displaceFrac = (sigma.magnitude - bindRadius) / sigma.magnitude;
-    //         if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
-    //             transitionToSurface = true; //both can't be less than tol, or would not be in this loop.
-    //             std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
-    //         }
-    //     }
-
-    //     transVec1.x = -sigma.x * (facilitatorCom.D.x / DxSum) * displaceFrac;
-    //     transVec1.y = -sigma.y * (facilitatorCom.D.y / DySum) * displaceFrac;
-    //     transVec1.z = -sigma.z * (facilitatorCom.D.z / DzSum) * displaceFrac;
-
-    //     transVec2.x = sigma.x * (stateChangeCom.D.x / DxSum) * displaceFrac;
-    //     transVec2.y = sigma.y * (stateChangeCom.D.y / DySum) * displaceFrac;
-    //     transVec2.z = sigma.z * (stateChangeCom.D.z / DzSum) * displaceFrac;
-    //     //std::cout<<" translation1 to sigma: "<<transVec1.x<<' '<<transVec1.y<<' '<<transVec1.z<<std::endl;
-    //     // update the temporary coordinates
-    //     for (auto& mp : facilitatorCom.memberList)
-    //         moleculeList[mp].update_association_coords(transVec1);
-    //     for (auto& mp : stateChangeCom.memberList)
-    //         moleculeList[mp].update_association_coords(transVec2);
-    // } //end moving to membrane
 
     // orientation corrections for membrane bound components
     bool isOnMembrane = false;
@@ -155,7 +113,8 @@ void perform_implicitlipid_state_change_sphere(int stateChangeIface, int facilit
         double displaceFrac {};
         double sigmaMag;
         // if both in 2D, ignore the z-component
-        if (facilitatorCom.D.z < 1E-14) {
+        // if (facilitatorCom.D.z < 1E-14) {
+        if (facilitatorCom.OnSurface) {
             isOnMembrane = true;
         } else { // note not on the membrane
             transitionToSurface = true;

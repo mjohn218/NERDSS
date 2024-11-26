@@ -47,9 +47,22 @@ struct BiMolData {
  */
 bool get_distance(int pro1, int pro2, int iface1, int iface2, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     double& sep, double& R1, double Rmax, std::vector<Complex>& complexList, const ForwardRxn& currRxn,
-    std::vector<Molecule>& moleculeList, Membrane& membraneObject);
+    std::vector<Molecule>& moleculeList, bool isSphere);
 
 double passocF(double r0, double tCurr, double Dtot, double bindRadius, double alpha, double cof);
+
+double passocF_1D(double r0, double tCurr, double Dtot, double bindRadius, double ka);
+
+double pirr_pfree_ratio_psF_1D(double rCurr, double r0, double tCurr,
+                               double Dtot, double bindrad, double ka,
+                               double ps_prev);
+
+void determine_1D_bimolecular_reaction_probability(
+    int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
+    BiMolData &biMolData, const Parameters &params,
+    std::vector<Molecule> &moleculeList, std::vector<Complex> &complexList,
+    const std::vector<ForwardRxn> &forwardRxns,
+    const std::vector<BackRxn> &backRxns);
 
 void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
     unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
@@ -58,10 +71,9 @@ void determine_2D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
     std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices);
 
 void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int rateIndex, bool isStateChangeBackRxn,
-    unsigned& DDTableIndex, double* tableIDs, BiMolData& biMolData, const Parameters& params,
+    BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns, Membrane& membraneObject, std::vector<gsl_matrix*>& normMatrices,
-    std::vector<gsl_matrix*>& survMatrices, std::vector<gsl_matrix*>& pirMatrices);
+    const std::vector<BackRxn>& backRxns);
 
 void perform_bimolecular_state_change(int stateChangeIface, int facilitatorIface, std::array<int, 3>& rxnItr,
     Molecule& stateChangeMol, Molecule& facilitatorMol, Complex& stateChangeCom, Complex& facilitatorCom,

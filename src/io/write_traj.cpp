@@ -13,7 +13,7 @@ void write_traj(long long int iter, std::ofstream& trajFile, const Parameters& p
     std::string chain { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     std::vector<std::string> molTypeNames;
     for (auto& molTemp : molTemplateList)
-        molTypeNames.push_back(molTemp.molName.substr(0, 2));
+        molTypeNames.push_back(molTemp.molName.substr(0, 4));
 
     trajFile << params.numTotalUnits << '\n';
     trajFile << "iteration: " << iter << std::endl;

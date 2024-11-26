@@ -28,11 +28,13 @@ void measure_complex_displacement(bool& flag, Complex& reactCom1, Complex& react
     Dtot2 = reactCom2.D.x; //Dtot2 = 1.0 / 3.0 * ( reactCom2.D.x) + 1.0 / 3.0 * ( reactCom2.D.y) + 1.0 / 3.0 * ( reactCom2.D.z);
 
     /*Calculate a mean square displacement for each complex given D and dimensionality.*/
-    if (reactCom1.D.z < 1e-16) {
+    // if (reactCom1.D.z < 1e-16) {
+    if (reactCom1.OnSurface) {
         //complex 1 is in 2D
         dim1 = 2;
     }
-    if (reactCom2.D.z < 1e-16) {
+    // if (reactCom2.D.z < 1e-16) {
+    if (reactCom2.OnSurface) {
         //complex 2 is in 2D
         dim2 = 2;
     }

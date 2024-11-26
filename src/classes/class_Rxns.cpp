@@ -86,6 +86,7 @@ ForwardRxn::ForwardRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& mol
     loopCoopFactor = parsedRxn.loopCoopFactor;
     irrevRingClosure = parsedRxn.irrevRingClosure;
     length3Dto2D = parsedRxn.length3Dto2D;
+    area3Dto1D = parsedRxn.area3Dto1D;
     rxnLabel = parsedRxn.rxnLabel;
     // set the product name for species output file headers
     productName = parsedRxn.productName;
@@ -220,6 +221,7 @@ void ForwardRxn::display() const
         std::cout << "bindRadSameCom " << bindRadSameCom << std::endl;
         std::cout << "loopCoopFactor " << loopCoopFactor << std::endl;
         std::cout << "length3Dto2D " << length3Dto2D << std::endl;
+        std::cout << "area3Dto1D " << area3Dto1D << std::endl;
         std::cout << "isCoupled? " << isCoupled << std::endl;
         if (isCoupled)
             std::cout << " coupledRxn Number: " << coupledRxn.absRxnIndex << " type: " << coupledRxn.rxnType << " prob to perform coupled: " << coupledRxn.probCoupled << std::endl;
@@ -275,6 +277,7 @@ BackRxn::BackRxn(double offRatekb, ForwardRxn& forwardRxn)
     bindRadSameCom = forwardRxn.bindRadSameCom;
     loopCoopFactor = forwardRxn.loopCoopFactor;
     length3Dto2D = forwardRxn.length3Dto2D;
+    area3Dto1D = forwardRxn.area3Dto1D;
     rxnLabel = forwardRxn.rxnLabel;
     // set reaction type
     rxnType = forwardRxn.rxnType;

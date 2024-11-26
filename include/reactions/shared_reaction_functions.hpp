@@ -13,6 +13,7 @@
 #pragma once
 
 #include "classes/class_Rxns.hpp"
+#include "classes/class_SimulVolume.hpp"
 #include "classes/class_copyCounters.hpp"
 #include "gsl/gsl_matrix.h"
 
@@ -133,3 +134,57 @@ void check_implicit_reactions(int pro1Index, int pro2Index, int simItr,
     const std::vector<MolTemplate>& molTemplateList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs);
 
+void check_perform_zeroth_first_order_reactions(
+    unsigned simItr, Parameters& params, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, SimulVolume& simulVolume,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays,
+    Membrane& membraneObject, std::vector<double>& IL2DbindingVec,
+    std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs,
+    MpiContext& mpiContext);
+
+void measure_separations_to_identify_possible_reactions(
+    unsigned simItr, Parameters& params, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, SimulVolume& simulVolume,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays,
+    Membrane& membraneObject, std::vector<double>& IL2DbindingVec,
+    std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs,
+    std::vector<gsl_matrix*>& normMatrices,
+    std::vector<gsl_matrix*>& survMatrices,
+    std::vector<gsl_matrix*>& pirMatrices, int implicitlipidIndex,
+    double* tableIDs, unsigned& DDTableIndex);
+
+void perform_bimolecular_reactions(
+    unsigned simItr, Parameters& params, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, SimulVolume& simulVolume,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays,
+    Membrane& membraneObject, std::vector<int>& region);
+
+void check_overlap(std::vector<int>& region, unsigned simItr,
+                   Parameters& params, std::vector<Molecule>& moleculeList,
+                   std::vector<Complex>& complexList, SimulVolume& simulVolume,
+                   std::vector<ForwardRxn>& forwardRxns,
+                   std::vector<BackRxn>& backRxns,
+                   std::vector<CreateDestructRxn>& createDestructRxns,
+                   std::vector<MolTemplate>& molTemplateList,
+                   std::map<std::string, int>& observablesList,
+                   copyCounters& counterArrays, Membrane& membraneObject,
+                   MpiContext& mpiContext);
+
+void remove_empty_slots(
+    unsigned simItr, Parameters& params, std::vector<Molecule>& moleculeList,
+    std::vector<Complex>& complexList, SimulVolume& simulVolume,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<CreateDestructRxn>& createDestructRxns,
+    std::vector<MolTemplate>& molTemplateList,
+    std::map<std::string, int>& observablesList, copyCounters& counterArrays,
+    Membrane& membraneObject, MpiContext& mpiContext);
+    

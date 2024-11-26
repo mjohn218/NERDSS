@@ -9,21 +9,21 @@
 // ifaceIndex2, reactMol2, reactCom2 are implicit-lipid's
 
 void associate_implicitlipid(
-    int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
+    long long int iter, int ifaceIndex1, int ifaceIndex2, Molecule& reactMol1, Molecule& reactMol2,
     Complex& reactCom1, Complex& reactCom2, const Parameters& params,
     ForwardRxn& currRxn, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList,
     copyCounters& counterArrays, std::vector<Complex>& complexList,
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns)
+    const std::vector<BackRxn>& backRxns, std::ofstream& assocDissocFile)
 {
     if (membraneObject.isSphere == true) {
-        associate_implicitlipid_sphere(ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
+        associate_implicitlipid_sphere(iter, ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
             currRxn, moleculeList, molTemplateList, observablesList,
-            counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+            counterArrays, complexList, membraneObject, forwardRxns, backRxns, assocDissocFile);
     } else {
-        associate_implicitlipid_box(ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
+        associate_implicitlipid_box(iter, ifaceIndex1, ifaceIndex2, reactMol1, reactMol2, reactCom1, reactCom2, params,
             currRxn, moleculeList, molTemplateList, observablesList,
-            counterArrays, complexList, membraneObject, forwardRxns, backRxns);
+            counterArrays, complexList, membraneObject, forwardRxns, backRxns, assocDissocFile);
     }
 }

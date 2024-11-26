@@ -8,7 +8,9 @@ Molecule initialize_molecule(int comIndex, const Parameters& params, const MolTe
     tmp.molTypeIndex = molTemplate.molTypeIndex;
     tmp.mass = molTemplate.mass;
     tmp.isLipid = molTemplate.isLipid;
+    tmp.isPromoter = molTemplate.isPromoter;
     tmp.myComIndex = comIndex;
+    tmp.id = Molecule::maxID++;
 
     // Set up interface state vectors
     tmp.freelist = std::vector<int>(molTemplate.interfaceList.size());

@@ -16,7 +16,8 @@ void reflect_traj_complex_rad_rot_nocheck_sphere(const Parameters& params, Compl
 
     std::array<double, 9> M = create_euler_rotation_matrix(targCom.trajRot);
 
-    if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    // if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    if (targCom.OnSurface) { // for the complex on the sphere surface
         // in this case, the movement only involves theta and phi, and R doesn't change,
         // so it won't make the complex outside the sphere.
 

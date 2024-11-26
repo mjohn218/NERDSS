@@ -10,7 +10,8 @@ void reflect_traj_complex_rad_rot_box(const Parameters& params, std::vector<Mole
     // for implicit-lipid model, the boundary surface must consider the reflecting-surface RS3D
     // for explicit-lipid model, membraneObject.RS3D = 0. And, for those proteins that are bound on surface, they are not allowed to reflect along Z-axis
     double RS3D;
-    if (targCom.OnSurface || targCom.D.z < 1E-8) {
+    // if (targCom.OnSurface || targCom.D.z < 1E-8) {
+    if (targCom.OnSurface) {
         RS3D = 0;
     } else {
         RS3D = RS3Dinput;

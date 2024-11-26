@@ -44,6 +44,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
         restartFile << "trajWrite = " << params.trajWrite << '\n';
         restartFile << "restartWrite = " << params.restartWrite << '\n';
         restartFile << "pdbWrite = " << params.pdbWrite << '\n';
+        restartFile << "accocDissocWrite = " << params.assocDissocWrite << '\n';
         restartFile << "checkPoint = " << params.checkPoint << '\n';
         restartFile << "scaleMaxDisplace = " << params.scaleMaxDisplace << '\n';
         restartFile << "transitionWrite = " << params.transitionWrite << '\n';
@@ -196,7 +197,8 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
             restartFile << oneRxn.isObserved << ' ' << oneRxn.observeLabel << ' ' << oneRxn.productName << '\n';
             restartFile << oneRxn.isReversible << ' ' << oneRxn.conjBackRxnIndex << ' ' << oneRxn.irrevRingClosure << ' ' << oneRxn.bindRadSameCom << ' '
                         << oneRxn.loopCoopFactor << '\n'
-                        << oneRxn.length3Dto2D << '\n';
+                        << oneRxn.length3Dto2D << '\n'
+                        << oneRxn.area3Dto1D << '\n';
             restartFile << std::setprecision(20) << oneRxn.bindRadius << ' ' << oneRxn.assocAngles.theta1 << ' ' << oneRxn.assocAngles.theta2
                         << ' ' << oneRxn.assocAngles.phi1 << ' ' << oneRxn.assocAngles.phi2 << ' '
                         << oneRxn.assocAngles.omega << '\n';
@@ -458,8 +460,8 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
         for (auto& oneMol : moleculeList) {
             restartFile << oneMol.index << ' ' << oneMol.isEmpty << ' ' << oneMol.myComIndex << ' '
                         << oneMol.molTypeIndex << ' ' << oneMol.mySubVolIndex << '\n';
-            restartFile << oneMol.mass << ' ' << oneMol.isLipid << ' ' << oneMol.isImplicitLipid << ' ' << oneMol.linksToSurface << ' ' << oneMol.isEmpty << '\n';
-
+            restartFile << oneMol.mass << ' ' << oneMol.isLipid << ' ' << oneMol.isImplicitLipid 
+                        << ' ' << oneMol.linksToSurface << ' ' << oneMol.isPromoter << ' ' << oneMol.isEmpty << '\n';
             // center of mass
             restartFile << std::fixed << oneMol.comCoord.x << ' ' << oneMol.comCoord.y << ' ' << oneMol.comCoord.z
                         << '\n';
@@ -533,6 +535,7 @@ void write_restart(long long int simItr, std::ofstream& restartFile, const Param
         for (const auto& oneCom : complexList) {
             restartFile << oneCom.index << ' ' << oneCom.isEmpty << ' ' << oneCom.radius << ' ' << oneCom.mass << '\n';
             restartFile << oneCom.linksToSurface << ' ' << oneCom.iLipidIndex << ' ' << oneCom.OnSurface << '\n';
+            restartFile << oneCom.onFiber << '\n';
             restartFile << std::fixed << oneCom.comCoord.x << ' ' << oneCom.comCoord.y << ' ' << oneCom.comCoord.z
                         << '\n';
             restartFile << std::fixed << oneCom.D.x << ' ' << oneCom.D.y << ' ' << oneCom.D.z << '\n';

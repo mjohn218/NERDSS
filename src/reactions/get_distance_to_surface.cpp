@@ -7,7 +7,8 @@ bool get_distance_to_surface(int pro1, int pro2, int iface1, int iface2, int rxn
     double dx = moleculeList[pro1].interfaceList[iface1].coord.x;
     double dy = moleculeList[pro1].interfaceList[iface1].coord.y;
     double dz = moleculeList[pro1].interfaceList[iface1].coord.z;
-    if (std::abs(complexList[moleculeList[pro1].myComIndex].D.z - 0) < 1E-12) {
+    // if (std::abs(complexList[moleculeList[pro1].myComIndex].D.z - 0) < 1E-12) {
+    if (complexList[moleculeList[pro1].myComIndex].OnSurface){
         dz = 0;
         R1 = 0;
     } else {

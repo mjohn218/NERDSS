@@ -262,7 +262,7 @@ void reflect_traj_tmp_crds_box(
         if (outside) {
             // Put back inside the box
             /*
-            if (targCom.D.z == 0)
+            // if (targCom.D.z == 0)
                 std::cout << "Putting complex " << targCom.index << " with ztot " << ztot
                           << ", zchg " << (targCom.tmpComCoord.z + traj[2]) - membraneObject.waterBox.z / 2.0
                           << ", currz " << targCom.tmpComCoord.z + traj[2] << " and traj[2] "

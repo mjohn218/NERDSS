@@ -369,41 +369,28 @@ void parse_reaction(std::ifstream& reactionFile, int& totSpecies, int& numProvid
         } else {
             if (is2D == true) { //2D reaction
                 if (std::isnan(parsedRxn.onRate3Dka) == true) {
-                    if (std::isnan(parsedRxn.onRate3DMacro) == false) {
-                        //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
-                        double Dtot { 0.0 };
-                        for (auto& reactant : parsedRxn.reactantList) {
-                            Dtot += (1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.y);
-                        }
-                        double tempVariable { 0.0 };
-                        double maxN { 0.0 };
-                        for (auto& reactant : parsedRxn.reactantList) {
-                            if (molTemplateList[reactant.molTypeIndex].copies > maxN) {
-                                maxN = molTemplateList[reactant.molTypeIndex].copies;
+                        if (std::isnan(parsedRxn.onRate3DMacro) == false) {
+                            //convert macro rate to micro rate, uM-1s-1 = 1/0.602214076 nm3/us, get Dtot first
+                            double Dtot { 0.0 };
+                            for (auto& reactant : parsedRxn.reactantList) {
+                                Dtot += (1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.x + 1 / 2.0 * molTemplateList[reactant.molTypeIndex].D.y);
                             }
-                        }
-                        double area { 0.0 };
-                        area = 1.0 * membraneObject.waterBox.x * membraneObject.waterBox.y;
-                        double b { 0.0 };
-                        double sigma { parsedRxn.bindRadius };
-                        b = 2.0 * pow(area / (M_PI * maxN) + parsedRxn.bindRadius * parsedRxn.bindRadius, 0.5);
-                        tempVariable = 4.0 * log(b / sigma) / pow(1.0 - pow(sigma / b, 2.0), 2.0) - 2.0 / (1.0 - pow(sigma / b, 2.0)) - 1.0;
-                        if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
-                            parsedRxn.onRate3Dka = 2.0 * parsedRxn.bindRadius / (1.0 / (1.0 * parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (8.0 * M_PI * Dtot) * tempVariable);
-                        } else {
-                            parsedRxn.onRate3Dka = 0;
-                        }
-                    }
-                    if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
-                        if (std::isnan(parsedRxn.offRateMacro) == false) {
                             if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
-                                parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / (2.0 * parsedRxn.bindRadius) / parsedRxn.onRate3DMacro;
+                                parsedRxn.onRate3Dka = 1.0 / (1.0 / (parsedRxn.onRate3DMacro / 0.602214076) - 1.0 / (4.0 * M_PI * parsedRxn.bindRadius * Dtot));
                             } else {
-                                parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                                parsedRxn.onRate3Dka = 0;
+                            }
+                        }
+                        if (std::isnan(parsedRxn.offRatekb) == true && parsedRxn.isReversible == true) {
+                            if (std::isnan(parsedRxn.offRateMacro) == false) {
+                                if (std::abs(parsedRxn.onRate3DMacro - 0.0) > 1E-15) {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro * parsedRxn.onRate3Dka * 0.602214706 / parsedRxn.onRate3DMacro;
+                                } else {
+                                    parsedRxn.offRatekb = parsedRxn.offRateMacro;
+                                }
                             }
                         }
                     }
-                }
             } else {
                 if (to2D == false) { // 3D reaction
                     if (std::isnan(parsedRxn.onRate3Dka) == true) {

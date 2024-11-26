@@ -1,157 +1,83 @@
-#include "classes/class_Molecule_Complex.hpp"
-#include "io/io.hpp"
-#include "tracing.hpp"
 #include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-double print_complex_hist(std::vector<Complex>& complexList, std::ofstream& outfile, int it, Parameters params,
-    std::vector<MolTemplate>& molTemplateList, int nImplicitLipids)
-{
-    // TRACE();
-    int i { 0 };
-    int j { 0 };
-    int size { 0 };
-    int p1 { 0 };
-    double index { 0 }; // might exceed max integer value.
-    /*Rename for simpler typing*/
-    int nTypes = params.numMolTypes;
+#include "classes/class_Molecule_Complex.hpp"
+#include "debug/debug.hpp"
+#include "io/io.hpp"
+#include "mpi/mpi_function.hpp"
+#include "tracing.hpp"
 
-    double mult[nTypes + 1]; // add plus one in case of surface interactions
-    int loc { 0 };
-    int flag { 0 };
+double print_complex_hist(std::vector<Complex>& complexList,
+                          std::ofstream& outfile, int it, Parameters params,
+                          std::vector<MolTemplate>& molTemplateList,
+                          std::vector<Molecule>& moleculeList,
+                          int nImplicitLipids) {
+  int n_mol_types = molTemplateList.size();
+  int n_complexes = complexList.size();
+  std::unordered_map<std::string, int> complex_count_dict;
+  std::vector<std::string> mol_type_names;
 
-    std::vector<double> assemblylist;
-    std::vector<int> histogram;
-    std::vector<int> complexrep;
-    // cout <<" in calc_complex_hist: "<<nTypes <<std::endl;
+  for (auto i = 0; i < n_mol_types; i++) {
+    mol_type_names.push_back(molTemplateList[i].molName);
+  }
 
-    for (j = 0; j < nTypes; j++) {
-        mult[j] = 1;
-        for (i = 0; i < j; i++)
-            mult[j] = mult[j] * (MolTemplate::numEachMolType[i] + 1);
-        // cout <<"mult factor for type: "<<j<<" is: "<<mult[j]<<std::endl;
-    }
-    int jend = nTypes;
-    mult[jend] = 1;
-    for (i = 0; i < jend; i++)
-        mult[jend] = mult[jend]
-            * (MolTemplate::numEachMolType[i] + 1); // add this in for possible surface interactions, linksToSurface
-
-    assemblylist.reserve(nTypes);
-    complexrep.reserve(nTypes);
-    histogram.reserve(nTypes);
-
-    if (complexList.size() == 0) {
-        outfile << "Time (s): " << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << "\n";
-        outfile << "NA\n";
-        return 0.0;
+  for (auto i = 0; i < n_complexes; i++) {
+    auto& com = complexList[i];
+    if (com.isEmpty) {
+      continue;
     }
 
-    // cout <<"Ncomplexes: "<<Nc<<std::endl;
-    /*Create the first complex type.*/
-    i = 0;
-    while (complexList[i].isEmpty)
-        i++;
-    int i1 = i; // might not be zero if this element is empty
+    std::vector<int> numEachMol(n_mol_types, 0);
 
-    index = 0;
-    for (j = 0; j < nTypes; j++) {
-        index += complexList[i].numEachMol[j] * mult[j];
-    }
-    //    std::cout <<" Complex, LINKS TO SURFACE: "<<complexList[i].linksToSurface<<std::endl;
-    index += complexList[i].linksToSurface * mult[jend];
-    // new assembly type.
+    int n_members = com.memberList.size();
 
-    assemblylist.push_back(index);
-    complexrep.push_back(i); // example complex with this composition
-    histogram.push_back(1); // created a new assembly type with one so far
-    // cout <<"New assembly type: "<<index<<" ffrom complex: "<<i<<" size of assemblylist:
-    // "<<assemblylist.size()<<std::endl;
-
-    for (i = i1 + 1; i < complexList.size(); i++) {
-        // smoe elements of this array are empty, do not count them
-        if (!complexList[i].isEmpty) {
-
-            index = 0;
-            for (j = 0; j < nTypes; j++) {
-                index += complexList[i].numEachMol[j] * mult[j];
-            }
-            index += complexList[i].linksToSurface * mult[jend];
-            flag = 0;
-            for (int a = 0; a < assemblylist.size(); a++) {
-                if (index == assemblylist[a]) {
-                    loc = a;
-                    flag = 1;
-                    a = assemblylist.size(); // break from loop, found your index already.
-                }
-            }
-            if (flag == 0) {
-                // new assembly type.
-
-                assemblylist.push_back(index);
-                complexrep.push_back(i); // example complex with this composition
-                histogram.push_back(1); // created a new assembly type with one so far
-                //   cout <<"New assembly type: "<<index<<" ffrom complex: "<<i<<" size of assemblylist:
-                //   "<<assemblylist.size()<<std::endl;
-            } else {
-                histogram[loc] += 1;
-            }
-
-        } // done if empty
-    } // done over all complexes
-    // cout <<" Assembly types: "<<assemblylist.size()<<std::endl;
-    // cout <<" histogram of last one: "<<histogram[assemblylist.size()-1]<<std::endl;
-    /*Calculated histograms of the assemblies, now write them out.*/
-    double meanComplexSize = 0.0; // This will count mean complex size over all complexes >1 protein
-    int numComplexTypes = 0;
-    int totProteins = 0;
-    outfile << "Time (s): " << (it - params.itrRestartFrom) * params.timeStep * 1E-6 + params.timeRestartFrom << "\n";
-    for (int a = 0; a < assemblylist.size(); a++) {
-        int c1 = complexrep[a];
-        if (complexList[c1].memberList.size() == 1) {
-            //int proIndex=complexList[c1].memberList[0];
-            for (j = 0; j < nTypes; j++) {
-                if (complexList[c1].numEachMol[j] != 0 && molTemplateList[j].isImplicitLipid == true) {
-                    //instead of saying 1 IL, print out N copies of the IL.
-                    histogram[a] = nImplicitLipids;
-                }
-            }
-        }
-        // cout <<"Representative complex: "<<c1<<std::endl;
-        outfile << histogram[a] << '\t';
-        totProteins = 0;
-        for (j = 0; j < nTypes; j++) {
-            if (complexList[c1].numEachMol[j] != 0) {
-                outfile << molTemplateList[j].molName << ": " << complexList[c1].numEachMol[j] << ". ";
-                totProteins += complexList[c1].numEachMol[j];
-            }
-        }
-        if (complexList[c1].linksToSurface > 0) {
-            outfile << molTemplateList[0].molName
-                    << ": " << complexList[c1].linksToSurface << ". ";
-        }
-
-        // here we want to record the complex's coord
-        //if (histogram[a] == 1) {
-        //    outfile << "?" << complexList[c1].comCoord.x << '\t' << complexList[c1].comCoord.y << '\t' << complexList[c1].comCoord.z << "?";
-        //}
-
-        if (assemblylist[a] == 0)
-            outfile << "PI1: 1. ";
-        outfile << "\n";
-        if (totProteins > 1) {
-            numComplexTypes += histogram[a];
-            meanComplexSize += histogram[a] * totProteins;
-        }
+    for (auto j = 0; j < n_members; j++) {
+      auto& mol = moleculeList[com.memberList[j]];
+      numEachMol[mol.molTypeIndex] += 1;
     }
 
-    if (meanComplexSize != 0) {
-        // this is also = NtotPro_inAssemblies/NAssemblies, so the numerator is all proteins that are not monomers
-        meanComplexSize = meanComplexSize / (1.0 * numComplexTypes);
+    if (molTemplateList[0].isImplicitLipid) {
+      numEachMol[0] = com.linksToSurface;
     }
 
-    // if (it % params.restartWrite == 0) {
-    outfile << std::flush;
-    // }
+    std::string components_string = "";
 
-    return meanComplexSize;
+    for (auto j = 0; j < n_mol_types; j++) {
+      if (numEachMol[j] != 0) {
+        components_string +=
+            mol_type_names[j] + ": " + std::to_string(numEachMol[j]) + ". ";
+      }
+    }
+
+    // update the count of this complex
+    if(components_string!=""){
+      if (complex_count_dict.find(components_string) == complex_count_dict.end()) {
+        complex_count_dict[components_string] = 1;
+      } else {
+        complex_count_dict[components_string] += 1;
+      }
+    }
+  }
+
+  // write the complex counts to the output file
+  outfile << "Time (s): "
+          << (it - params.itrRestartFrom) * params.timeStep * 1E-6 +
+                 params.timeRestartFrom
+          << "\n";
+
+  if(molTemplateList[0].isImplicitLipid){
+    outfile << nImplicitLipids << '\t' << mol_type_names[0] << ": 1." << "\n";
+  }
+
+  for (auto& pair : complex_count_dict) {
+    auto& components_string = pair.first;
+    auto& count = pair.second;
+    outfile << count << '\t' << components_string << "\n";
+  }
+
+  outfile << std::flush;
+
+  return 0.0;
 }

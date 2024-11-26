@@ -33,7 +33,8 @@ void reflect_traj_check_span_sphere(const Parameters& params, Complex& targCom, 
     std::array<double, 9> M;
     M = create_euler_rotation_matrix(targCom.trajRot);
 
-    if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    // if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    if (targCom.OnSurface) { // for the complex on the sphere surface
         // in this case, the movement only involves theta and phi, and R doesn't change,
         // so it won't make the complex outside the sphere.
 

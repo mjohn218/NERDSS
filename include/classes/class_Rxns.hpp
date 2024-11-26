@@ -58,8 +58,30 @@ struct RxnIface {
     friend std::ostream& operator<<(std::ostream& os, const RxnIface& oneIface);
 
     RxnIface() = default;
-    explicit RxnIface(std::string ifaceName, int molTypeIndex, int absIfaceIndex, int relIfaceIndex, char requiresState,
-        bool requiresInteraction);
+    explicit RxnIface(std::string ifaceName, int molTypeIndex, int absIfaceIndex, int relIfaceIndex, char requiresState, bool requiresInteraction);
+
+    /*
+    Function serialize serializes the RxnIface into arrayRank of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        serialize_string(ifaceName, arrayRank, nArrayRank);
+        PUSH(molTypeIndex);
+        PUSH(absIfaceIndex);
+        PUSH(relIfaceIndex);
+        PUSH(requiresState);
+        PUSH(requiresInteraction);
+    }
+    /*
+    Function deserialize deserializes the RxnIface from given arrayRank of bytes.
+    */
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        deserialize_string(ifaceName, arrayRank, nArrayRank);
+        POP(molTypeIndex);
+        POP(absIfaceIndex);
+        POP(relIfaceIndex);
+        POP(requiresState);
+        POP(requiresInteraction);
+    }
 };
 
 enum class ReactionType; // forward declaration
@@ -77,14 +99,31 @@ public:
          */
         double rate { 0.0 }; //!< rate for this reaction state (if no conditional reactions, this is the only rate)
         double prob { 0.0 }; //!< reaction probability, only used for zeroth and first order reactions (constant)
-        std::vector<std::vector<RxnIface>>
-            otherIfaceLists {}; //!< list of ancillary interfaces which must be present for the reaction to occur
+        std::vector<std::vector<RxnIface>> otherIfaceLists {}; //!< list of ancillary interfaces which must be present for the reaction to occur
 
         RateState() = default;
         RateState(double rate, const std::vector<std::vector<RxnIface>>& otherIfaceList)
             : rate(rate)
             , otherIfaceLists(otherIfaceList)
         {
+        }
+
+        /*
+        Function serialize serializes the RateState into arrayRank of bytes.
+        */
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            PUSH(rate);
+            PUSH(prob);
+            // serialize otherIfaceLists matrix of RxnIface
+            serialize_abstract_matrix<RxnIface>(otherIfaceLists, arrayRank, nArrayRank);
+        }
+        /*
+        Function deserialize deserializes the RateState from given arrayRank of bytes.
+        */
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            POP(rate);
+            POP(prob);
+            deserialize_abstract_matrix<RxnIface>(otherIfaceLists, arrayRank, nArrayRank);
         }
     };
 
@@ -103,6 +142,27 @@ public:
             : label(_label)
         {
         }
+
+        /*
+        Function serialize serializes the RxnIface into arrayRank of bytes.
+        */
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            PUSH(absRxnIndex);
+            PUSH(relRxnIndex);
+            PUSH(rxnType);
+            serialize_string(label, arrayRank, nArrayRank);
+            PUSH(probCoupled);
+        }
+        /*
+        Function deserialize deserializes the RxnIface from given arrayRank of bytes.
+        */
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            POP(absRxnIndex);
+            POP(relRxnIndex);
+            POP(rxnType);
+            deserialize_string(label, arrayRank, nArrayRank);
+            POP(probCoupled);
+        }
     };
 
     // Temporary Observable Feature
@@ -120,6 +180,7 @@ public:
     int relRxnIndex { 0 }; //!< absolute index of the reaction
     bool isCoupled { false };
     double length3Dto2D { -1 }; //!< in nm, length scale to convert 3D rate to 2D rate, by default will be set to 2* bindrad if not read in from file.
+    double area3Dto1D { -1 }; //!< in nm^2, area scale to convert 3D rate to 1D rate, by default will be set to 4*pi*bindrad^2
     std::string rxnLabel { "nonspecified" }; //!< label of the reaction, used for coupled; default value is nonspecified
     std::string coupledRxnLabel { "none" }; //!< lable of the coupled reaction, default value is none
     CoupledRxn coupledRxn;
@@ -141,6 +202,91 @@ public:
     /**< Contains rates dependent on different parameters, e.g. bound interfaces, different states, etc.*/
 
     virtual void display() const = 0;
+
+    /*
+    Function serialize serializes the Molecule into arrayRank of bytes.
+    */
+    void serialize_base(unsigned char* arrayRank, int& nArrayRank) {
+        // Serialization starts from the beginning of arrayRank
+        PUSH(isObserved);
+        serialize_string(observeLabel, arrayRank, nArrayRank);
+        PUSH(loopCoopFactor);
+        PUSH(bindRadSameCom);
+        PUSH(isSymmetric);
+        PUSH(isOnMem);
+        PUSH(hasStateChange);
+        PUSH(rxnType);
+        PUSH(absRxnIndex);
+        PUSH(relRxnIndex);
+        PUSH(isCoupled);
+        PUSH(length3Dto2D);
+
+        serialize_string(rxnLabel, arrayRank, nArrayRank);
+        serialize_string(coupledRxnLabel, arrayRank, nArrayRank);
+
+        coupledRxn.serialize(arrayRank, nArrayRank);
+
+        PUSH(excludeVolumeBound);
+
+        // serialize intProductList vector of int
+        serialize_primitive_vector<int>(intProductList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(intReactantList, arrayRank, nArrayRank);
+
+        PUSH(numberOfRxns);
+        PUSH(totRxnSpecies);
+
+        // serialize productListNew vector of RxnIface
+        serialize_abstract_vector<RxnIface>(productListNew, arrayRank, nArrayRank);
+        serialize_abstract_vector<RxnIface>(reactantListNew, arrayRank, nArrayRank);
+        serialize_abstract_vector<RateState>(rateList, arrayRank, nArrayRank);
+
+        stateChangeIface.first.serialize(arrayRank, nArrayRank);
+        stateChangeIface.second.serialize(arrayRank, nArrayRank);
+        // std::cout << "Total serialize RxnBase size in bytes: " << nArrayRank <<
+        // std::endl;
+    }
+    void deserialize_base(unsigned char* arrayRank, int& nArrayRank) {
+        POP(isObserved);
+
+        deserialize_string(observeLabel, arrayRank, nArrayRank);
+
+        POP(loopCoopFactor);
+        POP(bindRadSameCom);
+
+        POP(isSymmetric);
+        POP(isOnMem);
+        POP(hasStateChange);
+
+        POP(rxnType);
+
+        POP(absRxnIndex);
+        POP(relRxnIndex);
+        POP(isCoupled);
+        POP(length3Dto2D);
+
+        deserialize_string(rxnLabel, arrayRank, nArrayRank);
+        deserialize_string(coupledRxnLabel, arrayRank, nArrayRank);
+
+        coupledRxn.deserialize(arrayRank, nArrayRank);
+
+        POP(excludeVolumeBound);
+
+        deserialize_primitive_vector<int>(intProductList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(intReactantList, arrayRank, nArrayRank);
+
+        POP(numberOfRxns);
+        POP(totRxnSpecies);
+
+        deserialize_abstract_vector<RxnIface>(productListNew, arrayRank, nArrayRank);
+        deserialize_abstract_vector<RxnIface>(reactantListNew, arrayRank, nArrayRank);
+
+        deserialize_abstract_vector<RateState>(rateList, arrayRank, nArrayRank);
+
+        stateChangeIface.first.deserialize(arrayRank, nArrayRank);
+        stateChangeIface.second.deserialize(arrayRank, nArrayRank);
+        // std::cout << "Total deserialize RxnBase size in bytes: " << nArrayRank <<
+        // std::endl;
+    }
 };
 
 struct ParsedRxn; // forward declaration
@@ -197,6 +343,27 @@ public:
             , omega(omega)
         {
         }
+
+        /*
+        Function serialize serializes the Angles into array of bytes.
+        */
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            PUSH(theta1);
+            PUSH(theta2);
+            PUSH(phi1);
+            PUSH(phi2);
+            PUSH(omega);
+        }
+        /*
+        Function deserialize deserializes the Angles from given array of bytes.
+        */
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            POP(theta1);
+            POP(theta2);
+            POP(phi1);
+            POP(phi2);
+            POP(omega);
+        }
     };
 
     bool isReversible { false }; //!< is the reaction reversible (does it have a back reaction)
@@ -239,6 +406,44 @@ public:
         , assocAngles(assocAngles)
     {
     }
+
+    /*
+    Function serialize serializes the ForwardRxn into array of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        // std::cout << "+FwdRnx serialization starts here..." << std::endl;
+        this->serialize_base(arrayRank, nArrayRank);
+
+        PUSH(isReversible);
+        PUSH(conjBackRxnIndex);
+        PUSH(irrevRingClosure);
+        // conjBackRxn - vector_.begin()
+        // std::vector<RxnBase>::iterator conjBackRxn; //!< iterator the reaction's
+        // BackRxn, if reversible (not implemented)
+        serialize_string(productName, arrayRank, nArrayRank);
+        PUSH(bindRadius);
+        PUSH(bindRadius2D);
+
+        norm1.serialize(arrayRank, nArrayRank);
+        norm2.serialize(arrayRank, nArrayRank);
+        assocAngles.serialize(arrayRank, nArrayRank);
+    }
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        this->deserialize_base(arrayRank, nArrayRank);
+
+        POP(isReversible);
+        POP(conjBackRxnIndex);
+        POP(irrevRingClosure);
+        // std::vector<RxnBase>::iterator conjBackRxn; //!< iterator the reaction's
+        // BackRxn, if reversible (not implemented)
+        deserialize_string(productName, arrayRank, nArrayRank);
+        POP(bindRadius);
+        POP(bindRadius2D);
+
+        norm1.deserialize(arrayRank, nArrayRank);
+        norm2.deserialize(arrayRank, nArrayRank);
+        assocAngles.deserialize(arrayRank, nArrayRank);
+    }
 };
 
 /*******************/
@@ -263,6 +468,17 @@ struct BackRxn : public RxnBase {
      * \brief This constructor creates a conjugate BackRxn from a reversible ForwardRxn
      */
     explicit BackRxn(double offRatekb, ForwardRxn& forwardRxn);
+
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        this->serialize_base(arrayRank, nArrayRank);
+
+        PUSH(conjForwardRxnIndex);
+    }
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        this->deserialize_base(arrayRank, nArrayRank);
+
+        POP(conjForwardRxnIndex);
+    }
 };
 
 /*******************/
@@ -295,6 +511,17 @@ struct CreateDestructRxn : public RxnBase {
             , interfaceList(_interfaceList)
         {
         }
+
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            PUSH(molTypeIndex);
+            serialize_string(molName, arrayRank, nArrayRank);
+            serialize_abstract_vector<RxnIface>(interfaceList, arrayRank, nArrayRank);
+        }
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            POP(molTypeIndex);
+            deserialize_string(molName, arrayRank, nArrayRank);
+            deserialize_abstract_vector<RxnIface>(interfaceList, arrayRank, nArrayRank);
+        }
     };
 
     std::vector<CreateDestructMol> reactantMolList {};
@@ -312,6 +539,24 @@ struct CreateDestructRxn : public RxnBase {
      * during the simulation
      */
     explicit CreateDestructRxn(ParsedRxn& parsedRxn, const std::vector<MolTemplate>& molTemplateList);
+
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        // std::cout << "+Molecule serialization starts here..." << std::endl;
+        this->serialize_base(arrayRank, nArrayRank);
+
+        serialize_abstract_vector<CreateDestructMol>(reactantMolList, arrayRank, nArrayRank);
+        serialize_abstract_vector<CreateDestructMol>(productMolList, arrayRank, nArrayRank);
+        PUSH(conjBackRxnIndex);
+        PUSH(creationRadius);
+    }
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        this->deserialize_base(arrayRank, nArrayRank);
+
+        deserialize_abstract_vector<CreateDestructMol>(reactantMolList, arrayRank, nArrayRank);
+        deserialize_abstract_vector<CreateDestructMol>(productMolList, arrayRank, nArrayRank);
+        POP(conjBackRxnIndex);
+        POP(creationRadius);
+    }
 };
 
 struct TransmissionRxn : public RxnBase {

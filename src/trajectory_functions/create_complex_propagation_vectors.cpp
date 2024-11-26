@@ -11,7 +11,8 @@ void create_complex_propagation_vectors(const Parameters& params, Complex& targC
     // the diffusion inside the sphere is the same as inside a box system.
     // on sphere surface, we set D.z = 0.
 
-    if (targCom.D.z < 1E-14 && membraneObject.isSphere == true) { // on sphere surface
+    // if (targCom.D.z < 1E-14 && membraneObject.isSphere == true) { // on sphere surface
+    if (targCom.OnSurface && membraneObject.isSphere == true) { // on sphere surface
         Coord targTrans = create_complex_propagation_vectors_on_sphere(params, targCom);
         // now setup translational motion vector
         targCom.trajTrans.x = targTrans.x;

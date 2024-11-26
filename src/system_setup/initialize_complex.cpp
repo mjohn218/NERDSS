@@ -15,6 +15,7 @@ Complex initialize_complex(const Molecule& mol, const MolTemplate& molTemp)
     tmp.numEachMol = std::vector<int>(MolTemplate::numMolTypes);
     ++tmp.numEachMol[molTemp.molTypeIndex];
     tmp.lastNumberUpdateItrEachMol.resize(MolTemplate::numMolTypes);
+    tmp.id = Complex::maxID++;
     
     ++Complex::numberOfComplexes;
     

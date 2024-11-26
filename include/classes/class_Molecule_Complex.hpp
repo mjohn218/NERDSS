@@ -20,14 +20,16 @@
  */
 #pragma once
 
-#include "classes/class_Membrane.hpp"
-#include "classes/class_MolTemplate.hpp"
-#include "classes/class_Vector.hpp"
-
 #include <array>
 #include <cmath>
 #include <fstream>
 #include <limits>
+#include <unordered_map>
+
+#include "classes/class_Membrane.hpp"
+#include "classes/class_MolTemplate.hpp"
+#include "classes/class_Vector.hpp"
+#include "split.cpp"
 
 /*! \defgroup SimulClasses
  * \brief Classes actually used for simulation objects
@@ -44,6 +46,8 @@ enum class TrajStatus : int {
     empty = 5,
 };
 
+struct Complex;
+
 /*!
  * \ingroup SimulClasses
  * \brief Contains information for one specie (protein, lipid, etc.) in the system
@@ -52,23 +56,23 @@ struct Molecule {
     /*!
      * \brief Storage for information on Molecules this Molecule encounters during a timestep
      */
-    struct Encounter {
-        size_t theirIndex { 0 }; //!< the encountered Molecule's index in moleculeList
-        size_t myIface { 0 }; //!< this Molecule's interface which encountered the Molecule
-        size_t theirIface { 0 }; //!< the encountered Molecule's interface which encountered this Molecule
-        size_t rxnItr { 0 };
-        double probability { 0 };
+    // struct Encounter {
+    //     size_t theirIndex { 0 }; //!< the encountered Molecule's index in moleculeList
+    //     size_t myIface { 0 }; //!< this Molecule's interface which encountered the Molecule
+    //     size_t theirIface { 0 }; //!< the encountered Molecule's interface which encountered this Molecule
+    //     size_t rxnItr { 0 };
+    //     double probability { 0 };
 
-        Encounter() = default;
-        Encounter(size_t theirIndex, size_t myIface, size_t theirIface, size_t rxnItr, double probability)
-            : theirIndex(theirIndex)
-            , myIface(myIface)
-            , theirIface(myIface)
-            , rxnItr(rxnItr)
-            , probability(probability)
-        {
-        }
-    };
+    //     Encounter() = default;
+    //     Encounter(size_t theirIndex, size_t myIface, size_t theirIface, size_t rxnItr, double probability)
+    //         : theirIndex(theirIndex)
+    //         , myIface(myIface)
+    //         , theirIface(myIface)
+    //         , rxnItr(rxnItr)
+    //         , probability(probability)
+    //     {
+    //     }
+    // };
 
     /*!
      * \brief Holds information on the interactions this Molecule is currently participarting in
@@ -79,6 +83,9 @@ struct Molecule {
         int partnerIndex { -1 }; //!< bound partner index in moleculeList
         int partnerIfaceIndex { -1 }; //!< interface index of the Molecule's partner
         int conjBackRxn { -1 }; //!< back reaction of the forward reaction that formed this Interaction
+
+        // Following fields are for MPI version only:
+        int partnerId{-1};  // partner ID for finding partner on neighbor rank
 
         /*!
          * \brief Sets all the Interaction indices to 0. Used in break_interaction().
@@ -99,6 +106,26 @@ struct Molecule {
             , conjBackRxn(conjBackRxn)
         {
         }
+        /*
+        Function serialize serializes the Iface
+        into array of bytes.
+        */
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            PUSH(partnerIndex);
+            PUSH(partnerIfaceIndex);
+            PUSH(conjBackRxn);
+            PUSH(partnerId);
+        }
+        /*
+        Function deserialize deserializes the Iface
+        from given array of bytes.
+        */
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            POP(partnerIndex);
+            POP(partnerIfaceIndex);
+            POP(conjBackRxn);
+            POP(partnerId);
+        }
     };
 
     struct Iface {
@@ -113,11 +140,10 @@ struct Molecule {
         int relIndex { -1 }; //!< this interface's relative index (index in Molecule::interfaceList)
         int molTypeIndex { -1 }; //!< index of this interface's parent Molecule's MolTemplate (makes comparisons easier)
         bool isBound { false }; //!< is this interface bound
+        float boundTime { -1 }; //!< time the interface was bound
         bool excludeVolume { false }; //!< need check exclude volume?
-        std::vector<int> excludeMolList {}; //!< mol index of the exclude partner
-        std::vector<int> excludeInfList {}; //!< rel interface index of the exclude partner
 
-        Interaction interaction;
+        Interaction interaction{};
 
         /*!
          * \brief This simply changes the state of the interface.
@@ -151,7 +177,37 @@ struct Molecule {
             , isBound(isBound)
         {
         }
+        /*
+        Function serialize serializes the Iface
+        into array of bytes.
+        */
+        void serialize(unsigned char* arrayRank, int& nArrayRank) {
+            coord.serialize(arrayRank, nArrayRank);
+            PUSH(stateIden);
+            PUSH(stateIndex);
+            PUSH(index);
+            PUSH(relIndex);
+            PUSH(molTypeIndex);
+            PUSH(isBound);
+            PUSH(excludeVolume);
+            interaction.serialize(arrayRank, nArrayRank);
+        }
+        /* deserialies array of bytes into a struct,
+        and returns the number of bytes processed */
+        void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+            coord.deserialize(arrayRank, nArrayRank);
+            POP(stateIden);
+            POP(stateIndex);
+            POP(index);
+            POP(relIndex);
+            POP(molTypeIndex);
+            POP(isBound);
+            POP(excludeVolume);
+            interaction.deserialize(arrayRank, nArrayRank);
+        }
     };
+
+    // WHEN ADDING A FIELD TO THE MOLECULE OR COMPLEX STRUCT, UPDATE SERIALIZE AND DESERIALIZE METHODS AS WELL
 
     int myComIndex { -1 }; //!< which complex does the molecule belong to
     int molTypeIndex { -1 }; //!< index of the Molecule's MolTemplate in molTemplateList
@@ -159,11 +215,14 @@ struct Molecule {
     int index { -1 }; //!< index of the Molecule in moleculeList
     double mass { -1 }; //!< mass of this molecule
     bool isLipid { false }; //!< is the molecule a lipid
+    bool isPromoter {false}; //!< is the molecule a promoter for transcription initiation
     Coord comCoord; //!< center of mass coordinate
     std::vector<Iface> interfaceList; //!< interface coordinates
     bool isEmpty { false }; //!< true if the molecule has been destroyed and is void
     TrajStatus trajStatus { TrajStatus::none }; //!< Status of the molecule in that timestep
     bool isDissociated {false}; //!< true if the molecule just dissociated in this timestep
+    bool justBoundThisStep{false};  //!< true if the molecule just bound this step
+    bool justUnboundThisStep{false};  //!< true if the molecule just unbound this step
 
     bool isImplicitLipid = false;
     int linksToSurface { 0 }; //!<store each proteins links to surface, to ease updating complex.
@@ -187,11 +246,11 @@ struct Molecule {
     // Legacy encounter lists
     /*Vectors for possible association reactions*/
     std::vector<int> freelist; // legacy, may be replaced
-    std::vector<int> assoclist; // These species are capable of binding.
+    // std::vector<int> assoclist; // These species are capable of binding.
     std::vector<int> bndlist; // These species are capable of dissociation
     std::vector<int> bndpartner; // It if is bound, who is it bound to? Make this have the same numbering !!
     std::vector<int> bndRxnList;
-    std::vector<int> bndiface; // If it is bound, though which interface!
+    // std::vector<int> bndiface; // If it is bound, though which interface!
     //    int ncross = 0;
     //    int movestat = 0;
     std::vector<double> probvec;
@@ -201,7 +260,7 @@ struct Molecule {
 
     std::vector<std::array<int, 3>> crossrxn;
 
-    std::vector<double> probvec_dissociate;
+    // std::vector<double> probvec_dissociate;
 
     /*Vectors for reweighting!*/
     std::vector<int> prevlist;
@@ -218,6 +277,18 @@ struct Molecule {
     std::vector<double> prevsep;
     std::vector<double> currprevsep;
 
+    // Following fields are for MPI version only:
+    int id;  // unique molecule identifier in the system
+    bool isGhosted{false};  // whether this molecule belongs to certain rank, or is a copy from neighborhood rank This field doesn't get serialized, nor deserialized.
+    bool isShared{false};  // whether this molecule is shared between two ranks. This field doesn't get serialized, nor deserialized.
+    bool receivedFromNeighborRank{true}; // When one rank processes molecules near the border with another rank, it sends molecules to that rank, and receives updated versions of some. Those that are not received back should be deleted localy. This field doesn't get serialized, nor deserialized.
+    bool need_to_send{false};  // whether this molecule needs to be sent to another rank This field doesn't get serialized, nor deserialized.
+    int complexId{-1};  // used for molecules in ghosted zones, for finding complex at neighbor rank
+    // MPI static variable:
+    static int maxID;  //!< the number of the first empty ID for a complex atparticular rank
+    // Declaring mapIdToIndex to be able to translate ID to index relatively fast:
+    static std::unordered_map<size_t, size_t> mapIdToIndex;
+
     void write_crd_file(std::ofstream& os) const;
     void write_crd_file_cout() const;
     friend std::ostream& operator<<(std::ostream& os, const Molecule& mol);
@@ -232,10 +303,12 @@ struct Molecule {
     // other reaction member functions
     void create_random_coords(const MolTemplate& molTemplate, const Membrane& membraneObject);
     void destroy();
+    void MPI_remove_from_one_rank(std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList);
 
     void display(const MolTemplate& molTemplate) const;
     void display_all() const;
     void display_my_coords(const std::string& name);
+    void print(MpiContext &mpiContext) const;
 
     bool operator==(const Molecule& rhs) const;
     bool operator!=(const Molecule& rhs) const;
@@ -245,6 +318,120 @@ struct Molecule {
         : myComIndex(_mycomplex)
         , comCoord(_comcoords)
     {
+    }
+
+    /*
+    Function serialize serializes the Molecule into array of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        // std::cout << "+Molecule serialization starts here..." << std::endl;
+        //  Serialize myComIndex into arrayRank starting from nArrayRank byte
+        //  and increase nArrayRank by number of serialized bytes after:
+        PUSH(myComIndex);
+        PUSH(molTypeIndex);
+        PUSH(mySubVolIndex);
+        PUSH(index);
+        PUSH(mass);
+        PUSH(isLipid);
+        // Serialize comCoord starting from arrayRank, nArrayRank byte
+        // and increase nArrayRank by the number of serialized bytes:
+        comCoord.serialize(arrayRank, nArrayRank);
+
+        // serialize interfaceList vector of Iface
+        serialize_abstract_vector<Iface>(interfaceList, arrayRank, nArrayRank);
+
+        PUSH(isEmpty);
+        // Serialize trajStatus into arrayRank starting from nArrayRank byte
+        // and increase nArrayRank by number of serialized bytes after:
+        PUSH(trajStatus);
+
+        PUSH(isImplicitLipid);
+        PUSH(linksToSurface);
+        PUSH(Molecule::numberOfMolecules);
+
+        // serialize freelist vector of int
+        serialize_primitive_vector<int>(freelist, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(bndlist, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(bndpartner, arrayRank, nArrayRank);
+
+        // serialize_primitive_vector<int>(prevlist, arrayRank, nArrayRank);
+        // serialize_primitive_vector<int>(prevmyface, arrayRank, nArrayRank);
+        // serialize_primitive_vector<int>(prevpface, arrayRank, nArrayRank);
+        // serialize_primitive_vector<double>(prevnorm, arrayRank, nArrayRank);
+        // serialize_primitive_vector<double>(ps_prev, arrayRank, nArrayRank);
+        // serialize_primitive_vector<double>(prevsep, arrayRank, nArrayRank);
+
+        PUSH(id);
+        PUSH(complexId);
+        // std::cout << "+Total molecule " << id << " size in bytes: " << nArrayRank
+        // << std::endl;
+    }
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        POP(myComIndex);
+        // std::cout << "myComIndex=" << myComIndex << ", nArrayRank=" << nArrayRank
+        // << std::endl;
+        POP(molTypeIndex);
+        POP(mySubVolIndex);
+        POP(index);
+        POP(mass);
+        POP(isLipid);
+        // std::cout << "isLipid=" << isLipid << ", nArrayRank=" << nArrayRank <<
+        // std::endl;
+
+        comCoord.deserialize(arrayRank, nArrayRank);
+
+        deserialize_abstract_vector<Iface>(interfaceList, arrayRank, nArrayRank);
+
+        POP(isEmpty);
+        POP(trajStatus);
+        POP(isImplicitLipid);
+        POP(linksToSurface);
+        POP(numberOfMolecules);
+        
+        deserialize_primitive_vector<int>(freelist, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(bndlist, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(bndpartner, arrayRank, nArrayRank);
+
+        // deserialize_primitive_vector<int>(prevlist, arrayRank, nArrayRank);
+        // deserialize_primitive_vector<int>(prevmyface, arrayRank, nArrayRank);
+        // deserialize_primitive_vector<int>(prevpface, arrayRank, nArrayRank);
+        // deserialize_primitive_vector<double>(prevnorm, arrayRank, nArrayRank);
+        // deserialize_primitive_vector<double>(ps_prev, arrayRank, nArrayRank);
+        // deserialize_primitive_vector<double>(prevsep, arrayRank, nArrayRank);
+
+        // std::cout << "id=" << id << ", nArrayRank=" << nArrayRank << std::endl;
+        POP(id);
+        POP(complexId);
+    }
+    /*
+    Function serialize serializes the Molecule
+    into array of bytes.
+    */
+    void serialize_back(unsigned char* arrayRank, int& nArrayRank) {
+        // std::cout << "+Molecule serialization starts here..." << std::endl;
+        serialize_primitive_vector<double>(probvec, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(crossbase, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(mycrossint, arrayRank, nArrayRank);
+        serialize_vector_array<int, 3>(crossrxn, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(currlist, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(currmyface, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(currpface, arrayRank, nArrayRank);
+        serialize_primitive_vector<double>(currprevnorm, arrayRank, nArrayRank);
+        serialize_primitive_vector<double>(currps_prev, arrayRank, nArrayRank);
+        serialize_primitive_vector<double>(currprevsep, arrayRank, nArrayRank);
+        // std::cout << "+Total molecule size in bytes: " << start << std::endl;
+    }
+    void deserialize_back(unsigned char* arrayRank, int& nArrayRank) {
+        deserialize_primitive_vector<double>(probvec, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(crossbase, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(mycrossint, arrayRank, nArrayRank);
+        deserialize_vector_array<int, 3>(crossrxn, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(currlist, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(currmyface, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(currpface, arrayRank, nArrayRank);
+        deserialize_primitive_vector<double>(currprevnorm, arrayRank, nArrayRank);
+        deserialize_primitive_vector<double>(currps_prev, arrayRank, nArrayRank);
+        deserialize_primitive_vector<double>(currprevsep, arrayRank, nArrayRank);
     }
 };
 
@@ -266,6 +453,7 @@ public:
     Coord Dr { 0, 0, 0 }; //!< Complex's rotational diffusion constants
     bool isEmpty { false }; //!< true if the complex has been destroyed and is a void
     bool OnSurface { false }; // to check whether on the implicit-lipid membrane.
+    bool onFiber {false}; // to check whether on a fiber
     bool tmpOnSurface { false }; //
 
     // static variables
@@ -287,16 +475,33 @@ public:
     Coord trajRot;
     Coord tmpComCoord;
 
+    // Following fields are for MPI version only:
+    int id;  // unique complex identifier in the system
+    int ownerRank;  // rank responsible for collecting requests to associate and making decisions and propagating them.
+
+    // When another rank processes molecules near the border with this rank,
+    // it can associate two molecules of two received complexes,
+    // merging them into a single complex.
+    // Complex that is not received back should be deleted localy,
+    // and myComIndex must be updated for members that were in the shared zone.
+    // These fields don't get serialized, nor deserialized.
+    bool deleteIfNotReceivedBack{true};
+    bool receivedFromNeighborRank{true};
+
+    // MPI static variable:
+    static int maxID;  //!< the number of the first empty ID for a complex at particular rank
+
+    // Declaring mapIdToIndex to be able to translate ID to index relatively fast:
+    static std::unordered_map<size_t, size_t> mapIdToIndex;
+
     friend std::ostream& operator<<(std::ostream& os, const Molecule& mol);
 
     void update_properties(const std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList);
     void display();
     void display(const std::string& name);
     Complex create(const Molecule& mol, const MolTemplate& molTemp);
-    void destroy(std::vector<Molecule>& moleculeList,
-        std::vector<Complex>& complexList);
-    void put_back_into_SimulVolume(
-        int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList);
+    void destroy(std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList);
+    void put_back_into_SimulVolume(int& itr, Molecule& errantMol, const Membrane& membraneObject, std::vector<Molecule>& moleculeList, const std::vector<MolTemplate>& molTemplateList);
     void translate(Vector transVec, std::vector<Molecule>& moleculeList);
     // void propagate(std::vector<Molecule>& moleculeList);
     void propagate(std::vector<Molecule>& moleculeList, const Membrane membraneObject, const std::vector<MolTemplate>& molTemplateList);
@@ -307,6 +512,7 @@ public:
     Complex(const Molecule& mol, const MolTemplate& oneTemp);
     Complex(int _index, const Molecule& _memMol, const MolTemplate& _molTemp);
     Complex(Coord comCoord, Coord D, Coord Dr);
+    Complex(Coord comCoord, Coord D, Coord Dr, int idComplex);
 
     /*
     void operator=(const Complex com)
@@ -333,4 +539,78 @@ public:
         this->trajRot = com.trajRot;
         this->tmpComCoord = com.tmpComCoord;
     }*/
+   /*
+    Function serialize serializes the Molecule into array of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        // std::cout << "+Complex serialization nArrayRanks here..." << std::endl;
+        //  Serialize starting from beginning of arrayRank
+        //  increased by the number of bytes already serialized
+        comCoord.serialize(arrayRank, nArrayRank);
+        PUSH(index);
+        PUSH(radius);
+        PUSH(mass);
+        serialize_primitive_vector<int>(memberList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(numEachMol, arrayRank, nArrayRank);
+        serialize_primitive_vector<long long int>(lastNumberUpdateItrEachMol,
+                                                arrayRank, nArrayRank);
+        D.serialize(arrayRank, nArrayRank);
+        Dr.serialize(arrayRank, nArrayRank);
+        PUSH(isEmpty);
+        PUSH(OnSurface);
+        PUSH(tmpOnSurface);
+        PUSH(numberOfComplexes);
+        PUSH(currNumberComTypes);
+        PUSH(currNumberMolTypes);
+        // serialize_primitive_vector<int>(emptyComList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(obs, arrayRank, nArrayRank);
+        PUSH(linksToSurface);
+        PUSH(iLipidIndex);
+        PUSH(ncross);
+        PUSH(trajStatus);
+        trajTrans.serialize(arrayRank, nArrayRank);
+        trajRot.serialize(arrayRank, nArrayRank);
+        tmpComCoord.serialize(arrayRank, nArrayRank);
+        PUSH(id);
+        PUSH(ownerRank);
+        // std::cout << "+Total Complex size in bytes: " << nArrayRank << std::endl;
+    }
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        comCoord.deserialize(arrayRank, nArrayRank);
+        POP(index);
+        POP(radius);
+        POP(mass);
+        deserialize_primitive_vector<int>(memberList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(numEachMol, arrayRank, nArrayRank);
+        deserialize_primitive_vector<long long int>(lastNumberUpdateItrEachMol,
+                                                    arrayRank, nArrayRank);
+        D.deserialize(arrayRank, nArrayRank);
+        Dr.deserialize(arrayRank, nArrayRank);
+        POP(isEmpty);
+        POP(OnSurface);
+        POP(tmpOnSurface);
+        POP(numberOfComplexes);
+        POP(currNumberComTypes);
+        POP(currNumberMolTypes);
+        // deserialize_primitive_vector<int>(emptyComList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(obs, arrayRank, nArrayRank);
+        POP(linksToSurface);
+        POP(iLipidIndex);
+        POP(ncross);
+        POP(trajStatus);
+        trajTrans.deserialize(arrayRank, nArrayRank);
+        trajRot.deserialize(arrayRank, nArrayRank);
+        tmpComCoord.deserialize(arrayRank, nArrayRank);
+        POP(id);
+        POP(ownerRank);
+    }
+    /*
+    Function serialize serializes the Molecule into arrayRank of bytes.
+    */
+    void serialize_back(unsigned char* arrayRank, int& nArrayRank) {
+        PUSH(ncross);
+    }
+    void deserialize_back(unsigned char* arrayRank, int& nArrayRank) {
+        POP(ncross);
+    }
 };

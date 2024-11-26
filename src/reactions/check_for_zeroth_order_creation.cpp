@@ -132,6 +132,10 @@ void check_for_zeroth_order_creation(unsigned simItr, Parameters& params, SimulV
 
                     create_molecule_and_complex_from_rxn(0, newMolIndex, newComIndex, false, oneTemp, params, oneRxn, simulVolume, moleculeList, complexList, molTemplateList, forwardRxns, membraneObject);
 
+                    moleculeList[newMolIndex].isGhosted = false;
+                    moleculeList[newMolIndex].id = Molecule::maxID++;
+                    moleculeList[newMolIndex].need_to_send = true;
+
                     // update the copy number arrays
                     for (const auto& iface : moleculeList[newMolIndex].interfaceList)
                         ++counterArrays.copyNumSpecies[iface.index];

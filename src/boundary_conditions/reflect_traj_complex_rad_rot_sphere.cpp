@@ -42,7 +42,8 @@ void reflect_traj_complex_rad_rot_sphere(const Parameters& params, std::vector<M
       Also, check if it fits inside the sphere.
      */
 
-    if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    // if (targCom.D.z < 1E-14 || targCom.OnSurface) { // for the complex on the sphere surface
+    if (targCom.OnSurface) { // for the complex on the sphere surface
 
     } else { // for the complex inside the sphere
         Coord curr;

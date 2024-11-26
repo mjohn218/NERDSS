@@ -1,23 +1,23 @@
 #include "system_setup/system_setup.hpp"
 #include "tracing.hpp"
 
-void set_rMaxLimit(Parameters& params,
-                   const std::vector<MolTemplate>& molTemplateList,
-                   const std::vector<ForwardRxn>& forwardRxns,
+void set_rMaxLimit(Parameters &params,
+                   const std::vector<MolTemplate> &molTemplateList,
+                   const std::vector<ForwardRxn> &forwardRxns,
                    int numDoubleBeforeAdd, int numMolTemplateBeforeAdd) {
   /*For each reaction, need distance from the interface to the COM for both
    * partners, plus the bindrad+sqrt(6*Dtot*deltat)
    */
   double rMaxTot{0};
   params.rMaxLimit = 0.0;
-  for (auto& oneRxn : forwardRxns) {
+  for (auto &oneRxn : forwardRxns) {
     if (oneRxn.rxnType == ReactionType::bimolecular) {
-      const RxnIface& rxnIface1 = oneRxn.reactantListNew.at(0);
-      const RxnIface& rxnIface2 = oneRxn.reactantListNew.at(1);
+      const RxnIface &rxnIface1 = oneRxn.reactantListNew.at(0);
+      const RxnIface &rxnIface2 = oneRxn.reactantListNew.at(1);
 
       // MolTemplates of the interfaces involved in the reaction
-      const MolTemplate& pro1Temp = molTemplateList.at(rxnIface1.molTypeIndex);
-      const MolTemplate& pro2Temp = molTemplateList.at(rxnIface2.molTypeIndex);
+      const MolTemplate &pro1Temp = molTemplateList.at(rxnIface1.molTypeIndex);
+      const MolTemplate &pro2Temp = molTemplateList.at(rxnIface2.molTypeIndex);
 
       Interface iface1;
       Interface iface2;
@@ -28,7 +28,7 @@ void set_rMaxLimit(Parameters& params,
       } else {
         iface1 = molTemplateList.at(rxnIface1.molTypeIndex)
                      .interfaceList.at(MolTemplate::absToRelIface.at(
-                         rxnIface1.absIfaceIndex));
+                         rxnIface1.absIfaceIndex - numDoubleBeforeAdd));
       }
       if (rxnIface2.molTypeIndex < numMolTemplateBeforeAdd) {
         iface2 = molTemplateList.at(rxnIface2.molTypeIndex)
@@ -37,7 +37,7 @@ void set_rMaxLimit(Parameters& params,
       } else {
         iface2 = molTemplateList.at(rxnIface2.molTypeIndex)
                      .interfaceList.at(MolTemplate::absToRelIface.at(
-                         rxnIface2.absIfaceIndex));
+                         rxnIface2.absIfaceIndex - numDoubleBeforeAdd));
       }
 
       double scal{1.0 / 3.0};
@@ -50,7 +50,12 @@ void set_rMaxLimit(Parameters& params,
       double pro1R1{0};
       double pro2R1{0};
       // pro1
-      if (std::abs(pro1Temp.D.z) < 1E-10) {
+      if (pro1Temp.isPromoter) {
+        double R2 = (iface1.iCoord.x * iface1.iCoord.x);
+        pro1R1 = sqrt(R2);
+      }
+      // if (std::abs(pro1Temp.D.z) < 1E-10) {
+      if (pro1Temp.isImplicitLipid || pro1Temp.isLipid) {
         double R2 = (iface1.iCoord.x * iface1.iCoord.x) +
                     (iface1.iCoord.y * iface1.iCoord.y);
         pro1R1 = sqrt(R2);
@@ -68,7 +73,12 @@ void set_rMaxLimit(Parameters& params,
       }
 
       // pro2
-      if (std::abs(pro2Temp.D.z) < 1E-10) {
+      if (pro2Temp.isPromoter) {
+        double R2 = (iface2.iCoord.x * iface2.iCoord.x);
+        pro2R1 = sqrt(R2);
+      }
+      // if (std::abs(pro2Temp.D.z) < 1E-10) {
+      else if (pro2Temp.isImplicitLipid || pro2Temp.isLipid) {
         double R2 = (iface2.iCoord.x * iface2.iCoord.x) +
                     (iface2.iCoord.y * iface2.iCoord.y);
         pro2R1 = sqrt(R2);
@@ -93,6 +103,9 @@ void set_rMaxLimit(Parameters& params,
         params.rMaxRadius = pro1R1 + pro2R1;
       }
     }
+  }
+  if (forwardRxns.size() == 0) {
+    params.rMaxLimit = 40.0;
   }
   std::cout << "Rmaxlimit: " << params.rMaxLimit << std::endl;
 }

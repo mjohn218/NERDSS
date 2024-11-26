@@ -17,7 +17,8 @@ void reflect_complex_rad_rot_box(const Membrane& membraneObject, Complex& targCo
     // TRACE();
     // only works for the complex after association or diffusion, box system.
     double RS3D;
-    if (targCom.D.z < 1E-8) { // on surface
+    // if (targCom.D.z < 1E-8) { // on surface
+    if (targCom.OnSurface){
         RS3D = 0.0;
     } else { // in solution
         RS3D = RS3Dinput;

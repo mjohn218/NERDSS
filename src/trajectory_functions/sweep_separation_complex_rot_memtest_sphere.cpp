@@ -62,10 +62,11 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
         for (int i { 0 }; i < moleculeList[pro1Index].crossbase.size(); ++i) {
             int p2 { moleculeList[pro1Index].crossbase[i] };
             int k2 { moleculeList[p2].myComIndex };
-            if (complexList[k2].D.z < 1E-15) {
-                memCheckList[maxRows * c + i] = 1;
+            // if (complexList[k2].D.z < 1E-15) {
+            if (complexList[k2].OnSurface) {
+              memCheckList[maxRows * c + i] = 1;
             } else
-                memCheckList[maxRows * c + i] = 0;
+              memCheckList[maxRows * c + i] = 0;
             int i1 { moleculeList[pro1Index].mycrossint[i] };
             std::array<int, 3> rxnItr = moleculeList[pro1Index].crossrxn[i];
 
@@ -118,7 +119,8 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
                     int relIface2 { ifaceList[maxRows * memMolItr + crossMemItr] };
 
                     double dx1, dy1, dz1;
-                    if (complexList[comIndex1].D.z < 1E-15) { // complex on sphere surface
+                    // if (complexList[comIndex1].D.z < 1E-15) { // complex on sphere surface
+                    if (complexList[comIndex1].OnSurface) { // complex on sphere surface
                         Coord ifacecrds = moleculeList[pro1Index].interfaceList[relIface1].coord;
                         Coord iface_final = calculate_update_position_interface(complexList[comIndex1], ifacecrds);
                         dx1 = iface_final.x;
@@ -139,7 +141,8 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
                     //     reflectList[comIndex2] = 1;
                     // }
                     double dx2, dy2, dz2;
-                    if (complexList[comIndex2].D.z < 1E-15) { // complex on sphere surface
+                    // if (complexList[comIndex2].D.z < 1E-15) { // complex on sphere surface
+                    if (complexList[comIndex2].OnSurface) { // complex on sphere surface
                         Coord ifacecrds = moleculeList[p2].interfaceList[relIface2].coord;
                         Coord iface_final = calculate_update_position_interface(complexList[comIndex2], ifacecrds);
                         dx2 = iface_final.x;
@@ -175,7 +178,8 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
          break from loop*/
         if (hasOverlap) {
             ++itr;
-            if (complexList[comIndex1].D.z < 1E-15) { // complex on sphere surface
+            // if (complexList[comIndex1].D.z < 1E-15) { // complex on sphere surface
+            if (complexList[comIndex1].OnSurface) { // complex on sphere surface
                 Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[comIndex1]);
                 complexList[comIndex1].trajTrans.x = targTrans.x;
                 complexList[comIndex1].trajTrans.y = targTrans.y;
@@ -214,7 +218,8 @@ void sweep_separation_complex_rot_memtest_sphere(int simItr, int pro1Index, Para
                      */
 
                         /*If p2 just dissociated, also don't try to move again*/
-                        if (complexList[comIndex2].D.z < 1E-15) { // complex on sphere surface
+                        // if (complexList[comIndex2].D.z < 1E-15) { // complex on sphere surface
+                        if (complexList[comIndex2].OnSurface) { // complex on sphere surface
                             Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[comIndex2]);
                             complexList[comIndex2].trajTrans.x = targTrans.x;
                             complexList[comIndex2].trajTrans.y = targTrans.y;

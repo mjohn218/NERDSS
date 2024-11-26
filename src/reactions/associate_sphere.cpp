@@ -15,7 +15,7 @@ void associate_sphere(long long int iter,
     std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList,
     copyCounters& counterArrays, std::vector<Complex>& complexList,
     Membrane& membraneObject, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<BackRxn>& backRxns)
+    const std::vector<BackRxn>& backRxns, std::ofstream& assocDissocFile)
 {
     // TRACE();
     if (reactCom1.index == reactCom2.index) {
@@ -25,7 +25,7 @@ void associate_sphere(long long int iter,
         // update the Molecule's TrajStatus (this is done in the else, when
         // Molecules are rotated but not otherwise)
         for (auto& memMol : reactCom1.memberList)
-            moleculeList[memMol].trajStatus = TrajStatus::associated;
+            moleculeList[memMol].trajStatus = TrajStatus::propagated;
     } else { // not in the same complex
         if (reactMol2.isImplicitLipid == true || reactMol1.isImplicitLipid == true) {
             std::cout << "WRONG: implicit-lipid binding involves wrong function file. associate_ImplicitLipid_sphere should be called instead of associate_sphere!" << std::endl;
@@ -79,7 +79,8 @@ void associate_sphere(long long int iter,
             double arc1Move, arc2Move;
             double sigmaMag;
             // if both in 2D, ignore the z-component
-            if (DzSum < 1E-14) {
+            // if (DzSum < 1E-14) {
+            if (reactCom1.OnSurface && reactCom2.OnSurface) {
                 isOnMembrane = true;
                 currRxn.bindRadius2D = calc_bindRadius2D(currRxn.bindRadius, reactIface1);
                 DzSum = 1; // to prevent divide by 0
@@ -91,7 +92,8 @@ void associate_sphere(long long int iter,
                 sigmaMag = sqrt((sigma.x * sigma.x) + (sigma.y * sigma.y) + (sigma.z * sigma.z));
                 displaceFrac = (sigmaMag - currRxn.bindRadius) / sigmaMag;
                 /*At least one protein is in 3D*/
-                if (reactCom1.D.z < tol || reactCom2.D.z < tol) {
+                // if (reactCom1.D.z < tol || reactCom2.D.z < tol) {
+                if (reactCom1.OnSurface || reactCom2.OnSurface) {
                     transitionToSurface = true; // both can't be less than tol, or would not be in this loop.
                     // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
                 }
@@ -103,12 +105,14 @@ void associate_sphere(long long int iter,
             if (isOnMembrane == true) { // both complexes are on the sphere
                 target1Pos = find_position_after_association(arc1Move, reactIface1, reactIface2, sigmaMag, currRxn.bindRadius2D);
                 target2Pos = find_position_after_association(arc2Move, reactIface2, reactIface1, sigmaMag, currRxn.bindRadius2D);
-            } else if (reactCom1.D.z < 1E-14) { //complex1 is on sphere
+            // } else if (reactCom1.D.z < 1E-14) { //complex1 is on sphere
+            } else if (reactCom1.OnSurface) { //complex1 is on sphere
                 transVec1 = Vector(0, 0, 0);
                 sigma.calc_magnitude();
                 double lamda = (sigma.magnitude - currRxn.bindRadius) / sigma.magnitude;
                 transVec2 = Vector(lamda * sigma);
-            } else if (reactCom2.D.z < 1E-14) { //complex2 is on sphere
+            // } else if (reactCom2.D.z < 1E-14) { //complex2 is on sphere
+            } else if (reactCom2.OnSurface) { //complex2 is on sphere
                 transVec2 = Vector(0, 0, 0);
                 sigma.calc_magnitude();
                 double lamda = (sigma.magnitude - currRxn.bindRadius) / sigma.magnitude;
@@ -524,6 +528,11 @@ void associate_sphere(long long int iter,
     if (currRxn.isReversible) {
         reactMol1.interfaceList[ifaceIndex1].interaction.conjBackRxn = currRxn.conjBackRxnIndex;
         reactMol2.interfaceList[ifaceIndex2].interaction.conjBackRxn = currRxn.conjBackRxnIndex;
+    }
+    if (assocDissocFile.is_open()) {
+        assocDissocFile << "ITR:" << iter << "," << "BOND," 
+        << molTemplateList[reactMol1.molTypeIndex].molName << "," << reactMol1.index << "," << ifaceIndex1 << "," 
+        << molTemplateList[reactMol2.molTypeIndex].molName << "," << reactMol2.index << "," << ifaceIndex2 << std::endl;
     }
 
     reactMol1.interfaceList[ifaceIndex1].isBound = true;

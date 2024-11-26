@@ -117,7 +117,8 @@ void sweep_separation_complex_rot_memtest_cluster_box(int simItr, int pro1Index,
                     }
                     if (flag == 0) {
 
-                        if (membraneObject.isSphere == true && complexList[k].D.z < 1E-15) { // complex on sphere surface
+                        // if (membraneObject.isSphere == true && complexList[k].D.z < 1E-15) { // complex on sphere surface
+                        if (membraneObject.isSphere == true && complexList[k].OnSurface) { // complex on sphere surface
                             Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[k1]);
                             complexList[k].trajTrans.x = targTrans.x;
                             complexList[k].trajTrans.y = targTrans.y;
@@ -321,7 +322,8 @@ void sweep_separation_complex_rot_memtest_cluster_box(int simItr, int pro1Index,
                         }
                         if (flag == 0) {
 
-                            if (membraneObject.isSphere == true && complexList[k].D.z < 1E-15) { // complex on sphere surface
+                            // if (membraneObject.isSphere == true && complexList[k].D.z < 1E-15) { // complex on sphere surface
+                            if (membraneObject.isSphere == true && complexList[k].OnSurface) { // complex on sphere surface
                                 Coord targTrans = create_complex_propagation_vectors_on_sphere(params, complexList[k1]);
                                 complexList[k].trajTrans.x = targTrans.x;
                                 complexList[k].trajTrans.y = targTrans.y;

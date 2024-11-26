@@ -13,6 +13,14 @@ void determine_shape_molecule(std::vector<MolTemplate>& molTemplateList)
             molTemplate.D.z = 0;
         }
 
+        if (molTemplate.isPromoter == true) {
+          if (std::abs(molTemplate.D.y - 0) > 1e-12 || std::abs(molTemplate.D.z - 0) > 1e-12) {
+            std::cerr << "WARNING: D of Promoter Must Be Zero. D of " << molTemplate.molName << " has been set to zero." << std::endl;
+            molTemplate.D.y = 0;
+            molTemplate.D.z = 0;
+          }
+        }
+
         molTemplate.isPoint = true;
         molTemplate.isRod = true;
         // if all interfaces are on the COM, this is a point

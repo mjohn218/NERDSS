@@ -23,6 +23,7 @@ void print_system_information(long long int simItr, std::ofstream& systemFile, c
             systemFile << "Parent complex index: " << mol.myComIndex << '\n';
             systemFile << "Sub volume index: " << mol.mySubVolIndex << '\n';
             systemFile << "Is a lipid: " << std::boolalpha << mol.isLipid << '\n';
+            systemFile << "Is a promoter: " << std::boolalpha << mol.isPromoter << '\n';
             systemFile << "Center of mass coordinate: " << mol.comCoord << '\n';
             systemFile << "Interfaces:\n";
             for (const auto& iface : mol.interfaceList) {

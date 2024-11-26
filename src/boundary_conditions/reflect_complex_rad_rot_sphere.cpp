@@ -20,8 +20,8 @@ void reflect_complex_rad_rot_sphere(const Membrane& membraneObject, Complex& tar
 
     // declare the boundary
     double sphereR;
-    if (targCom.D.z < 1E-8) {
-        sphereR = radius;
+    if (targCom.OnSurface){
+        sphereR = membraneObject.sphereR;
     } else {
         sphereR = radius - RS3Dinput;
     }

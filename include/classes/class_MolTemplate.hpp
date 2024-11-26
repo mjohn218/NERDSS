@@ -52,16 +52,12 @@ struct Interface {
 
         std::string ifaceAndStateName {};
         char iden { '\0' }; //!< identity of the state, i.e. the character after the tilde
-        //        int index{ -1 }; //!< absolute (global) index of the state
         int index { -1 };
-        std::vector<unsigned>
-            myForwardRxns {}; //!< indices of the reactions in which the state is a reactant (ForwardRxn)
-        std::vector<unsigned> myCreateDestructRxns {}; //!< indices of the reactions in which the state is created or
-        //!< destroyed (CreateDestructRxn)
+        std::vector<unsigned> myForwardRxns {}; //!< indices of the reactions in which the state is a reactant (ForwardRxn)
+        std::vector<unsigned> myCreateDestructRxns {}; //!< indices of the reactions in which the state is created or destroyed (CreateDestructRxn)
         std::vector<unsigned> rxnPartners {};
         std::vector<std::pair<int, int>> stateChangeRxns {}; //!< indices of state change reactions (forward, back)
-        static int totalNumOfStates; //!< total number of states in the system (should be same as totalIfaceNum provided
-        //!< in Parameter file
+        static int totalNumOfStates; //!< total number of states in the system (should be same as totalIfaceNum provided in Parameter file
 
         State() = default;
         explicit State(int index);
@@ -73,6 +69,53 @@ struct Interface {
         State(const std::string& ifaceAndStateName, int index);
         State(const std::string& ifaceAndStateName, char iden, int index);
         ~State() = default;
+
+        /*
+        Function serialize serializes the State into array of bytes.
+        */
+        void serialize(unsigned char *arrayRank, int &nArrayRank) {
+            // std::cout << "+State serialization nArrayRanks here..." << std::endl;
+            serialize_string(ifaceAndStateName, arrayRank, nArrayRank);
+            PUSH(iden);
+            PUSH(index);
+            serialize_primitive_vector<unsigned>(myForwardRxns, arrayRank, nArrayRank);
+            serialize_primitive_vector<unsigned>(myCreateDestructRxns, arrayRank, nArrayRank);
+            serialize_primitive_vector<unsigned>(rxnPartners, arrayRank, nArrayRank);
+
+            // serialize stateChangeRxns vector of std::pair<int, int>
+            *((int *)&(arrayRank[nArrayRank])) = stateChangeRxns.size();
+            nArrayRank += sizeof(int);
+            for (auto &it : stateChangeRxns) {
+                *((int *)&(arrayRank[nArrayRank])) = it.first;
+                nArrayRank += sizeof(int);
+                *((int *)&(arrayRank[nArrayRank])) = it.second;
+                nArrayRank += sizeof(int);
+            }
+
+            PUSH(totalNumOfStates);
+            // std::cout << "+Total State size in bytes: " << nArrayRank << std::endl;
+        }
+        void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+            deserialize_string(ifaceAndStateName, arrayRank, nArrayRank);
+            POP(iden);
+            POP(index);
+            deserialize_primitive_vector<unsigned>(myForwardRxns, arrayRank, nArrayRank);
+            deserialize_primitive_vector<unsigned>(myCreateDestructRxns, arrayRank, nArrayRank);
+            deserialize_primitive_vector<unsigned>(rxnPartners, arrayRank, nArrayRank);
+
+            int vector_size = *((int *)(arrayRank + nArrayRank));
+            nArrayRank += sizeof(int);
+            for (int i = 0; i < vector_size; i++) {
+                std::pair<int, int> temp;
+                temp.first = *((int *)&(arrayRank[nArrayRank]));
+                nArrayRank += sizeof(int);
+                temp.second = *((int *)&(arrayRank[nArrayRank]));
+                nArrayRank += sizeof(int);
+                stateChangeRxns.push_back(temp);
+            }
+
+            POP(totalNumOfStates);
+        }
     };
 
     struct RxnState {
@@ -86,12 +129,38 @@ struct Interface {
     std::vector<int> excludeVolumeBoundIfaceList {}; //!< list of interface rel index that this molecule interface exclude volume with when it is bound
     std::vector<int> excludeVolumeBoundReactList {}; //!< list of reaction index that this molecule interface exclude volume with when it is bound
     std::vector<double> excludeRadiusList {}; //!< list of the exclude bindRaius for each interface
-    void set_ifaceAndStateNames(); //!< sets the full name for each state (i.e. ifaceName~state). used only in parameter
-    //!< file parsing.
+    void set_ifaceAndStateNames(); //!< sets the full name for each state (i.e. ifaceName~state). used only in parameter file parsing.
 
     explicit Interface() = default;
     Interface(std::string name, const Coord& iCoord);
     Interface(std::string name, std::vector<State> states, Coord iCoord);
+
+    /*
+    Function serialize serializes the Interface into arrayRank of bytes.
+    */
+    void serialize(unsigned char *arrayRank, int &nArrayRank) {
+        // std::cout << "+Interface serialization nArrayRanks here..." << std::endl;
+        PUSH(index);
+        iCoord.serialize(arrayRank, nArrayRank);
+        serialize_string(name, arrayRank, nArrayRank);
+        serialize_abstract_vector<State>(stateList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(excludeVolumeBoundList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(excludeVolumeBoundIfaceList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(excludeVolumeBoundReactList, arrayRank, nArrayRank);
+        serialize_primitive_vector<double>(excludeRadiusList, arrayRank, nArrayRank);
+        // std::cout << "+Total Interface size in bytes: " << nArrayRank <<
+        // std::endl;
+    }
+    void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+        POP(index);
+        iCoord.deserialize(arrayRank, nArrayRank);
+        deserialize_string(name, arrayRank, nArrayRank);
+        deserialize_abstract_vector<State>(stateList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(excludeVolumeBoundList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(excludeVolumeBoundIfaceList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(excludeVolumeBoundReactList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<double>(excludeRadiusList, arrayRank, nArrayRank);
+    }
 };
 
 struct ParsedMolNumState {
@@ -105,6 +174,20 @@ struct ParsedMolNumState {
     std::vector<std::string> nameEachState {}; //!< iface~state for each state
 
     ParsedMolNumState() = default;
+
+    /*
+    Function serialize serializes the ParsedMolNumState into arrayRank of bytes.
+    */
+    void serialize(unsigned char *arrayRank, int &nArrayRank) {
+        PUSH(totalCopyNumbers);
+        serialize_primitive_vector<int>(numberEachState, arrayRank, nArrayRank);
+        serialize_vector_strings(nameEachState, arrayRank, nArrayRank);
+    }
+    void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+        POP(totalCopyNumbers);
+        deserialize_primitive_vector<int>(numberEachState, arrayRank, nArrayRank);
+        deserialize_vector_strings(nameEachState, arrayRank, nArrayRank);
+    }
 };
 
 struct MolTemplate {
@@ -148,6 +231,7 @@ struct MolTemplate {
     // Molecule types, for checking to perform certain actions
     bool isRod { false }; //!< is the molecule a rod (is it strictly one dimensional)
     bool isLipid { false }; //!< is the molecule a lipid?
+    bool isPromoter {false}; //!< is the molecule a promoter for transcription initiation
     bool isPoint { false }; //!< is the Molecule a point (i.e., do all its interfaces overlap with the COM)
     bool isImplicitLipid { false }; //!< is the molecule an implicit lipid? to use, must specify implicitLipid=true in boundaries.
 
@@ -170,4 +254,78 @@ struct MolTemplate {
     MolTemplate() = default;
     MolTemplate(Coord& comCoord, std::vector<Interface>& Interfaces);
     MolTemplate(std::string molName, std::vector<Interface>& interfaceList);
+
+    /*
+    Function serialize serializes the MolTemplate into array of bytes.
+    */
+    void serialize(unsigned char *arrayRank, int &nArrayRank) {
+        // std::cout << "+MolTemplate serialization nArrayRanks here..." <<
+        // std::endl;
+        //  Serialize starting from beginning of arrayRank
+        //  increased by the number of bytes already serialized:
+        comCoord.serialize(arrayRank, nArrayRank);
+        PUSH(checkOverlap);
+        PUSH(countTransition);
+        PUSH(transitionMatrixSize);
+        serialize_primitive_matrix<long long int>(transitionMatrix, arrayRank, nArrayRank);
+        serialize_primitive_matrix<double>(lifeTime, arrayRank, nArrayRank);
+        //    double bindSepFactor { 1.0 }; //!< separation factor for binding
+        //    within the same complex
+        // HOW IS COPIES DIFFERENT THAN NumEachMolType?
+        PUSH(copies);
+        PUSH(molTypeIndex);
+        PUSH(mass);
+        PUSH(radius);
+        D.serialize(arrayRank, nArrayRank);
+        Dr.serialize(arrayRank, nArrayRank);
+        serialize_string(molName, arrayRank, nArrayRank);
+        serialize_abstract_vector<Interface>(interfaceList, arrayRank, nArrayRank);
+        serialize_primitive_vector<int>(rxnPartners, arrayRank, nArrayRank);
+
+        serialize_vector_array<int, 2>(bondList, arrayRank, nArrayRank);
+
+        serialize_primitive_vector<int>(ifacesWithStates, arrayRank, nArrayRank);
+        startingNumState.serialize(arrayRank, nArrayRank);
+        PUSH(canDestroy);
+        PUSH(excludeVolumeBound);
+        PUSH(isRod);
+        PUSH(isLipid);
+        PUSH(isPoint);
+        PUSH(isImplicitLipid);
+        PUSH(bindToSurface);
+        // std::cout << "+Total MolTemplate size in bytes: " << nArrayRank <<
+        // std::endl;
+    }
+    void deserialize(unsigned char *arrayRank, int &nArrayRank) {
+        comCoord.deserialize(arrayRank, nArrayRank);
+        POP(checkOverlap);
+        POP(countTransition);
+        POP(transitionMatrixSize);
+        deserialize_primitive_matrix<long long int>(transitionMatrix, arrayRank, nArrayRank);
+        deserialize_primitive_matrix<double>(lifeTime, arrayRank, nArrayRank);
+        //    double bindSepFactor { 1.0 }; //!< separation factor for binding
+        //    within the same complex
+        // HOW IS COPIES DIFFERENT THAN NumEachMolType?
+        POP(copies);
+        POP(molTypeIndex);
+        POP(mass);
+        POP(radius);
+        D.deserialize(arrayRank, nArrayRank);
+        Dr.deserialize(arrayRank, nArrayRank);
+        deserialize_string(molName, arrayRank, nArrayRank);
+        deserialize_abstract_vector<Interface>(interfaceList, arrayRank, nArrayRank);
+        deserialize_primitive_vector<int>(rxnPartners, arrayRank, nArrayRank);
+
+        deserialize_vector_array<int, 2>(bondList, arrayRank, nArrayRank);
+
+        deserialize_primitive_vector<int>(ifacesWithStates, arrayRank, nArrayRank);
+        startingNumState.deserialize(arrayRank, nArrayRank);
+        POP(canDestroy);
+        POP(excludeVolumeBound);
+        POP(isRod);
+        POP(isLipid);
+        POP(isPoint);
+        POP(isImplicitLipid);
+        POP(bindToSurface);
+    }
 };

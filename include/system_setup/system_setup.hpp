@@ -18,6 +18,7 @@
  * @return             True if the distance between the two molecules is less than the sum of their radii plus a safety margin of 2.
  */
 bool are_molecules_in_vicinity(const Molecule& mol1, const Molecule& mol2, const std::vector<MolTemplate>& molTemplates);
+bool areInVicinity(const Molecule& mol1, const Molecule& mol2, const std::vector<MolTemplate>& molTemplateList);
 
 /*!
  * \ingroup SystemSetup
@@ -32,9 +33,13 @@ bool are_molecules_in_vicinity(const Molecule& mol1, const Molecule& mol2, const
  *   1. Extrapolate along the mol1 iface - mol2 iface vector using each molecule's interface, to see if they even
  * can be overlapping
  */
-void generate_coordinates(const Parameters& params, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList,
-    const std::vector<ForwardRxn>& forwardRxns, const Membrane& membraneObject);
+void generate_coordinates(const Parameters &params,
+                          std::vector<Molecule> &moleculeList,
+                          std::vector<Complex> &complexList,
+                          std::vector<MolTemplate> &molTemplateList,
+                          const std::vector<ForwardRxn> &forwardRxns,
+                          const Membrane &membraneObject,
+                          std::string &coordinateFileName);
 
 /*!
  * \ingroup SystemSetup
@@ -57,6 +62,13 @@ Complex initialize_complex(const Molecule& mol, const MolTemplate& molTemp);
 void initialize_paramters_for_implicitlipid_and_compartment_model(int& implicitlipidIndex, const Parameters& params, std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns, std::vector<TransmissionRxn>& transmissionRxns, std::vector<Molecule>& moleculeList,
     std::vector<MolTemplate>& molTemplateList, std::vector<Complex>& complexList, Membrane& membraneObject);
 
+void initialize_paramters_for_implicitlipid_model(
+    int& implicitlipidIndex, const Parameters& params,
+    std::vector<ForwardRxn>& forwardRxns, std::vector<BackRxn>& backRxns,
+    std::vector<Molecule>& moleculeList,
+    std::vector<MolTemplate>& molTemplateList,
+    std::vector<Complex>& complexList, Membrane& membraneObject);
+
 //functions to generate new added molecules and complexes fo a restart simulation
 void generate_coordinates_for_restart(Parameters& params, std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList,
@@ -77,3 +89,5 @@ void determine_shape_molecule(std::vector<MolTemplate>& molTemplateList);
 
 // function to initialize starting copy number for each state
 void initialize_states(std::vector<Molecule>& moleculeList, std::vector<MolTemplate>& molTemplateList, Membrane& membraneObject);
+
+void set_exclude_volume_bound(std::vector<ForwardRxn>& forwardRxns, std::vector<MolTemplate>& molTemplateList);

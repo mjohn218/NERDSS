@@ -67,6 +67,25 @@ public:
     // TODO: include this in association 2.0
     explicit Coord(std::array<double, 3>& arr);
     explicit Coord(std::vector<double> vals);
+
+    /*
+    Function serialize serializes the Coord
+    into array of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        PUSH(x);
+        PUSH(y);
+        PUSH(z);
+    }
+    /*
+    Function deserialize deserializes the Coord
+    from array of bytes.
+    */
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        POP(x);
+        POP(y);
+        POP(z);
+    }
 };
 
 Coord round(const Coord& c);

@@ -101,6 +101,10 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+            restartFile >> params.assocDissocWrite;
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '=');
             restartFile >> params.checkPoint;
             restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -393,7 +397,9 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 restartFile >> tmpRxn.productName;
                 std::cout << "Product name: " << tmpRxn.productName << std::endl;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                restartFile >> tmpRxn.isReversible >> tmpRxn.conjBackRxnIndex >> tmpRxn.irrevRingClosure >> tmpRxn.bindRadSameCom >> tmpRxn.loopCoopFactor >> tmpRxn.length3Dto2D;
+                restartFile >> tmpRxn.isReversible >> tmpRxn.conjBackRxnIndex >>
+                    tmpRxn.irrevRingClosure >> tmpRxn.bindRadSameCom >>
+                    tmpRxn.loopCoopFactor >> tmpRxn.length3Dto2D >> tmpRxn.area3Dto1D;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpRxn.bindRadius;
                 std::string th1, th2, ph1, ph2, omega;
@@ -919,9 +925,9 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 restartFile >> tmpMol.index >> tmpMol.isEmpty >> tmpMol.myComIndex >> tmpMol.molTypeIndex
                     >> tmpMol.mySubVolIndex;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                restartFile >> tmpMol.mass >> tmpMol.isLipid >> tmpMol.isImplicitLipid >> tmpMol.linksToSurface >> tmpMol.isEmpty;
+                restartFile >> tmpMol.mass >> tmpMol.isLipid >> tmpMol.isImplicitLipid 
+                            >> tmpMol.linksToSurface >> tmpMol.isPromoter >> tmpMol.isEmpty;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
                 // center of mass
                 restartFile >> std::fixed >> tmpMol.comCoord.x >> tmpMol.comCoord.y >> tmpMol.comCoord.z;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -1051,6 +1057,8 @@ void read_restart(long long int& simItr, std::ifstream& restartFile, Parameters&
                 restartFile >> tmpCom.index >> tmpCom.isEmpty >> tmpCom.radius >> tmpCom.mass;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpCom.linksToSurface >> tmpCom.iLipidIndex >> tmpCom.OnSurface;
+                restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                restartFile >> tmpCom.onFiber;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 restartFile >> tmpCom.comCoord.x >> tmpCom.comCoord.y >> tmpCom.comCoord.z;
                 restartFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');

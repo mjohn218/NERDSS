@@ -7,14 +7,17 @@
 #include "reactions/unimolecular/unimolecular_reactions.hpp"
 #include "tracing.hpp"
 
-void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& params, SimulVolume& simulVolume,
-    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, unsigned int molItr,
-    std::vector<Molecule>& moleculeList,
+void check_dissociation_implicitlipid(long long int simItr, const Parameters& params, SimulVolume& simulVolume,
+    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, unsigned int molItr,std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<BackRxn>& backRxns, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs)
+    const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, 
+    std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs, std::ofstream& assocDissocFile)
 {
     // TRACE();
     double Dtot;
+    if (moleculeList[molItr].isGhosted == true) {
+        return;
+    }
     for (int relIface1Itr { 0 }; relIface1Itr < moleculeList[molItr].bndlist.size(); ++relIface1Itr) {
         int relIface1 { moleculeList[molItr].bndlist[relIface1Itr] };
         if (moleculeList[molItr].interfaceList[relIface1].isBound) { // make sure it's actually bound
@@ -100,7 +103,22 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
                 //        }
                 //    }
                 //}
+                #ifdef mpi_
+                for (int p1 = 0; p1 < moleculeList.size(); p1++) {
+                    if (moleculeList[p1].isGhosted == true) continue;
+                    int numIfaces = moleculeList[p1].interfaceList.size();
+                    for (int j = 0; j < numIfaces; j++) {
+                        // find out which state each interface on the molecule is in, and
+                        // increment copyNumSpecies array.
+                        int index = moleculeList[p1].interfaceList[j].index;
+                        if (index == proteinIndex) {
+                        numberProtein += 1;
+                        }
+                    }  // end all interfaces
+                }    // end all current molecules
+                #else
                 numberProtein = counterArrays.copyNumSpecies[proteinIndex];
+                #endif
 
                 long long int probMatrixIndex { 0 };
                 double Dcomplex_x = complexList[moleculeList[molItr].myComIndex].D.x;
@@ -193,8 +211,8 @@ void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& par
 			*/
 
                 // 'break_interaction' frees certain protein and its interface
-                break_interaction_implicitlipid(relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
-                    backRxns[mu], moleculeList, complexList, molTemplateList);
+                break_interaction_implicitlipid(simItr, relIface1, relIface2, moleculeList[molItr], moleculeList[pro2Index],
+                    backRxns[mu], moleculeList, complexList, molTemplateList, assocDissocFile);
 
                 // Change the number of bound pairs in the system.
                 update_Nboundpairs(moleculeList[molItr].molTypeIndex, moleculeList[pro2Index].molTypeIndex, -1,

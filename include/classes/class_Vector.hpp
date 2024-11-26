@@ -79,4 +79,23 @@ struct Vector : public Coord {
     explicit Vector(std::vector<double> arr);
     explicit Vector(Coord coord);
     Vector(const Coord& coordEnd, const Coord& coordStart);
+
+    /*
+    Function serialize serializes the Vector into array of bytes.
+    */
+    void serialize(unsigned char* arrayRank, int& nArrayRank) {
+        PUSH(x);
+        PUSH(y);
+        PUSH(z);
+        PUSH(magnitude);
+    }
+    /*
+    Function deserialize deserializes the Vector from array of bytes.
+    */
+    void deserialize(unsigned char* arrayRank, int& nArrayRank) {
+        POP(x);
+        POP(y);
+        POP(z);
+        POP(magnitude);
+    }
 };

@@ -65,64 +65,6 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
     double tol = 1E-14;
     int slowPro;
 
-    /* MOVE PROTEIN TO SIGMA */
-    // {
-    //     double DxSum { facilitatorCom.D.x + stateChangeCom.D.x };
-    //     double DySum { facilitatorCom.D.y + stateChangeCom.D.y };
-    //     double DzSum { facilitatorCom.D.z + stateChangeCom.D.z };
-
-    //     Vector sigma { reactIface1 - reactIface2 };
-    //     //        std::cout<<" sigma: "<<sigma.x<<' '<<sigma.y<<' '<<sigma.z<<std::endl;
-    //     //std::cout <<" Dsum and components: "<<DxSum<<' '<<DySum<<' '<<DzSum<<std::endl;
-
-    //     Vector transVec1 {};
-    //     Vector transVec2 {};
-    //     double displaceFrac {};
-
-    //     // if both in 2D, ignore the z-component
-    //     if (DzSum < 1E-14) {
-    //         isOnMembrane = true;
-    //         /*Store coordinates of one protein to recover membrane-bound orientation*/
-
-    //         if (stateChangeCom.D.x < facilitatorCom.D.x) {
-    //             slowPro = stateChangeMol.index;
-    //             memProtein = stateChangeMol; //rotate relative to the slower protein.
-    //         } else {
-    //             slowPro = facilitatorMol.index;
-    //             memProtein = facilitatorMol;
-    //         }
-
-    //         DzSum = 1; // to prevent divide by 0
-    //         if (std::abs(std::abs(sigma.z) - bindRadius) < 1E-3) {
-    //             // if entirety of sigma is in z-component, ignore x and y
-    //             displaceFrac = 1;
-    //         } else {
-    //             double sigmaMag = sqrt((sigma.x * sigma.x) + (sigma.y * sigma.y));
-    //             displaceFrac = (sigmaMag - bindRadius) / sigmaMag;
-    //         }
-    //     } else {
-    //         sigma.calc_magnitude();
-    //         displaceFrac = (sigma.magnitude - bindRadius) / sigma.magnitude;
-    //         if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
-    //             transitionToSurface = true; //both can't be less than tol, or would not be in this loop.
-    //             std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
-    //         }
-    //     }
-
-    //     transVec1.x = -sigma.x * (facilitatorCom.D.x / DxSum) * displaceFrac;
-    //     transVec1.y = -sigma.y * (facilitatorCom.D.y / DySum) * displaceFrac;
-    //     transVec1.z = -sigma.z * (facilitatorCom.D.z / DzSum) * displaceFrac;
-
-    //     transVec2.x = sigma.x * (stateChangeCom.D.x / DxSum) * displaceFrac;
-    //     transVec2.y = sigma.y * (stateChangeCom.D.y / DySum) * displaceFrac;
-    //     transVec2.z = sigma.z * (stateChangeCom.D.z / DzSum) * displaceFrac;
-    //     //std::cout<<" translation1 to sigma: "<<transVec1.x<<' '<<transVec1.y<<' '<<transVec1.z<<std::endl;
-    //     // update the temporary coordinates
-    //     for (auto& mp : facilitatorCom.memberList)
-    //         moleculeList[mp].update_association_coords(transVec1);
-    //     for (auto& mp : stateChangeCom.memberList)
-    //         moleculeList[mp].update_association_coords(transVec2);
-    // } //end moving to sigma
     {
         double DxSum { stateChangeCom.D.x + facilitatorCom.D.x };
         double DySum { stateChangeCom.D.y + facilitatorCom.D.y };
@@ -148,7 +90,8 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
             sigmaMag = sqrt((sigma.x * sigma.x) + (sigma.y * sigma.y) + (sigma.z * sigma.z));
             displaceFrac = (sigmaMag - currRxn.bindRadius) / sigmaMag;
             /*At least one protein is in 3D*/
-            if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
+            // if (stateChangeCom.D.z < tol || facilitatorCom.D.z < tol) {
+            if (stateChangeCom.OnSurface || facilitatorCom.OnSurface) {
                 transitionToSurface = true; // both can't be less than tol, or would not be in this loop.
                 // std::cout << "TRANSITIONING FROM 3D->2D " << std::endl;
             }
@@ -160,12 +103,14 @@ void perform_bimolecular_state_change_sphere(int stateChangeIface, int facilitat
         if (isOnMembrane == true) { // both complexes are on the sphere
             target1Pos = find_position_after_association(arc1Move, reactIface1, reactIface2, sigmaMag, currRxn.bindRadius2D);
             target2Pos = find_position_after_association(arc2Move, reactIface2, reactIface1, sigmaMag, currRxn.bindRadius2D);
-        } else if (stateChangeCom.D.z < 1E-14) { //complex1 is on sphere
+        // } else if (stateChangeCom.D.z < 1E-14) { //complex1 is on sphere
+        } else if (stateChangeCom.OnSurface) { //complex1 is on sphere
             transVec1 = Vector(0, 0, 0);
             sigma.calc_magnitude();
             double lamda = (sigma.magnitude - currRxn.bindRadius) / sigma.magnitude;
             transVec2 = Vector(lamda * sigma);
-        } else if (facilitatorCom.D.z < 1E-14) { //complex2 is on sphere
+        // } else if (facilitatorCom.D.z < 1E-14) { //complex2 is on sphere
+        } else if (facilitatorCom.OnSurface) { //complex2 is on sphere
             transVec2 = Vector(0, 0, 0);
             sigma.calc_magnitude();
             double lamda = (sigma.magnitude - currRxn.bindRadius) / sigma.magnitude;

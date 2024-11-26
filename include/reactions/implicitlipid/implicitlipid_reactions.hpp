@@ -51,15 +51,15 @@ void determine_2D_implicitlipid_reaction_probability(int simItr, int rxnIndex, i
     std::vector<double>& ILTableIDs, BiMolData& biMolData, const Parameters& params,
     std::vector<Molecule>& moleculeList, std::vector<Complex>& complexList, const std::vector<ForwardRxn>& forwardRxns,
     const std::vector<BackRxn>& backRxns, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, Membrane& membraneObject, const int& relStateIndex);
-void check_dissociation_implicitlipid(unsigned int simItr, const Parameters& params, SimulVolume& simulVolume,
-    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, unsigned int molItr,
-    std::vector<Molecule>& moleculeList,
+void check_dissociation_implicitlipid(long long int simItr, const Parameters& params, SimulVolume& simulVolume,
+    std::vector<MolTemplate>& molTemplateList, std::map<std::string, int>& observablesList, unsigned int molItr,std::vector<Molecule>& moleculeList,
     std::vector<Complex>& complexList, const std::vector<BackRxn>& backRxns, const std::vector<ForwardRxn>& forwardRxns,
-    const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs);
+    const std::vector<CreateDestructRxn>& createDestructRxns, copyCounters& counterArrays, Membrane& membraneObject, 
+    std::vector<double>& IL2DbindingVec, std::vector<double>& IL2DUnbindingVec, std::vector<double>& ILTableIDs, std::ofstream& assocDissocFile);
 
-void break_interaction_implicitlipid(size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
+void break_interaction_implicitlipid(long long int iter, size_t relIface1, size_t relIface2, Molecule& reactMol1, Molecule& reactMol2,
     const BackRxn& currRxn, std::vector<Molecule>& moleculeList,
-    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList);
+    std::vector<Complex>& complexList, std::vector<MolTemplate>& molTemplateList, std::ofstream& assocDissocFile);
 
 void determine_entering_compartment_probability(double distToCompartment, const std::vector<TransmissionRxn> &transmissionRxns, int rxnIndex, int pro1Index,
                                                 std::vector<Molecule> &moleculeList, double Dtot, const Parameters &parameters, Membrane &membraneObject);
