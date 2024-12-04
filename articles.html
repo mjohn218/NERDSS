@@ -58,22 +58,93 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<h1>Selective articles that used NERDSS simulations</h1>
+							<h1>Selective articles about NERDSS</h1>
                             <p>We kindly ask that you cite: <b>Varga, M., Fu, Y., Loggia, S., Yogurtcu, O.N., & M.E. Johnson 
                                 NERDSS: a nonequilibrium simulator for multibody self-assembly at the cellular scale. 
                                 Biophysical Journal 118, P3026-P3040 (2020)</b> in all publications that make use of NERDSS.</p>
-							<p>Below are a few selective articles that made use of NERDSS:</p>
-                            <p>- <a href="https://elifesciences.org/articles/84881" target="_blank">Guo, Sikao, et al. "Structure of the HIV immature lattice allows for essential lattice remodeling within budded virions." elife 12 (2023): e84881.</a></p>
-                            <p>- <a href="https://www.cell.com/biophysj/fulltext/S0006-3495(23)00409-5" target="_blank">Qian, Yian, et al. "Temporal control by cofactors prevents kinetic trapping in retroviral Gag lattice assembly." Biophysical Journal 122.15 (2023): 3173-3190.</a></p>
-							<p>- <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011800" target="_blank">Husar, Adam, et al. "Mcell4 with bionetgen: A Monte Carlo simulator of rule-based reaction-diffusion systems with python interface." PLOS Computational Biology 20.4 (2024): e1011800.</a></p>
-							<p>- <a href="https://elifesciences.org/articles/84881" target="_blank">Guo, Sikao, et al. "Structure of the HIV immature lattice allows for essential lattice remodeling within budded virions" eLife 12 (2023): e84881.</a></p>
-							<p>- <a href="https://doi.org/10.1039/D1SM01333E" target="_blank">Fu, Yiben, et al. "A continuum membrane model can predict curvature sensing by helix insertion." Soft Matter, 2021,17, 10649-10663 (2021)</a></p>
-							<p>- <a href="https://www.cell.com/biophysj/fulltext/S0006-3495(21)02083-X" target="_blank">Guo, Sikao, et al. "Large self-assembled clathrin lattices spontaneously disassemble without sufficient adaptor proteins." Biophysical Journal 121.3 (2022): 331a.</a></p>
-                            <p>- <a href="https://pubs.rsc.org/en/content/articlelanding/2021/sm/d1sm01333e/unauth" target="_blank">Fu, Yiben, et al. "A continuum membrane model can predict curvature sensing by helix insertion." Soft Matter 17.47 (2021): 10649-10663.</a></p>
-                            <p>- <a href="https://www.nature.com/articles/s41467-024-47677-8" target="_blank">Jiang, Anmin, et al. "Dynamin1 long-and short-tail isoforms exploit distinct recruitment and spatial patterns to form endocytic nanoclusters." Nature Communications 15.1 (2024): 4060.</a></p>
-                            <p>- <a href="https://doi.org/10.1101/2020.07.02.185595" target="_blank">Johnson, M. E., et al. "The Roles of Space and Stochasticity in Computational Simulations of Cellular Biochemistry: Quantitative Analysis and Qualitative Insights." bioRxiv (2020): 2020-07.</a></p>
-                            
-                            
+							<p><b>The algorithm that NERDSS is based of is explained in the following articles:</b></p>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/free_propagater.png" alt="" /></span></div>
+							<p><b><a href="https://journals.aps.org/prx/abstract/10.1103/PhysRevX.4.031037" target="_blank">Free propagator reweighting integrator 
+								for single-particle dynamics in reaction-diffusion models of heterogeneous protein-protein interaction systems</a></b>
+							<br>Johnson, Margaret E. & Hummer, Gerhard, Phys. Rev. X 4, 031037 (2014).</p>
+							<p>Free-propagator reweighting algorithm for particle-based RD.</p>
+							<p><br></p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/theory_of_bi-molecular.jpg"" alt="" /></span></div>
+							<p><b><a href="https://doi.org/10.1063/1.4929390" target="_blank">Theory of bi-molecular association dynamics in 2D for accurate model and experimental parameterization of binding rates</a></b>
+							<br> Yogurtcu, O.N. & Johnson, Margaret E., J. Chem. Phys. 143, 084117 (2015)</p>
+							<p>The extension to 2D of FPR and analysis of how diffusion impacts more strongly the reaction kinetics in 2D systems.</p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/modeling_the_self-assembly.jpg" alt="" /></span></div>
+							<p><b><a href="https://pubs.acs.org/doi/10.1021/acs.jpcb.8b08339" target="_blank">Modeling the self-assembly of protein complexes through a rigid-body rotational reaction-diffusion algorithm</a></b>
+							<br>Johnson, Margaret E., J Phys Chem B. 122, 11771 (2018)</p>
+							<p>Introduction of multi-site molecules and rotational diffusion, validated for the FPR algorithm.</p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://doi.org/10.1063/1.5120516" target="_blank">An implicit lipid model for efficient reaction-diffusion simulations of protein binding to surfaces of arbitrary topology</a></b>
+							<br>Fu, Yiben, et al., J Chem Phys. 151, 124115 (2019)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+
+							<p><b><br><br><br>Below are some selective articles that made use of NERDSS:</b></p>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://elifesciences.org/articles/84881" target="_blank">Structure of the HIV immature lattice allows for essential lattice remodeling within budded virions</a></b>
+							<br>Guo, Sikao, et al. elife 12 (2023)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+                            <section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://www.cell.com/biophysj/fulltext/S0006-3495(23)00409-5" target="_blank">Temporal control by cofactors prevents kinetic trapping in retroviral Gag lattice assembly</a></b>
+							<br>Qian, Yian, et al. Biophysical Journal 122.15 (2023)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011800" target="_blank">Mcell4 with bionetgen: A Monte Carlo simulator of rule-based reaction-diffusion systems with python interface</a></b>
+							<br>Husar, Adam, et al. PLOS Computational Biology 20.4 (2024)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+                            <section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://doi.org/10.1039/D1SM01333E" target="_blank">A continuum membrane model can predict curvature sensing by helix insertion</a></b>
+							<br>Fu, Yiben, et al. Soft Matter, 2021,17, 10649-10663 (2021)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://www.cell.com/biophysj/fulltext/S0006-3495(21)02083-X" target="_blank">Large self-assembled clathrin lattices spontaneously disassemble without sufficient adaptor proteins</a></b>
+							<br>Guo, Sikao, et al. Biophysical Journal 121.3 (2022)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://www.nature.com/articles/s41467-024-47677-8" target="_blank">Dynamin1 long-and short-tail isoforms exploit distinct recruitment and spatial patterns to form endocytic nanoclusters</a></b>
+							<br>Jiang, Anmin, et al. Nature Communications 15.1 (2024)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
+							<section>
+							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<p><b><a href="https://doi.org/10.1101/2020.07.02.185595" target="_blank">The Roles of Space and Stochasticity in Computational Simulations of Cellular Biochemistry: Quantitative Analysis and Qualitative Insights</a></b>
+							<br>Johnson, M. E., et al. bioRxiv (2020)</p>
+							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p><br></p>
+							</section>
 						</div>
 					</div>
 
