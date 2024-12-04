@@ -68,81 +68,115 @@
 							<p><b><a href="https://journals.aps.org/prx/abstract/10.1103/PhysRevX.4.031037" target="_blank">Free propagator reweighting integrator 
 								for single-particle dynamics in reaction-diffusion models of heterogeneous protein-protein interaction systems</a></b>
 							<br>Johnson, Margaret E. & Hummer, Gerhard, Phys. Rev. X 4, 031037 (2014).</p>
-							<p>Free-propagator reweighting algorithm for particle-based RD.</p>
+							<p>This paper introduces the free-propagator reweighting algorithm (FPR) for particle-based RD. We combine the use of the 
+								exact Green's function for a pair of reacting particles with the approximate free-diffusion propagator for position updates 
+								to particles. Trajectory reweighting in the FPR method is able to recover the exact association rates 
+								for a pair of interacting particles at all times. </p>
 							<p><br></p>
 							<p><br></p>
 							</section>
 							<section>
 							<div class="inner"><span class="image left"><img src="images/theory_of_bi-molecular.jpg"" alt="" /></span></div>
 							<p><b><a href="https://doi.org/10.1063/1.4929390" target="_blank">Theory of bi-molecular association dynamics in 2D for accurate model and experimental parameterization of binding rates</a></b>
-							<br> Yogurtcu, O.N. & Johnson, Margaret E., J. Chem. Phys. 143, 084117 (2015)</p>
-							<p>The extension to 2D of FPR and analysis of how diffusion impacts more strongly the reaction kinetics in 2D systems.</p>
+							<br> Yogurtcu, Osman N. & Johnson, Margaret E., J. Chem. Phys. 143, 084117 (2015)</p>
+							<p>The dynamics of association between diffusing and reacting molecular species are routinely quantified using simple rate-equation 
+								kinetics that assume both well-mixed concentrations of species and a single rate constant for parameterizing the binding rate. 
+								In two-dimensions (2D), however, even when systems are well-mixed, the assumption of a single characteristic rate constant 
+								for describing association is not generally accurate, due to the properties of diffusional searching in dimensions d ≤ 2. 
+								When FPR is extended to 2D, diffusion impacts more strongly the reaction kinetics in these 2D systems.</p>
 							<p><br></p>
 							</section>
 							<section>
 							<div class="inner"><span class="image left"><img src="images/modeling_the_self-assembly.jpg" alt="" /></span></div>
 							<p><b><a href="https://pubs.acs.org/doi/10.1021/acs.jpcb.8b08339" target="_blank">Modeling the self-assembly of protein complexes through a rigid-body rotational reaction-diffusion algorithm</a></b>
 							<br>Johnson, Margaret E., J Phys Chem B. 122, 11771 (2018)</p>
-							<p>Introduction of multi-site molecules and rotational diffusion, validated for the FPR algorithm.</p>
+							<p>We develop a relatively simple but accurate approach for building rigid structure and rotation into single-particle 
+								reaction-diffusion methods, providing a rate-based method for studying protein self-assembly. This approach reproduces 
+								both the kinetics of association, which is altered by rotational diffusion, and the equilibrium 
+								of reversible association, which is not. The macroscopic kinetics of association can also be predicted on the basis of the 
+								microscopic parameters of our structurally resolved model, allowing for critical comparisons with theory and other rate-based simulations.
+								</p>
 							<p><br></p>
 							</section>
 							<section>
 							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
 							<p><b><a href="https://doi.org/10.1063/1.5120516" target="_blank">An implicit lipid model for efficient reaction-diffusion simulations of protein binding to surfaces of arbitrary topology</a></b>
 							<br>Fu, Yiben, et al., J Chem Phys. 151, 124115 (2019)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p>This paper introduces an algorithm for reversible binding of proteins to continuum surfaces with implicit lipids, providing
+								 dramatic speed-ups to many body simulations. This algorithm implements FPR 3D-to-2D to account for the 
+								 reactive flux at a surface and handle diffusion on surfaces that have arbitrary topologies.</p>
 							<p><br></p>
 							</section>
 
 							<p><b><br><br><br>Below are some selective articles that made use of NERDSS:</b></p>
 							<section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<div class="inner"><span class="image left"><img src="images/structure_of_the_HIV.jpg" alt="" /></span></div>
 							<p><b><a href="https://elifesciences.org/articles/84881" target="_blank">Structure of the HIV immature lattice allows for essential lattice remodeling within budded virions</a></b>
 							<br>Guo, Sikao, et al. elife 12 (2023)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p>For HIV virions to become infectious, the immature lattice of Gag polyproteins attached to the virion membrane must be cleaved. 
+								Cleavage cannot initiate without the protease formed by the homo-dimerization of domains linked to Gag. However, The mechanism 
+								of Gag-Pol dimerization is unknown. The authors use NERDSS to carry out simulations of the immature Gag lattice as derived from 
+								experimental structures, showing that dynamics of the lattice on the membrane is unavoidable due to the missing 1/3 of the spherical 
+								protein coat. These dynamics allow for Gag-Pol molecules carrying the protease domains to detach and reattach at new places within 
+								the lattice.</p>
 							<p><br></p>
 							</section>
                             <section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<div class="inner"><span class="image left"><img src="images/temporal_control_by_cofactors.jpg" alt="" /></span></div>
 							<p><b><a href="https://www.cell.com/biophysj/fulltext/S0006-3495(23)00409-5" target="_blank">Temporal control by cofactors prevents kinetic trapping in retroviral Gag lattice assembly</a></b>
 							<br>Qian, Yian, et al. Biophysical Journal 122.15 (2023)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p>For retroviruses like HIV to proliferate, they must form virions shaped by the self-assembly of Gag polyproteins into a rigid lattice. 
+								The energetic criterion for forming stable lattices is unknown, as are their 
+								corresponding rates. Here, the authors use NERDSS simulations with models designed from the cryo-ET structure of the immature Gag lattice to map 
+								a phase diagram of assembly outcomes controlled by experimentally constrained rates and free energies over experimentally relevant 
+								timescales. It is shown that multiple Gag lattices nucleate before growth can complete, resulting in loss of free monomers 
+								and frequent kinetic trapping. Based on the simulations, the authors propose a mechanism by which Gag binding to IP6 can provide 
+								the additional time delay necessary to support smooth growth of the immature lattice with relatively fast assembly kinetics and 
+								avoid most kinetic traps.</p>
 							<p><br></p>
 							</section>
 							<section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<div class="inner"><span class="image left"><img src="images/mcell4_with_bionetgen.PNG" alt="" /></span></div>
 							<p><b><a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011800" target="_blank">Mcell4 with bionetgen: A Monte Carlo simulator of rule-based reaction-diffusion systems with python interface</a></b>
 							<br>Husar, Adam, et al. PLOS Computational Biology 20.4 (2024)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
-							<p><br></p>
-							</section>
-                            <section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
-							<p><b><a href="https://doi.org/10.1039/D1SM01333E" target="_blank">A continuum membrane model can predict curvature sensing by helix insertion</a></b>
-							<br>Fu, Yiben, et al. Soft Matter, 2021,17, 10649-10663 (2021)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
-							<p><br></p>
+							<p>The authors describe and validate a new version of the open-source MCell simulation program (MCell4), which supports generalized 3D 
+								Monte Carlo modeling of diffusion and chemical reaction of discrete molecules and macromolecular complexes in solution, on 
+								surfaces representing membranes, and combinations thereof. For volume-surface and surface-surface reactions, MCell subdivides 
+								the surface areas of geometric objects into small tiles with a maximum of one molecule can occupy one tile at a time. Simulations that involve
+							    binding to a surface are performed with MCell4 and with NERDSS, MCell3, and VCell. Their results show good alignment and the algorithm 
+								that MCell4 incorporates is validated.</p>
 							<p><br></p>
 							</section>
 							<section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<div class="inner"><span class="image left"><img src="images/large_self-assembly_clathrin_lattices.jpg" alt="" /></span></div>
 							<p><b><a href="https://www.cell.com/biophysj/fulltext/S0006-3495(21)02083-X" target="_blank">Large self-assembled clathrin lattices spontaneously disassemble without sufficient adaptor proteins</a></b>
 							<br>Guo, Sikao, et al. Biophysical Journal 121.3 (2022)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p>Clathrin-coated structures must assemble on cell membranes to internalize receptors. These structures can grow surprisingly large, 
+								containing over 20 clathrin seemingly locked in a hexagonal lattice, yet often fail to form productive vesicles. The authors 
+								combine in vitro kinetic measurements and NERDSS simulations to build a theory to differentiate mechanisms of stable vs 
+								unstable clathrin assembly on membranes. Their model predicts how adaptor protein density controls stabilization of clathrin-coated structures 
+								against spontaneous disassembly, and shows ATPases are not required for lattice remodeling, which is a critical advance towards 
+								predicting productive vesicle formation.</p>
 							<p><br></p>
 							</section>
 							<section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
+							<div class="inner"><span class="image left"><img src="images/Dynamin1_long-and_short-tail_isoforms.png" alt="" /></span></div>
 							<p><b><a href="https://www.nature.com/articles/s41467-024-47677-8" target="_blank">Dynamin1 long-and short-tail isoforms exploit distinct recruitment and spatial patterns to form endocytic nanoclusters</a></b>
 							<br>Jiang, Anmin, et al. Nature Communications 15.1 (2024)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<p>Endocytosis requires a coordinated framework of molecular interactions that ultimately lead to the fission of nascent 
+								endocytic structures. How cytosolic proteins such as dynamin concentrate at discrete sites that are sparsely distributed 
+								across the plasma membrane remains poorly understood. NERDSS is used to model the 3D to 2D binding of dynamin to the cell membrane
+								and assess the binding kinetics of the reaction.</p>
 							<p><br></p>
 							</section>
 							<section>
-							<div class="inner"><span class="image left"><img src="images/an_implicit_lipid_model.jpg" alt="" /></span></div>
-							<p><b><a href="https://doi.org/10.1101/2020.07.02.185595" target="_blank">The Roles of Space and Stochasticity in Computational Simulations of Cellular Biochemistry: Quantitative Analysis and Qualitative Insights</a></b>
-							<br>Johnson, M. E., et al. bioRxiv (2020)</p>
-							<p>The 3D-to-2D implementation of FPR that accounts for the reactive flux at a surface, and handles diffusion on surfaces that have arbitrary topologies.</p>
+							<div class="inner"><span class="image left"><img src="images/quantifying_the_roles_of_space_and_stochasticity.jpg" alt="" /></span></div>
+							<p><b><a href="https://doi.org/10.1091/mbc.E20-08-0530" target="_blank">Quantifying the roles of space and stochasticity in computer simulations for cell biology and cellular biochemistry</a></b>
+							<br>Johnson, M. E., et al. Molecular Biology of the CellVol. 32, No. 2 (2021)</p>
+							<p>The authors defined a series of computational test cases ranging from very simple to moderately complex, varying key 
+								features of dimensionality, reaction type, reaction speed, crowding, and cell size. A number of commonly used computational programs
+								or approaches including NERDSS were tested on these test cases. The strengths and limitations of these programs and approaches for exploring 
+								cell biological questions were discussed to provide a framework for decision making by researchers developing new models.</p>
 							<p><br></p>
 							</section>
 						</div>
