@@ -40,7 +40,7 @@ The details of benchmarking inputs can be found [here](./Benchmarking/README.md)
 
 ### Limitations
 
-Note that the size of the largest complex in the simulation cannot be larger than half of the size of one rank, due to the parallelization scheme used in NERDSS. If this limitation is exceeded, the simulation will produce incorrect results.
+Note that the size of the largest complex in the simulation cannot be larger than the size of one rank, due to the parallelization scheme used in NERDSS. If this limitation is exceeded, the simulation will produce incorrect results.
 
 ### Analyzing Results
 
