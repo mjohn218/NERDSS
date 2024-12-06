@@ -1,0 +1,37 @@
+# Input file
+
+start parameters
+    nItr = 2e6
+    timeStep = 0.1
+    timeWrite = 200
+    trajWrite = 10000000
+    pdbWrite = 10000000
+    checkPoint = 10000000
+    restartWrite = 1000000
+	transitionWrite = 2000000
+    scaleMaxDisplace = 30.0
+    overlapSepLimit = 2.3
+end parameters
+
+start boundaries
+    WaterBox = [20000, 2000, 2000]
+end boundaries
+
+start molecules
+    hex : 20000
+end molecules
+
+start reactions
+    
+    ### HEX - HEX IN SOLUTION###
+    hex(cd1) + hex(cd2) <-> hex(cd1!1).hex(cd2!1)
+    onRate3Dka = 100.0  #nm3/us
+    offRatekb = 10.0 #
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 1.0
+    bindRadSameCom = 1.2
+    loopCoopFactor = 1.0
+    assocAngles = [M_PI,M_PI,nan,nan,0]
+
+end reactions

@@ -1,0 +1,18 @@
+##
+# R molecule information file
+##
+
+Name    = F
+isLipid = true
+
+
+# translational diffusion constants
+D       = [2.0,2.0,0.0]
+
+# rotational diffusion constants
+Dr      = [0.0,0.0,0.0]
+
+# Coordinates, with states below, or
+COM     0.0000    0.0000    0.0000
+f       0.0000    0.0000    0.0000
+

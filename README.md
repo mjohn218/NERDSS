@@ -5,6 +5,8 @@ Parallelization with MPI
 
 In addition to the serial version, NERDSS can also be parallelized using MPI (Message Passing Interface).
 
+![graphical_abstract](./doc/Graphical_Abstract.png)
+
 ### Version Information
 
 - Current Version: 1.0.0
@@ -32,6 +34,10 @@ To start the simulation, use the command *mpirun -np $nprocs  ./nerdss_mpi -f pa
 
 To debug the code, use the command *mpirun -np 2 xterm -e gdb --ex 'b error' --ex r --args ./nerdss_mpi -f parms.inp -s 123*.
 
+### Benchmarking
+
+The details of benchmarking inputs and results can be found [here](./Benchmarking/README.md).
+
 ### Limitations
 
 Note that the size of the largest complex in the simulation cannot be larger than half of the size of one rank, due to the parallelization scheme used in NERDSS. If this limitation is exceeded, the simulation will produce incorrect results.
@@ -43,4 +49,5 @@ Note that the size of the largest complex in the simulation cannot be larger tha
 3. Refer to the [ioNERDSS repository](https://github.com/mjohn218/io_nerdss) for more details.
 
 ### NERDSS Parallel Developer Guide
- [NERDSS_Parallel_Developer_Guide](./NERDSS_Parallel_Developer_Guide.pdf)
+
+ [NERDSS_Parallel_Developer_Guide](./doc/NERDSS_Parallel_Developer_Guide.pdf)

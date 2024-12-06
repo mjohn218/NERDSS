@@ -1,0 +1,34 @@
+# Input file
+
+start parameters
+    nItr = 8000000
+    timeStep = 0.1
+
+    timeWrite = 200
+    pdbWrite = 20000
+    trajWrite = 1000000000
+    restartWrite = 1000000000
+
+end parameters
+
+start boundaries
+    WaterBox = [20000,2000,2000] #nm
+end boundaries
+
+start molecules
+    D : 10000
+    C : 10000
+end molecules
+
+start reactions
+    C(c) + D(d) <-> C(c!1).D(d!1)
+    onRate3DMacro = 55
+    offRateMacro = 5.5
+    norm1 = [0,0,1]
+    norm2 = [0,0,1]
+    sigma = 2.0
+    assocAngles = [nan,nan,nan,nan,nan]
+    bindRadSameCom = 1.1
+
+end reactions
+
