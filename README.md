@@ -28,7 +28,7 @@ To build NERDSS with MPI support, you need:
 
 ### Running Simulations
 
-Example input files are located in the subdirectories within the sample_inputs folder. They can also be generated using the python GUI program, which is included in the ioNERDSS tool.
+Some example input files are located in the subdirectories within the [Benchmarking](./Benchmarking/) folder. They can also be generated using the python GUI program, which is included in the ioNERDSS tool.
 
 To start the simulation, use the command *mpirun -np $nprocs  ./nerdss_mpi -f parms.inp*.
 
@@ -36,7 +36,7 @@ To debug the code, use the command *mpirun -np 2 xterm -e gdb --ex 'b error' --e
 
 ### Benchmarking
 
-The details of benchmarking inputs and results can be found [here](./Benchmarking/README.md).
+The details of benchmarking inputs can be found [here](./Benchmarking/README.md).
 
 ### Limitations
 
