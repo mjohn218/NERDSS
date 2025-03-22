@@ -161,14 +161,10 @@ bool break_interaction(long long int iter, size_t relIface1, size_t relIface2, M
         // rateClose will be in units of /us (due to ka units), so no need for 1E-6 factor, since timeStep has
         // units of us
 
-	double poisson = timeStep * rateClose;
-	double correctionRatio;
-	if(poisson < 1)
-	  correctionRatio = 1;
-	else
-	  correctionRatio = (1 - exp(-poisson)) / poisson;
+        double poisson = timeStep * rateClose;
+        double correctionRatio{(1 - exp(-poisson)) / poisson};
 		
-	//std::cout <<"Correction Ratio: "<<correctionRatio<<std::endl;
+	    //std::cout <<"Correction Ratio: "<<correctionRatio<<std::endl;
 
         if (1.0 * rand_gsl() > correctionRatio) {
             /*Cancel the dissociation!!*/

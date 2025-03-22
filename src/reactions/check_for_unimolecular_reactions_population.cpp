@@ -29,18 +29,29 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                 NA = static_cast<int>(oneTemp.monomerList.size());
 
                 // determine the reaction number in this time step, numEvents
-                long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds * NA };
+                long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds};
                 double explam=exp(-lambda);
-				long double prob { explam };
-				int numEvents { 0 };
-				double rNum { 1.0 * rand_gsl() };
-				long double lampow=lambda;
-				long double factor = 1;
-								
+
+                // Poisson distribution
+				//long double prob { explam };
+				//int numEvents { 0 };
+                // double rNum { 1.0 * rand_gsl() };
+				// long double lampow=lambda;
+				// long double factor = 1;
+
+                // Binomial distribution
+                long double prob = 1 - explam;
+                int numEvents = gsl_ran_binomial(r, prob, NA); // r is global rng
+
+				
+
+                
+
+				/* Poisson sampling				
                 while (rNum > prob) {
                     ++numEvents;
                     //prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
-					/*this method is much faster, same accuracy*/
+					//this method is much faster, same accuracy
 					prob += explam *lampow /factor;
 					lampow = lampow*lambda;// accumulate the powers
 					factor = factor * (numEvents + 1);//accumulate the factorial
@@ -50,6 +61,7 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                     // std::cout << " WARNING: CANNOT perform N destruction Events of : " << numEvents << " Not enough species exist, perform: " << NA << std::endl;
                     numEvents = NA;
                 }
+                */
 
                 // whether to use the strong destruction
                 if ( oneRxn.rateList[0].rate == -1 ){ // && membraneObject.hasCompartment == true ){
@@ -121,18 +133,19 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                 NA = membraneObject.numberOfFreeLipidsEachState[0];
 
                 // determine the reaction number in this time step, numEvents
-                long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds * NA };
+                long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds};
                 double explam=exp(-lambda);
-				long double prob { explam };
-				unsigned numEvents { 0 };
-				double rNum { 1.0 * rand_gsl() };
+				long double prob { 1 - explam };
+				int numEvents = gsl_ran_binomial(r, prob, NA); // r is global rng
+				/*double rNum { 1.0 * rand_gsl() };
 				long double lampow=lambda;
-				long double factor = 1;
+				long double factor = 1;*/
 				
+                /* Poisson
                 while (rNum > prob) {
                     ++numEvents;
                     //prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
-					/*this method is much faster, same accuracy*/
+					//this method is much faster, same accuracy
 					prob += explam *lampow /factor;
 					lampow = lampow*lambda;// accumulate the powers
 					factor = factor * (numEvents + 1);//accumulate the factorial
@@ -142,6 +155,8 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                     // std::cout << " WARNING: CANNOT perform N IL Events of : " << numEvents << " Not enough species exist, perform: " << NA << std::endl;
                     numEvents = NA;
                 }
+                */
+
                 // destory numEvents A molecule in this time step, just need to update the membraneObject.numberOfFreeLipidsEachState because A is implicit lipid
                 if (numEvents > 0) {
                     // std::cout << "Destroying " << numEvents << " molecule(s) of type " << oneRxn.reactantMolList.at(0).molName
@@ -184,30 +199,32 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
             NA = static_cast<int>(poolAList.size());
 
             // determine the reaction number in this time step, numEvents
-            long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds * NA };
+            long double lambda { oneRxn.rateList.at(0).rate * params.timeStep * Constants::usToSeconds };
             double explam=exp(-lambda);
-			long double prob { explam };
-			unsigned numEvents { 0 };
-			double rNum { 1.0 * rand_gsl() };
-			long double lampow=lambda;
-			long double factor = 1;
+			long double prob { 1 - explam };
+			int numEvents = gsl_ran_binomial(r, prob, NA); // r is global rng
+            /*double rNum { 1.0 * rand_gsl() };
+            long double lampow=lambda;
+            long double factor = 1;*/
 			
+            /* Poisson
             while (rNum > prob) {
                 ++numEvents;
 				// prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
-				/*this method is much faster, same accuracy*/
+				//this method is much faster, same accuracy
 				prob += explam *lampow /factor;
 				lampow = lampow*lambda;// accumulate the powers
 				factor = factor * (numEvents + 1);//accumulate the factorial
 					
             }
+            */
             //Here we are still limited in creation, because once one molecule creates, it cannot create again.
             //Allow one to create more than one in this case, since it would occur with a smaller time-step.
 
-          //if(numEvents>NA){
-	          //std::cout <<" WARNING: CANNOT perform N Creation Events of : "<<numEvents<<" Not enough species exist, perform: "<<NA<<std::endl;
-	          //numEvents=NA;
-	      //}
+            //if(numEvents>NA){
+                //std::cout <<" WARNING: CANNOT perform N Creation Events of : "<<numEvents<<" Not enough species exist, perform: "<<NA<<std::endl;
+                //numEvents=NA;
+            //}
 
             // create numEvents B molecule in this time step, the cooresponding numEvents A are chosen randomly from the pool
             if (numEvents > 0) {
@@ -215,6 +232,7 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                 // std::cout << "Creating " << numEvents << " molecule(s) of type " << oneRxn.productMolList.back().molName
                 //           << " from reaction " << oneRxn.absRxnIndex << " at iteration " << simItr << std::endl;
                 while (numEvents > 0) {
+
                     // chose one A whose TrajStatus should be None
 
                     int randIntNum { static_cast<int>(1.0 * NA * rand_gsl()) };
@@ -259,6 +277,7 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
 	//dissociateMolIndex.push_back(1);//allocate before clearing.
 
     // std::cout << "Start check dissociation on population..." << std::endl;
+    
     for (auto& oneRxn : backRxns) {
         // In order to treat the dissociation based on population, we set the specie's canDissociate = true if it can dissociate
         // and track the specie's mol index in specie's bindPairList
@@ -294,19 +313,20 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                     }
 
                     // determine the reaction number in this time step, numEvents
-                    long double lambda { rate * params.timeStep * Constants::usToSeconds * NAB };
+                    long double lambda { rate * params.timeStep * Constants::usToSeconds };
                     double explam = exp(-lambda);
-                    long double prob { explam };
+                    long double prob { 1 - explam };
                     // std::cout << rate << "," << lambda << "," << prob << std::endl;
-                    unsigned numEvents { 0 };
-                    double rNum { 1.0 * rand_gsl() };
-					long double lampow=lambda;
-					long double factor = 1;
+                    int numEvents = gsl_ran_binomial(r, prob, NAB); // r is global rng
+                    /*double rNum { 1.0 * rand_gsl() };
+                    long double lampow=lambda;
+                    long double factor = 1;*/
 					
+                    /* Poisson
                     while (rNum > prob) {
                         ++numEvents;
 						// prob += (exp(-lambda) * pow(lambda, numEvents)) / MathFuncs::gammFactorial(numEvents);
-						/*this method is much faster, same accuracy*/
+						//this method is much faster, same accuracy
 						prob += explam *lampow /factor;
 						lampow = lampow*lambda;// accumulate the powers
 						factor = factor * (numEvents + 1);//accumulate the factorial
@@ -318,6 +338,7 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                         std::cout << " WARNING: CANNOT perform N Events of : " << numEvents << " Not enough species exist, perform: " << NAB << std::endl;
                         numEvents = NAB;
                     }
+                    */
 
                     // choose numEvents A-B from the poolABList (stored in counterArrays.bindPairList) randomly, then break the interaction between the pair
                     if (numEvents > 0) {
@@ -330,12 +351,12 @@ void check_for_unimolecular_reactions_population(long long int simItr, Parameter
                         // std::cout << std::endl;
 					  
                         // choose numEvents A-B from the poolABList randomly
-					  //std::cout << "Dissociating " << numEvents <<" Out of possible N: "<<NAB << " pair(s) " << oneRxn.productListNew[0].ifaceName << "-" << oneRxn.productListNew[1].ifaceName << " from reaction " << oneRxn.absRxnIndex << " at iteration " << simItr << std::endl;
+                        //std::cout << "Dissociating " << numEvents <<" Out of possible N: "<<NAB << " pair(s) " << oneRxn.productListNew[0].ifaceName << "-" << oneRxn.productListNew[1].ifaceName << " from reaction " << oneRxn.absRxnIndex << " at iteration " << simItr << std::endl;
 
-					  // record the index of the selected mol
-					  //dissociateMolIndex.clear();
-					  std::vector<int> dissociateMolIndex {};
-					  while (numEvents > 0) {
+                        // record the index of the selected mol
+                        //dissociateMolIndex.clear();
+                        std::vector<int> dissociateMolIndex {};
+                        while (numEvents > 0) {
                             int randIntNum { static_cast<int>(1.0 * NAB * rand_gsl()) };
                             if (randIntNum == NAB) {
                                 randIntNum = NAB - 1;

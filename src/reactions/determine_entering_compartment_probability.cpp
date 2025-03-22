@@ -13,7 +13,7 @@ void determine_entering_compartment_probability(double distToCompartment, const 
 
 
     // if (moleculeList[pro1Index].trajStatus != TrajStatus::propagated && moleculeList[pro2Index].trajStatus != TrajStatus::propagated)
-    if (moleculeList[pro1Index].trajStatus != TrajStatus::propagated) {
+    if (moleculeList[pro1Index].isDissociated != true) {
         // This movestat check is if you allow just dissociated proteins to avoid overlap
         if (transmissionRxns[rxnIndex].rateList[0].rate > 0)
         {

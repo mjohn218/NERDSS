@@ -122,7 +122,14 @@ void generate_coordinates(const Parameters &params,
 
   // replace molecules with given coordinates
   std::cout << "\ncoordinate file: " << coordinateFileName << std::endl;
-  if (coordinateFileName != "") {
+  // The format is as follows:
+  // newtype
+  // <molecule name>
+  // <number of coordinates>
+  // <x1> <y1> <z1> 
+  // <x2> <y2> <z2>
+  // ...
+  if (coordinateFileName != ""){
     std::cout << "Parsing given coordinates..." << std::endl;
     std::vector<int> changedMoleculeIndex{};
     std::ifstream inputFile{coordinateFileName};

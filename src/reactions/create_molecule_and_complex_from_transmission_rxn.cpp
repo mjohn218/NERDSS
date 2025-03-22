@@ -69,6 +69,7 @@ void create_molecule_and_complex_from_transmission_rxn(int parentMolIndex, int& 
 
     moleculeList[newMolIndex].myComIndex = newComIndex;
     moleculeList[newMolIndex].trajStatus = TrajStatus::propagated;
+    moleculeList[newMolIndex].isDissociated = true;
     complexList[newComIndex] = Complex { newComIndex, moleculeList.at(newMolIndex), createdMolTemp };
     complexList[newComIndex].trajStatus = TrajStatus::propagated;
     ++Complex::numberOfComplexes;

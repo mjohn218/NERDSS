@@ -6,12 +6,15 @@ Structure-Resolved Reaction-Diffusion Simulation Software by Johnson Lab, JHU
 
 ### Version Information
 
-- Current Version: 1.2.0
+- Current Version: 1.2.1
     - This version includes the latest stable features
-    - For release notes and changes, see the [Changelog](./Changelog.md)
 
 - Parallel NERDSS
     - A parallelized version of NERDSS is in the [mpi](https://github.com/mjohn218/NERDSS/tree/mpi) branch.
+
+#### Run a quick trial with our server
+
+Go to the [NERDSS server](http://18.188.233.206:5000/).
 
 ### Installation
 
@@ -38,4 +41,4 @@ To build NERDSS, you need:
 
 1. Use the ioNERDSS PyPi library for visualizing simulation results.
 2. Install ioNERDSS with *pip install ioNERDSS*.
-3. Refer to the [ioNERDSS repository](https://github.com/mjohn218/io_nerdss) for more details.
+3. Refer to the [ionerdss repository](https://github.com/JohnsonBiophysicsLab/ionerdss) for more details.

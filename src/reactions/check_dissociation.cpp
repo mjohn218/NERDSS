@@ -23,7 +23,7 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
             int pro2Index { moleculeList[molItr].interfaceList[relIface1].interaction.partnerIndex };
             int relIface2 { moleculeList[molItr].interfaceList[relIface1].interaction.partnerIfaceIndex };
 
-            if (molItr > pro2Index || moleculeList[pro2Index].isImplicitLipid)
+            if (molItr > pro2Index || moleculeList[pro2Index].isImplicitLipid || moleculeList[pro2Index].isDissociated)
                 continue;
 
             // Make sure the other protein knows it's bound to this protein
@@ -70,10 +70,10 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
                     // double rnum2 { rnum + rand_gsl() * Constants::iRandMax }; // to get higher resolution
 
                     // if (prob > rnum2) {
-                    std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
-                              << " partner: " << pro2Index << '\n';
-                    std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
-                              << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
+                    // std::cout << "Dissociation at iteration: " << simItr << " protein: " << molItr
+                    //           << " partner: " << pro2Index << '\n';
+                    // std::cout << "Complex " << moleculeList[molItr].myComIndex << ", composed of "
+                    //           << complexList[moleculeList[molItr].myComIndex].memberList.size() << " molecules\n";
                     /*Perform this dissociation reaction.
                         Sometimes it is a bond broken, not a full dissociation to two complexes if
                         the two interfaces are part of the same complex
@@ -115,8 +115,8 @@ void check_dissociation(unsigned int simItr, const Parameters& params, SimulVolu
                     // consider the reflecting-surface movement
                     // reflect_complex_rad_rot(membraneObject, complexList[moleculeList[molItr].myComIndex], moleculeList, 0.0);
 
-                    std::cout << "Coords of p1 (COM): " << moleculeList[molItr].comCoord << '\n';
-                    std::cout << "Coords of p2 (COM): " << moleculeList[pro2Index].comCoord << '\n';
+                    // std::cout << "Coords of p1 (COM): " << moleculeList[molItr].comCoord << '\n';
+                    // std::cout << "Coords of p2 (COM): " << moleculeList[pro2Index].comCoord << '\n';
 
                     for (auto memMol : complexList[moleculeList[molItr].myComIndex].memberList)
                         moleculeList[memMol].trajStatus = TrajStatus::propagated;

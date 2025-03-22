@@ -45,12 +45,13 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
     //    std::cout <<" in phi, rotAxis: "<<rotAxis.x<<' '<<rotAxis.y<<' '<<rotAxis.z<<std::endl;
     double currPhi { calculate_phi(
         reactIface1, ifaceIndex2, reactMol1, reactMol2, normal, rotAxis, currRxn, molTemplateList) };
+    double initPhi{currPhi};
     // std::cout << "Desired phi: " << targPhi << " Current phi: " << currPhi << std::endl;
 
     // quit out if the angles are damn near the same, or if the target is 0/M_PI, if the current angle is -0 or -M_PI
-    if ((std::abs(targPhi - currPhi) < 1E-8)) {
+    if (areSameAngle(currPhi, targPhi)) {
         // std::cout << "No phi rotation needed" << std::endl;
-    } else if ((areSameAngle(targPhi, M_PI) || areSameAngle(targPhi, 0)) && areSameAngle(targPhi, currPhi)) {
+    // } else if ((areSameAngle(targPhi, M_PI) || areSameAngle(targPhi, 0)) && areSameAngle(targPhi, currPhi)) {
         // std::cout << "No phi rotation needed" << std::endl;
     } else {
         rotAxis.normalize(); // rotation axis must be normalized
@@ -98,7 +99,7 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
         }
 
         // if it rotated the wrong way, reverse the rotation and swap quaternions
-        if (std::abs(currPhi - targPhi) > 1E-11) {
+        if (!areSameAngle(currPhi, targPhi)) {
             // reverse the rotation
             // std::cout << "Reversing rotation, current phi: " << currPhi << ", target phi: " << targPhi << '\n';
             
@@ -156,7 +157,8 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
             //write_xyz_assoc("phi_reversal2.xyz", reactCom1, reactCom2, moleculeList);
 
             // If the rotation still didn't give the desired angle
-            if (std::abs(currPhi - targPhi) > 1E-4) {
+            
+            if (!areSameAngle(currPhi, targPhi)) {
                 // std::cout << ">>>>>>> Complex 1 >>>>>>>" << std::endl;
                 // for (int mol : reactCom1.memberList) {
                 //   moleculeList[mol].display_all();
@@ -167,7 +169,9 @@ void phi_rotation(Coord& reactIface1, Coord& reactIface2, int ifaceIndex2, Molec
                 // }
                 std::cerr << "Cannot resolve phi angle for protein " << reactMol1.index << " in complex "
                           << reactCom1.index << " relative to protein " << reactMol2.index << " in complex "
-                          << reactCom2.index << ". Final angle: " << currPhi << ". Exiting..." << std::endl;
+                          << reactCom2.index << ". Final angle: " << currPhi << ". Target angle: " << targPhi
+                          << ". Error: " << std::abs(currPhi - targPhi) << ". Initial: " << initPhi 
+                          << ". Exiting..." << std::endl;
                 exit(1);
             }
         }

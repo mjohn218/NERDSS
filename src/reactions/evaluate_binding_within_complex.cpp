@@ -89,12 +89,8 @@ void evaluate_binding_within_complex(int pro1Index, int pro2Index, int iface1Ind
                 // rateClose will be in units of /us (due to ka units), so no need for 1E-6 factor, since timeStep has
                 // units of us!!!!!
 
-		double poisson = params.timeStep * rateClose;
-		
-		if(poisson < 1)
-		  probvec1=poisson;
-		else
-		  probvec1 = 1 - exp(-poisson);
+		        double poisson = params.timeStep * rateClose;
+		        probvec1 = 1 - exp(-poisson);
 
                 if (oneRxn.irrevRingClosure) {
                     // std::cout << "Ring closure reaction probability for species " << pro1Index << " and " << pro2Index

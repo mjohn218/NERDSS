@@ -248,7 +248,7 @@ void Molecule::destroy() {
   molTypeIndex = -1;
   mass = -1;
   id = -1;
-  trajStatus = TrajStatus::empty;
+  trajStatus = TrajStatus::none;
 
   // clear coordinates
   comCoord.zero_crds();
@@ -303,7 +303,7 @@ void Molecule::MPI_remove_from_one_rank(std::vector<Molecule>& moleculeList,
   myComIndex = -1;
   molTypeIndex = -1;
   mass = -1;
-  trajStatus = TrajStatus::empty;
+  trajStatus = TrajStatus::none;
 
   // clear coordinates
   comCoord.zero_crds();
@@ -873,7 +873,7 @@ void Complex::destroy(std::vector<Molecule> &moleculeList,
   receivedFromNeighborRank = true;
 
   // iterate down the number of complexes in the system.
-  trajStatus = TrajStatus::empty;
+  trajStatus = TrajStatus::none;
   --Complex::numberOfComplexes;
 }
 

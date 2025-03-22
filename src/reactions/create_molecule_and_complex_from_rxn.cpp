@@ -177,6 +177,7 @@ void create_molecule_and_complex_from_rxn(int parentMolIndex, int& newMolIndex, 
     moleculeList[newMolIndex].myComIndex = newComIndex;
     moleculeList[newMolIndex].trajStatus = TrajStatus::propagated;
     moleculeList[newMolIndex].isGhosted = false;
+    moleculeList[newMolIndex].isDissociated = true;
     complexList[newComIndex] = Complex { newComIndex, moleculeList.at(newMolIndex), createdMolTemp };
     complexList[newComIndex].trajStatus = TrajStatus::propagated;
     moleculeList[newMolIndex].complexId = complexList[newComIndex].id;

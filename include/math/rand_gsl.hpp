@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gsl/gsl_rng.h"
+#include <gsl/gsl_randist.h>
 
 extern gsl_rng* r;
 extern long long randNum;

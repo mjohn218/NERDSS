@@ -56,7 +56,7 @@ void determine_3D_bimolecular_reaction_probability(int simItr, int rxnIndex, int
 
     if (moleculeList[biMolData.pro1Index].isDissociated != true
         && moleculeList[biMolData.pro2Index].isDissociated != true) {
-    /*This movestat check is if you allow just dissociated proteins to avoid
+        /*This movestat check is if you allow just dissociated proteins to avoid
          * overlap*/
         if (withinRmax && forwardRxns[rxnIndex].rateList[rateIndex].rate > 0) {
             /*Evaluate probability of reaction, with reweighting*/

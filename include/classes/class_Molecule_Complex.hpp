@@ -39,11 +39,8 @@ extern int propCalled;
 
 enum class TrajStatus : int {
     none = 0,
-    dissociated = 1,
-    associated = 2,
-    propagated = 3,
-    canBeResampled = 4,
-    empty = 5,
+    propagated = 1,
+    canBeResampled = 2,
 };
 
 struct Complex;
