@@ -57,6 +57,7 @@ void deserialize_complexes(MpiContext &mpiContext,
                complexList[complexIndex].id);
 
       c.index = complexList.size();
+      // c.isRightGhost = true;
       complexIndex = c.index;
       complexList.push_back(c);
     } else {
@@ -66,10 +67,10 @@ void deserialize_complexes(MpiContext &mpiContext,
                complexList[complexIndex].id);
 
       auto vecOld = complexList[complexIndex].memberList;
-      c.isLeftEdge = complexList[complexIndex].isLeftEdge;
-      c.isRightEdge = complexList[complexIndex].isRightEdge;
-      c.isLeftGhost = complexList[complexIndex].isLeftGhost;
-      c.isRightGhost = complexList[complexIndex].isRightGhost;
+      // c.isLeftEdge = complexList[complexIndex].isLeftEdge;
+      // c.isRightEdge = complexList[complexIndex].isRightEdge;
+      // c.isLeftGhost = complexList[complexIndex].isLeftGhost;
+      // c.isRightGhost = complexList[complexIndex].isRightGhost;
 
       complexList[complexIndex] = c;  // copy all deserialized properties
       complexList[complexIndex].index = complexIndex;
@@ -142,10 +143,10 @@ void deserialize_complexes_right(MpiContext &mpiContext,
                complexList[complexIndex].id);
 
       auto vecOld = complexList[complexIndex].memberList;
-      c.isLeftEdge = complexList[complexIndex].isLeftEdge;
-      c.isRightEdge = complexList[complexIndex].isRightEdge;
-      c.isLeftGhost = complexList[complexIndex].isLeftGhost;
-      c.isRightGhost = complexList[complexIndex].isRightGhost;
+      // c.isLeftEdge = complexList[complexIndex].isLeftEdge;
+      // c.isRightEdge = complexList[complexIndex].isRightEdge;
+      // c.isLeftGhost = complexList[complexIndex].isLeftGhost;
+      // c.isRightGhost = complexList[complexIndex].isRightGhost;
 
       complexList[complexIndex] = c;  // copy all deserialized properties
       complexList[complexIndex].index = complexIndex;
@@ -216,10 +217,10 @@ void deserialize_molecules(MpiContext &mpiContext, SimulVolume &simulVolume,
 
       Molecule oldMol = moleculeList[molIndex];
       // keep the region flags
-      mol.isLeftEdge = oldMol.isLeftEdge;
-      mol.isRightEdge = oldMol.isRightEdge;
-      mol.isLeftGhost = oldMol.isLeftGhost;
-      mol.isRightGhost = oldMol.isRightGhost;
+      // mol.isLeftEdge = oldMol.isLeftEdge;
+      // mol.isRightEdge = oldMol.isRightEdge;
+      // mol.isLeftGhost = oldMol.isLeftGhost;
+      // mol.isRightGhost = oldMol.isRightGhost;
       mol.receivedFromNeighborRank = true;
       mol.mySubVolIndex = oldMol.mySubVolIndex;
 
@@ -228,6 +229,7 @@ void deserialize_molecules(MpiContext &mpiContext, SimulVolume &simulVolume,
       newMol++;
       mol.index = moleculeList.size();
       molIndex = mol.index;
+      // mol.isRightGhost = true;
       mol.receivedFromNeighborRank = true;
       moleculeList.push_back(mol);
     }
@@ -277,10 +279,10 @@ void deserialize_molecules_right(
 
       Molecule oldMol = moleculeList[molIndex];
       // keep the region flags
-      mol.isLeftEdge = oldMol.isLeftEdge;
-      mol.isRightEdge = oldMol.isRightEdge;
-      mol.isLeftGhost = oldMol.isLeftGhost;
-      mol.isRightGhost = oldMol.isRightGhost;
+      // mol.isLeftEdge = oldMol.isLeftEdge;
+      // mol.isRightEdge = oldMol.isRightEdge;
+      // mol.isLeftGhost = oldMol.isLeftGhost;
+      // mol.isRightGhost = oldMol.isRightGhost;
       mol.receivedFromNeighborRank = true;
       mol.mySubVolIndex = oldMol.mySubVolIndex;
 

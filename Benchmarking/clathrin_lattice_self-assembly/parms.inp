@@ -12,7 +12,7 @@ start parameters
     checkPoint = 500000000
     scaleMaxDisplace = 10.0
     overlapSepLimit = 7.0
-    clusterOverlapCheck = true
+    clusterOverlapCheck = false
 end parameters
 
 start boundaries

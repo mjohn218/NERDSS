@@ -258,13 +258,15 @@ void SimulVolume::update_memberMolLists(
     mol.isRightGhost = false;
     mol.isRightEdge = false;
 
-    if (mol.isEmpty || mol.isImplicitLipid) continue;
+    if (mol.isEmpty) continue;
 
     Complex& com = complexList[mol.myComIndex];
     com.isLeftGhost = false;
     com.isLeftEdge = false;
     com.isRightGhost = false;
     com.isRightEdge = false;
+
+    if (mol.isImplicitLipid) continue;
 
     // Get which box the Molecule belongs to.
     // xOffset represents starting x coordinate of cell at current rank;

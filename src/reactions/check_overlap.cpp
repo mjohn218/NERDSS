@@ -53,14 +53,14 @@ void check_overlap(std::vector<int>& region, bool isLeft, unsigned simItr,
     // if it is a left ghost mol, it can not diffuse because it can still possibly react with others in the left neighbor processor
     // if it is a left edge mol and its parent complex is left ghost, it can not diffuse because it's members in the same complex 
     // can still possibly react with others in the left neighbor processor
-    // if it is a right ghost mol, it can not diffuse
+    // if it is a right ghost mol but it is not belong to right edge complex, it can not diffuse because its right neighbor has diffused it
     if (mol.isLeftGhost) {
       continue;
     }
     if (mol.isLeftEdge && complexList[mol.myComIndex].isLeftGhost) {
       continue;
     }
-    if (mol.isRightGhost) {
+    if (mol.isRightGhost && complexList[mol.myComIndex].isRightEdge == false) {
       continue;
     }
 

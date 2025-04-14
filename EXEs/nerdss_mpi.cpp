@@ -331,6 +331,11 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  simulVolume.update_memberMolLists(params, moleculeList, complexList,
+                                    molTemplateList, membraneObject, simItr,
+                                    mpiContext);
+  simulVolume.update_region_flags(moleculeList, complexList, mpiContext);
+
   int meanComplexSize{0};
 
   totalSpeciesNum = init_speciesFile(speciesFile1, counterArrays,
@@ -361,11 +366,6 @@ int main(int argc, char* argv[]) {
   meanComplexSize = print_complex_hist(
       complexList, assemblyfile, simItr, params, molTemplateList, moleculeList,
       number_of_lipids, mpiContext, simulVolume);
-
-  simulVolume.update_memberMolLists(params, moleculeList, complexList,
-                                    molTemplateList, membraneObject, simItr,
-                                    mpiContext);
-  simulVolume.update_region_flags(moleculeList, complexList, mpiContext);
 
   std::cout << "*************** BEGIN SIMULATION **************** "
             << std::endl;
@@ -472,6 +472,9 @@ int main(int argc, char* argv[]) {
     std::vector<int> left{};
     std::vector<int> right{};
     for (int i = 0; i < moleculeList.size(); i++) {
+      if (moleculeList[i].isImplicitLipid) {
+        continue;
+      }
       int x_bin = get_x_bin(mpiContext, moleculeList[i]);
       if (mpiContext.rank == 0) {
         if (x_bin < (simulVolume.numSubCells.x - 1) / 2)
@@ -653,6 +656,13 @@ int main(int argc, char* argv[]) {
       debug_molecule_complex_missmatch(mpiContext, moleculeList, complexList,
                                        "After Receive from right");
     }
+
+    // update simVolume memberMolLists and update region flags of molecules and
+    // complexes
+    simulVolume.update_memberMolLists(params, moleculeList, complexList,
+                                      molTemplateList, membraneObject, simItr,
+                                      mpiContext);
+    simulVolume.update_region_flags(moleculeList, complexList, mpiContext);
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
