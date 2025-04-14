@@ -3,13 +3,13 @@
 Structure-Resolved Reaction-Diffusion Simulation Software by Johnson Lab, JHU
 Parallelization with MPI
 
-In addition to the serial version, NERDSS can also be parallelized using MPI (Message Passing Interface).
+NERDSS has been parallelized using MPI (Message Passing Interface).
 
 ![graphical_abstract](./doc/Graphical_Abstract.png)
 
 ### Version Information
 
-- Current Version: 1.0.0
+- Current Version: 1.0.1
 
 ### Installation
 
@@ -44,9 +44,9 @@ Note that the size of the largest complex in the simulation cannot be larger tha
 
 ### Analyzing Results
 
-1. Use the ioNERDSS PyPi library for visualizing simulation results.
+1. Use the [ioNERDSS](https://github.com/JohnsonBiophysicsLab/ionerdss) PyPi library for visualizing simulation results.
 2. Install ioNERDSS with *pip install ioNERDSS*.
-3. Refer to the [ioNERDSS repository](https://github.com/mjohn218/io_nerdss) for more details.
+3. Refer to the [ioNERDSS repository](https://github.com/JohnsonBiophysicsLab/ionerdss) for more details.
 
 ### NERDSS Parallel Developer Guide
 
