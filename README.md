@@ -5,6 +5,8 @@ Parallelization with MPI
 
 NERDSS has been parallelized using MPI (Message Passing Interface).
 
+Reference: Guo, S., Korolija, N., Milfeld, K., Jhaveri, A., Sang, M., Ying, Y.M. and Johnson, M.E. (**2025**), Parallelization of Particle-Based Reaction–Diffusion Simulations Using MPI. *J Comput Chem*, 46: e70132. https://doi.org/10.1002/jcc.70132
+
 ![graphical_abstract](./doc/Graphical_Abstract.png)
 
 ### Version Information
