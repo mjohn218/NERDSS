@@ -1,7 +1,0 @@
-# Simulation of the Remodeling of HIV-1 Immature Lattice
-
-1. Forming a single spherical lattice by assembling the structure fully in solution using the inputs files in the folder named 1-initialAssemblyInSolution.
-2. Determining the time point that the lattice having the expected coverage and taking the restart file at that time point as the input file for the next step. I used the script in the folder named 2-findSystemWithSpecifedMoleculeCopies.
-3. Using the restart files from step 2 and put the assembled single lattice into a spherical system by linking the structure to the membrane using one lipid attachment per monomer. Meantime,modifying the reaction rates and other system parameters to the desired values. I used the cpp code in the folder named 3-hackRestartFile.
-4. Running the remodeling simulations using the restart file from step 3 in NERDSS.
-5. Some restart files which include the intial molecule coordinates are provided in the folder 4-runRemodelingSim. A simple way to run the remodeling simulation is: ./nerdss -r restart1.dat. If you want to run the simulation with different rates and free energies, you need to specify the new binding and unbinding rates in the parms file newRates.inp and run with: ./nerdss -r restart1.dat -a newRates.inp
